@@ -245,10 +245,13 @@ class Action:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
             params = params.update({'funcname': funcname})
+        else:
+            params = {'funcname': funcname}
+
         # 发送请求
         try:
             resp = self.c.request(
-                method, httpx.URL(url=path, params=params), data=payload
+                method, httpx.URL(url=path, params=params), json=payload
             )
             resp.raise_for_status()
         except httpx.RequestError as e:
