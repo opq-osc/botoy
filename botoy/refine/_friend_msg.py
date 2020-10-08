@@ -1,6 +1,6 @@
 # pylint: disable=R0902,W0231
 from botoy import json
-from botoy.collections import MsgTypes
+from botoy.collection import MsgTypes
 from botoy.exceptions import InvalidContextError
 from botoy.model import FriendMsg
 from botoy.refine import _copy_ctx
