@@ -44,6 +44,7 @@ class Action:
         flashPic=False,
     ):
         """发送好友图片消息"""
+        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
         return self.post(
             'SendMsg',
             {
@@ -62,6 +63,7 @@ class Action:
         self, user: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
     ):
         """发送好友语音消息"""
+        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
         return self.post(
             'SendMsg',
             {
@@ -113,6 +115,7 @@ class Action:
         atUser: Union[int, List[int]],
     ) -> dict:
         """发送群组图片消息"""
+        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
         if atUser != 0:
             content = macro.atUser(atUser) + content
         return self.post(
@@ -133,6 +136,7 @@ class Action:
         self, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
     ) -> dict:
         """发送群组语音消息"""
+        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
         return self.post(
             'SendMsg',
             {
@@ -194,8 +198,48 @@ class Action:
             },
         )
 
-    def sendPrivateVoice(self) -> dict:
-        pass
+    def sendPrivateVoice(
+        self, user: int, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+    ) -> dict:
+        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        return self.post(
+            'SendMsg',
+            {
+                "toUser": user,
+                "sendToType": 3,
+                "sendMsgType": "VoiceMsg",
+                "content": "",
+                "groupid": group,
+                "voiceUrl": voiceUrl,
+                "voiceBase64Buf": voiceBase64Buf,
+            },
+        )
+
+    def sendPrivatePic(
+        self,
+        user: int,
+        group: int,
+        content: str = '',
+        *,
+        picUrl: str = '',
+        picBase64Buf: str = '',
+        fileMd5: str = '',
+    ) -> dict:
+        """发送私聊图片消息"""
+        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
+        return self.post(
+            'SendMsg',
+            {
+                "toUser": user,
+                "sendToType": 3,
+                "sendMsgType": "PicMsg",
+                "content": content,
+                "groupid": group,
+                "picUrl": picUrl,
+                "picBase64Buf": picBase64Buf,
+                "fileMd5": fileMd5,
+            },
+        )
 
     def sendPhoneText(self, content: str):
         """给手机发文字"""
@@ -221,18 +265,25 @@ class Action:
         """获取当前bot加入的群列表"""
         return self.post('GetGroupList', {'NextToken': ''})
 
-    def getGroupUserList(self, groupID: int):  # todo:循环获取
+    def getGroupUserList(self, group: int):  # todo:循环获取
         """获取群信息(bot已经加入的,未加入的获取不到)"""
-        return self.post('GetGroupUserList', {'GroupUin': groupID, 'LastUin': ''})
+        return self.post('GetGroupUserList', {'GroupUin': group, 'LastUin': ''})
 
     ############操作############
-    def setUniqueTitle(self):
-        pass
+    def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
+        """设置群头衔"""
+        return self.post(
+            'OidbSvc.0x8fc_2',
+            {"GroupID": group, "UserID": user, "NewTitle": title},
+        )
 
-    def modifyGroupCard(self):
-        pass
+    def modifyGroupCard(self, user: int, group: int, nick: str) -> dict:
+        """修改群名片"""
+        return self.post(
+            'ModifyGroupCard', {'UserID': user, 'GroupID': group, 'NewNick': nick}
+        )
 
-    def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
+    def shutUserUp(self, groupID: int, userid: int, ShutTime: int) -> dict:
         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
         return self.post(
             'ShutUp',
@@ -244,14 +295,16 @@ class Action:
             },
         )
 
-    def shutAllUp(self, groupID: int, ShutTime: int):
+    def shutAllUp(self, group: int, switch: int):
+        """全体禁言
+        :param switch: 1 开启; 0 关闭
+        """
         return self.post(
-            'ShutUp',
-            {"ShutUpType": 1, "GroupID": groupID, "ShutUid": 0, "ShutTime": ShutTime},
+            'OidbSvc.0x89a_0',
+            {"GroupID": group, "Switch": switch},
         )
 
-        ############################################################################
-
+    ############################################################################
     def baseRequest(
         self,
         method: str,

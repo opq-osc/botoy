@@ -214,11 +214,71 @@ class AsyncAction:
             },
         )
 
+    async def sendPrivatePic(
+        self,
+        user: int,
+        group: int,
+        content: str = '',
+        *,
+        picUrl: str = '',
+        picBase64Buf: str = '',
+        fileMd5: str = '',
+    ) -> dict:
+        """发送私聊图片消息"""
+        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
+        return await self.post(
+            'SendMsg',
+            {
+                "toUser": user,
+                "sendToType": 3,
+                "sendMsgType": "PicMsg",
+                "content": content,
+                "groupid": group,
+                "picUrl": picUrl,
+                "picBase64Buf": picBase64Buf,
+                "fileMd5": fileMd5,
+            },
+        )
+
     async def sendPhoneText(self, content: str) -> dict:
         """给手机发文字"""
         return await self.post(
             'SendMsgV2',
             {"SendToType": 2, "SendMsgType": "PhoneMsg", "Content": content},
+        )
+
+    async def setUniqueTitle(self, user: int, group: int, title: str):
+        """设置群头衔"""
+        return await self.post(
+            'OidbSvc.0x8fc_2',
+            {"GroupID": group, "UserID": user, "NewTitle": title},
+        )
+
+    async def modifyGroupCard(self, user: int, group: int, nick: str):
+        """修改群名片"""
+        return await self.post(
+            'ModifyGroupCard', {'UserID': user, 'GroupID': group, 'NewNick': nick}
+        )
+
+    async def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
+        """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
+        return await self.post(
+            'ShutUp',
+            {
+                'ShutUpType': 0,
+                'GroupID': groupID,
+                'ShutUid': userid,
+                'ShutTime': ShutTime,
+            },
+        )
+
+    async def shutAllUp(self, group: int, switch: int):
+        """全体禁言
+        :param switch: 1 开启; 0 关闭
+        """
+        return await self.post(
+            'OidbSvc.0x89a_0',
+            {"GroupID": group, "Switch": switch},
         )
 
     async def baseRequest(
