@@ -17,7 +17,7 @@ class Action:
             headers={'Content-Type': 'application/json'},
             timeout=timeout + 5,
             base_url=self.config.address,
-            params={'qq': self.qq},
+            params={'qq': self.qq, 'timeout': timeout},
         )
 
     ############发送相关############
