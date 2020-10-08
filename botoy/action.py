@@ -305,17 +305,17 @@ class Action:
         )
     def setgroupAnnounce(self, group: int, Title: str, Text: str, Pinned: bool, typ: bool):
     """设置群公告;Title可以空,Pinned 是否置顶 typ:是否发送新成员"""
-    if typ:
-        Type = 20
-    else:
-        Type = 0
-    return self.post(path='/v1/Group/Announce', funcname='', payload={
-        "GroupID": group,
-        "Title": Title,
-        "Text": Text,
-        "Pinned": Pinned,
-        "Type": Type
-    })
+        if typ:
+            Type = 20
+        else:
+            Type = 0
+        return self.post(path='/v1/Group/Announce', funcname='', payload={
+            "GroupID": group,
+            "Title": Title,
+            "Text": Text,
+            "Pinned": Pinned,
+            "Type": Type
+        })
 
     ############################################################################
     def baseRequest(
