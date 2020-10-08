@@ -1,19 +1,18 @@
 import traceback
-from json import JSONDecodeError
 from typing import List, Union
 
 import httpx
 
-from botoy import macro
+from botoy import json, macro
 from botoy.config import Config
 from botoy.log import logger
 
 
-class Action:
+class AsyncAction:
     def __init__(self, qq: int, port: int = None, host: str = None, timeout=20):
         self.qq = qq
         self.config = Config(host=host, port=port)
-        self.c = httpx.Client(
+        self.c = httpx.AsyncClient(
             headers={'Content-Type': 'application/json'},
             timeout=timeout + 5,
             base_url=self.config.address,
@@ -21,9 +20,9 @@ class Action:
         )
 
     ############发送相关############
-    def sendFriendText(self, user: int, content: str) -> dict:
+    async def sendFriendText(self, user: int, content: str) -> dict:
         """发送好友文本消息"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": user,
@@ -33,7 +32,7 @@ class Action:
             },
         )
 
-    def sendFriendPic(
+    async def sendFriendPic(
         self,
         user: int,
         *,
@@ -44,7 +43,8 @@ class Action:
         flashPic=False,
     ):
         """发送好友图片消息"""
-        return self.post(
+        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
+        return await self.post(
             'SendMsg',
             {
                 "toUser": user,
@@ -58,11 +58,12 @@ class Action:
             },
         )
 
-    def sendFriendVoice(
+    async def sendFriendVoice(
         self, user: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
     ):
         """发送好友语音消息"""
-        return self.post(
+        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        return await self.post(
             'SendMsg',
             {
                 "toUser": user,
@@ -73,9 +74,9 @@ class Action:
             },
         )
 
-    def sendFriendXml(self, user: int, content: str) -> dict:
+    async def sendFriendXml(self, user: int, content: str) -> dict:
         """发送好友Xml消息"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": user,
@@ -85,13 +86,13 @@ class Action:
             },
         )
 
-    def sendGroupText(
+    async def sendGroupText(
         self, group: int, content: str, atUser: Union[int, List[int]] = 0
     ) -> dict:
         """发送群组文本消息"""
         if atUser != 0:
             content = macro.atUser(atUser) + content
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": group,
@@ -101,7 +102,7 @@ class Action:
             },
         )
 
-    def sendGroupPic(
+    async def sendGroupPic(
         self,
         user: int,
         *,
@@ -113,9 +114,10 @@ class Action:
         atUser: Union[int, List[int]],
     ) -> dict:
         """发送群组图片消息"""
+        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
         if atUser != 0:
             content = macro.atUser(atUser) + content
-        return self.post(
+        return await self.post(
             'SendMsg',
             {
                 "toUser": user,
@@ -129,11 +131,12 @@ class Action:
             },
         )
 
-    def sendGroupVoice(
+    async def sendGroupVoice(
         self, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
     ) -> dict:
         """发送群组语音消息"""
-        return self.post(
+        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        return await self.post(
             'SendMsg',
             {
                 "toUser": group,
@@ -144,9 +147,9 @@ class Action:
             },
         )
 
-    def sendGroupXml(self, group: int, content: str) -> dict:
+    async def sendGroupXml(self, group: int, content: str) -> dict:
         """发送群组Xml消息"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": group,
@@ -156,9 +159,9 @@ class Action:
             },
         )
 
-    def sendGroupJson(self, group: int, content: str) -> dict:
+    async def sendGroupJson(self, group: int, content: str) -> dict:
         """发送群组Json消息"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": group,
@@ -168,9 +171,9 @@ class Action:
             },
         )
 
-    def sendPrivateText(self, user: int, group: int, content: str) -> dict:
+    async def sendPrivateText(self, user: int, group: int, content: str) -> dict:
         """发送私聊文本消息"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": user,
@@ -181,9 +184,9 @@ class Action:
             },
         )
 
-    def sendPrivateXml(self, user: int, group: int, content: str) -> dict:
+    async def sendPrivateXml(self, user: int, group: int, content: str) -> dict:
         """发送私聊Xml消息"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {
                 "ToUserUid": user,
@@ -194,65 +197,31 @@ class Action:
             },
         )
 
-    def sendPrivateVoice(self) -> dict:
-        pass
+    async def sendPrivateVoice(
+        self, user: int, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+    ) -> dict:
+        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        return await self.post(
+            'SendMsg',
+            {
+                "toUser": user,
+                "sendToType": 3,
+                "sendMsgType": "VoiceMsg",
+                "content": "",
+                "groupid": group,
+                "voiceUrl": voiceUrl,
+                "voiceBase64Buf": voiceBase64Buf,
+            },
+        )
 
-    def sendPhoneText(self, content: str):
+    async def sendPhoneText(self, content: str) -> dict:
         """给手机发文字"""
-        return self.post(
+        return await self.post(
             'SendMsgV2',
             {"SendToType": 2, "SendMsgType": "PhoneMsg", "Content": content},
         )
 
-    ############获取############
-    def getCookies(self):
-        """获取QQ相关cookie"""
-        return self.get('GetUserCook')
-
-    def getUserList(self):  # todo:循环获取
-        """获取好友列表"""
-        return self.post('GetQQUserList', {'StartIndex': 0})
-
-    def getUserInfo(self, UserID: int):
-        """获取任意用户信息昵称头像等"""
-        return self.post('GetUserInfo', {'UserID': UserID})
-
-    def getGroupList(self):  # todo:循环获取
-        """获取当前bot加入的群列表"""
-        return self.post('GetGroupList', {'NextToken': ''})
-
-    def getGroupUserList(self, groupID: int):  # todo:循环获取
-        """获取群信息(bot已经加入的,未加入的获取不到)"""
-        return self.post('GetGroupUserList', {'GroupUin': groupID, 'LastUin': ''})
-
-    ############操作############
-    def setUniqueTitle(self):
-        pass
-
-    def modifyGroupCard(self):
-        pass
-
-    def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
-        """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
-        return self.post(
-            'ShutUp',
-            {
-                'ShutUpType': 0,
-                'GroupID': groupID,
-                'ShutUid': userid,
-                'ShutTime': ShutTime,
-            },
-        )
-
-    def shutAllUp(self, groupID: int, ShutTime: int):
-        return self.post(
-            'ShutUp',
-            {"ShutUpType": 1, "GroupID": groupID, "ShutUid": 0, "ShutTime": ShutTime},
-        )
-
-        ############################################################################
-
-    def baseRequest(
+    async def baseRequest(
         self,
         method: str,
         funcname: str,
@@ -268,7 +237,7 @@ class Action:
 
         # 发送请求
         try:
-            resp = self.c.request(
+            resp = await self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
             resp.raise_for_status()
@@ -282,7 +251,7 @@ class Action:
         # 处理数据
         try:
             data = resp.json()
-        except JSONDecodeError as e:
+        except json.JSONDecodeError as e:
             logger.error('API响应结果非json格式')
             return {}
 
@@ -310,7 +279,7 @@ class Action:
 
         return data
 
-    def post(
+    async def post(
         self,
         funcname: str,
         payload: dict,
@@ -318,15 +287,17 @@ class Action:
         path: str = '/v1/LuaApiCaller',
     ) -> dict:
         """封装常用的post操作"""
-        return self.baseRequest(
+        return await self.baseRequest(
             'POST', funcname=funcname, path=path, payload=payload, params=params
         )
 
-    def get(
+    async def get(
         self,
         funcname: str,
         params: dict = None,
         path: str = '/v1/LuaApiCaller',
     ) -> dict:
         """封装get操作"""
-        return self.baseRequest('GET', funcname=funcname, path=path, params=params)
+        return await self.baseRequest(
+            'GET', funcname=funcname, path=path, params=params
+        )
