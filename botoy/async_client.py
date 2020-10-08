@@ -21,17 +21,6 @@ class AsyncBotoy(Botoy):
     def asyncRun(self, func: Callable, *args):
         self.pool.submit(func, *args)
 
-    async def connect(self):
-        logger.success('Connected to the server successfully!')
-
-        # 这里属于初始化操作，应该不用异步吧？
-        # 连接成功执行用户定义的函数，如果有
-        if self._when_connected_do is not None:
-            self._when_connected_do[0]()
-            # 如果不需要每次运行，这里运行一次后就废弃设定的函数
-            if not self._when_connected_do[1]:
-                self._when_connected_do = None
-
     async def close(self, status=0):
         await self.socketio.disconnect()
         self.pool.shutdown(wait=False)
