@@ -1,0 +1,16 @@
+site_name: BOTOY - OPQ的Python开发助手
+
+repo_url: https://github.com/xiyaowong/botoy
+
+theme:
+  name: material
+
+nav:
+  - index.md
+
+markdown_extensions:
+  - codehilite
+  - admonition
+  - tables
+  - toc:
+      permalink: '#'
