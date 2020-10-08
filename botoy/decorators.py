@@ -1,16 +1,17 @@
+# pylint:disable=W0613
+"""提供辅助构建接收函数的装饰器"""
 import copy
-import functools
 import re
 
-from . import json
-from .model import FriendMsg, GroupMsg
-from .refine import (
+from botoy import json
+from botoy.collections import MsgTypes
+from botoy.model import FriendMsg, GroupMsg
+from botoy.refine import (
     _PicFriendMsg,
     _PicGroupMsg,
     refine_pic_friend_msg,
     refine_pic_group_msg
 )
-from .utils import MsgTypes
 
 
 def startswith(string: str, trim=True):
@@ -57,7 +58,7 @@ def in_content(string: str):
     def deco(func):
         def inner(ctx):
             if isinstance(ctx, (GroupMsg, FriendMsg)):
-                if re.findall(string, ctx.Content):
+                if re.search(string, ctx.Content):
                     return func(ctx)
             return None
 
@@ -90,10 +91,10 @@ def equal_content(string: str):
     return deco
 
 
-def not_botself(func=None):
+def ignore_botself(func=None):
     """忽略机器人自身的消息"""
     if func is None:
-        return functools.partial(not_botself)
+        return ignore_botself
 
     def inner(ctx):
         if isinstance(ctx, (GroupMsg, FriendMsg)):
@@ -111,7 +112,7 @@ def not_botself(func=None):
 def is_botself(func=None):
     """只要机器人自身的消息"""
     if func is None:
-        return functools.partial(not_botself)
+        return is_botself
 
     def inner(ctx):
         if isinstance(ctx, (GroupMsg, FriendMsg)):
@@ -126,7 +127,7 @@ def is_botself(func=None):
     return inner
 
 
-def not_these_users(users: list):  # pylint:disable=W0613
+def not_these_users(users: list):
     """不接受这些人的消息
     :param users: qq号列表
     """
@@ -150,7 +151,7 @@ def not_these_users(users: list):  # pylint:disable=W0613
     return deco
 
 
-def only_these_users(users: list):  # pylint:disable=W0613
+def only_these_users(users: list):
     """仅接受这些人的消息
     :param users: qq号列表
     """
@@ -191,7 +192,7 @@ def only_this_msg_type(msg_type: str):
     return deco
 
 
-def not_these_groups(groups: list):  # pylint:disable=W0613
+def not_these_groups(groups: list):
     """不接受这些群组的消息
     :param groups: 群号列表
     """
@@ -212,7 +213,7 @@ def not_these_groups(groups: list):  # pylint:disable=W0613
     return deco
 
 
-def only_these_groups(groups: list):  # pylint:disable=W0613
+def only_these_groups(groups: list):
     """只接受这些群组的消息
     :param groups: 群号列表
     """
