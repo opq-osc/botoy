@@ -8,5 +8,4 @@ formats: all
 python:
   version: 3.7
   install:
-    - mkdocs-material
-    - markdown
+    - requirements: docs/requirements.txt
