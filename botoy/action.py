@@ -303,19 +303,33 @@ class Action:
             'OidbSvc.0x89a_0',
             {"GroupID": group, "Switch": switch},
         )
-    def setgroupAnnounce(self, group: int, Title: str, Text: str, Pinned: bool, typ: bool):
-    """设置群公告;Title可以空,Pinned 是否置顶 typ:是否发送新成员"""
-    if typ:
-        Type = 20
-    else:
-        Type = 0
-    return self.post(path='/v1/Group/Announce', funcname='', payload={
-        "GroupID": group,
-        "Title": Title,
-        "Text": Text,
-        "Pinned": Pinned,
-        "Type": Type
-    })
+
+    def setGroupAnnounce(
+        self,
+        group: int,
+        text: str,
+        pinned: bool = False,
+        title: str = '',
+        typ: bool = True,
+    ):
+        """设置群公告
+        :param group: 群号
+        :param text: 内容
+        :param pinned: 是否置顶
+        :param title: 标题,可以空
+        :param typ: 是否发送新成员
+        """
+        return self.post(
+            path='/v1/Group/Announce',
+            funcname='',
+            payload={
+                "GroupID": group,
+                "Title": title,
+                "Text": text,
+                "Pinned": 1 if pinned else 0,
+                "Type": 20 if typ else 10,  # 20 发给新成员, 10 弹窗
+            },
+        )
 
     ############################################################################
     def baseRequest(
