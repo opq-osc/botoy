@@ -313,7 +313,7 @@ class Action:
             "GroupID": group,
             "Title": Title,
             "Text": Text,
-            "Pinned": Pinned,
+            "Pinned": int(Pinned),
             "Type": Type
         })
 
