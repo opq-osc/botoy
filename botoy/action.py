@@ -34,14 +34,14 @@ class Action:
         )
 
     def sendFriendPic(
-        self,
-        user: int,
-        *,
-        picUrl: str = '',
-        picBase64Buf: str = '',
-        fileMd5: str = '',
-        content: str = '',
-        flashPic=False,
+            self,
+            user: int,
+            *,
+            picUrl: str = '',
+            picBase64Buf: str = '',
+            fileMd5: str = '',
+            content: str = '',
+            flashPic=False,
     ):
         """发送好友图片消息"""
         return self.post(
@@ -59,7 +59,7 @@ class Action:
         )
 
     def sendFriendVoice(
-        self, user: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+            self, user: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
     ):
         """发送好友语音消息"""
         return self.post(
@@ -86,7 +86,7 @@ class Action:
         )
 
     def sendGroupText(
-        self, group: int, content: str, atUser: Union[int, List[int]] = 0
+            self, group: int, content: str, atUser: Union[int, List[int]] = 0
     ) -> dict:
         """发送群组文本消息"""
         if atUser != 0:
@@ -102,15 +102,15 @@ class Action:
         )
 
     def sendGroupPic(
-        self,
-        user: int,
-        *,
-        content: str = '',
-        picUrl: str = '',
-        picBase64Buf: str = '',
-        fileMd5: str = '',
-        flashPic=False,
-        atUser: Union[int, List[int]],
+            self,
+            user: int,
+            *,
+            content: str = '',
+            picUrl: str = '',
+            picBase64Buf: str = '',
+            fileMd5: str = '',
+            flashPic=False,
+            atUser: Union[int, List[int]],
     ) -> dict:
         """发送群组图片消息"""
         if atUser != 0:
@@ -130,7 +130,7 @@ class Action:
         )
 
     def sendGroupVoice(
-        self, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+            self, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
     ) -> dict:
         """发送群组语音消息"""
         return self.post(
@@ -206,19 +206,24 @@ class Action:
 
     ############获取############
     def getCookies(self):
-        pass
+        """获取QQ相关cookie"""
+        return self.get('GetUserCook')
 
-    def getUserList(self):
-        pass
+    def getUserList(self):  # todo:循环获取
+        """获取好友列表"""
+        return self.post('GetQQUserList', {'StartIndex': 0})
 
-    def getUserInfo(self):
-        pass
+    def getUserInfo(self, UserID: int):
+        """获取任意用户信息昵称头像等"""
+        return self.post('GetUserInfo', {'UserID': UserID})
 
-    def getGroupList(self):
-        pass
+    def getGroupList(self):  # todo:循环获取
+        """获取当前bot加入的群列表"""
+        return self.post('GetGroupList', {'NextToken': ''})
 
-    def getGroupUserList(self):
-        pass
+    def getGroupUserList(self, groupID: int):  # todo:循环获取
+        """获取群信息(bot已经加入的,未加入的获取不到)"""
+        return self.post('GetGroupUserList', {'GroupUin': groupID, 'LastUin': ''})
 
     ############操作############
     def setUniqueTitle(self):
@@ -227,20 +232,28 @@ class Action:
     def modifyGroupCard(self):
         pass
 
-    def shutUserUp(self):
-        pass
+    def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
+        """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
+        return self.post('ShutUp',
+                         {'ShutUpType': 0, 'GroupID': groupID, 'ShutUid': userid, 'ShutTime': ShutTime})
 
-    def shutAllUp(self):
-        pass
+    def shutAllUp(self, groupID: int, ShutTime: int):
+        return self.post('ShutUp', {
+            "ShutUpType": 1,
+            "GroupID": groupID,
+            "ShutUid": 0,
+            "ShutTime": ShutTime
+        })
 
-    ############################################################################
+        ############################################################################
+
     def baseRequest(
-        self,
-        method: str,
-        funcname: str,
-        path: str,
-        payload: dict = None,
-        params: dict = None,
+            self,
+            method: str,
+            funcname: str,
+            path: str,
+            payload: dict = None,
+            params: dict = None,
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
@@ -293,11 +306,11 @@ class Action:
         return data
 
     def post(
-        self,
-        funcname: str,
-        payload: dict,
-        params: dict = None,
-        path: str = '/v1/LuaApiCaller',
+            self,
+            funcname: str,
+            payload: dict,
+            params: dict = None,
+            path: str = '/v1/LuaApiCaller',
     ) -> dict:
         """封装常用的post操作"""
         return self.baseRequest(
@@ -305,10 +318,10 @@ class Action:
         )
 
     def get(
-        self,
-        funcname: str,
-        params: dict = None,
-        path: str = '/v1/LuaApiCaller',
+            self,
+            funcname: str,
+            params: dict = None,
+            path: str = '/v1/LuaApiCaller',
     ) -> dict:
         """封装get操作"""
         return self.baseRequest('GET', funcname=funcname, path=path, params=params)
