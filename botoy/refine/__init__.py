@@ -1,5 +1,9 @@
+"""解析各类消息的详细字段, 所有操作不会影响原始消息上下文对象"""
 import copy
 import functools
+
+
+# TODO: support AtMsg
 
 
 def _copy_ctx(f):
@@ -10,8 +14,31 @@ def _copy_ctx(f):
     return i
 
 
-# pylint: disable=wrong-import-position
-from botoy.refine._event import (
+# pylint: disable=C0413
+from ._friend_msg import (
+    _FriendPic,
+    _PicFriendMsg,
+    _RedBagFriendMsg,
+    _VideoFriendMsg,
+    _VoiceFriendMsg,
+    refine_pic_friend_msg,
+    refine_RedBag_friend_msg,
+    refine_video_friend_msg,
+    refine_voice_friend_msg,
+)
+from ._group_msg import (
+    _AtGroupMsg,
+    _GroupPic,
+    _PicGroupMsg,
+    _RedBagGroupMsg,
+    _VideoGroupMsg,
+    _VoiceGroupMsg,
+    refine_pic_group_msg,
+    refine_RedBag_group_msg,
+    refine_video_group_msg,
+    refine_voice_group_msg,
+)
+from ._event import (
     _FriendDeleteEventMsg,
     _FriendRevokeEventMsg,
     _GroupAdminEventMsg,
@@ -27,28 +54,5 @@ from botoy.refine._event import (
     refine_group_exit_event_msg,
     refine_group_join_event_msg,
     refine_group_revoke_event_msg,
-    refine_group_shut_event_msg
-)
-from botoy.refine._friend_msg import (
-    _FriendPic,
-    _PicFriendMsg,
-    _RedBagFriendMsg,
-    _VideoFriendMsg,
-    _VoiceFriendMsg,
-    refine_pic_friend_msg,
-    refine_RedBag_friend_msg,
-    refine_video_friend_msg,
-    refine_voice_friend_msg
-)
-from botoy.refine._group_msg import (
-    _AtGroupMsg,
-    _GroupPic,
-    _PicGroupMsg,
-    _RedBagGroupMsg,
-    _VideoGroupMsg,
-    _VoiceGroupMsg,
-    refine_pic_group_msg,
-    refine_RedBag_group_msg,
-    refine_video_group_msg,
-    refine_voice_group_msg
+    refine_group_shut_event_msg,
 )

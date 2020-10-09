@@ -1,4 +1,6 @@
 # pylint: disable=R0902,W0231
+from typing import List
+
 from botoy import json
 from botoy.collection import MsgTypes
 from botoy.exceptions import InvalidContextError
