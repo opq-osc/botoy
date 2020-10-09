@@ -23,7 +23,7 @@ class Config:
         group_blacklist: List[int] = None,
         friend_blacklist: List[int] = None,
         blocked_users: List[int] = None,
-        webhook: str = None,
+        webhook: bool = None,
         webhook_post_url: str = None,
         webhook_timeout: int = None,
     ):

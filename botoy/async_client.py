@@ -22,8 +22,8 @@ class AsyncBotoy(Botoy):
         self.pool.submit(func, *args)
 
     async def close(self, status=0):
-        await self.socketio.disconnect()
         self.pool.shutdown(wait=False)
+        await self.socketio.disconnect()
         self._exit = True
         sys.exit(status)
 
@@ -102,6 +102,8 @@ class AsyncBotoy(Botoy):
                     context = new_context
                 else:
                     return
+        context._host = self.config.host
+        context._port = self.config.port
         await self._friend_context_distributor(context)
 
     async def _group_msg_handler(self, msg):
@@ -126,6 +128,8 @@ class AsyncBotoy(Botoy):
                     context = new_context
                 else:
                     return
+        context._host = self.config.host
+        context._port = self.config.port
         await self._group_context_distributor(context)
 
     async def _event_handler(self, msg):
@@ -144,6 +148,8 @@ class AsyncBotoy(Botoy):
                     context = new_context
                 else:
                     return
+        context._host = self.config.host
+        context._port = self.config.port
         await self._event_context_distributor(context)
 
     ########################################################################

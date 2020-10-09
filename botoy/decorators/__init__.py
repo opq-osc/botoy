@@ -9,3 +9,4 @@ from .in_content import in_content
 from .is_botself import is_botself
 from .startswith import startswith
 from .these_msgtypes import these_msgtypes
+from .with_pattern import with_pattern

@@ -1,4 +1,4 @@
-# pylint: disable = too-many-instance-attributes
+# pylint: disable = too-many-instance-attributes, W0212
 import copy
 import functools
 import sys
@@ -86,6 +86,14 @@ class Botoy:
         self._friend_context_middlewares = []
         self._group_context_middlewares = []
         self._event_context_middlewares = []
+
+        # webhook
+        if self.config.webhook:
+            from . import webhook  # pylint: disable=C0415
+
+            self._friend_msg_receivers.append(webhook.receive_friend_msg)
+            self._group_msg_receivers.append(webhook.receive_group_msg)
+            self._event_receivers.append(webhook.receive_events)
 
         # 插件管理
         # 管理插件提供的接收函数
@@ -217,8 +225,8 @@ class Botoy:
                 self._when_disconnected_do = None
 
     def close(self, status=0):
-        self.socketio.disconnect()
         self.pool.shutdown(wait=False)
+        self.socketio.disconnect()
         self._exit = True
         sys.exit(status)
 
@@ -284,6 +292,9 @@ class Botoy:
                     context = new_context
                 else:
                     return
+        # 传递几个数据供(插件中的)接收函数调用, 其他不再注释
+        context._host = self.config.host
+        context._port = self.config.port
         self.pool.submit(self._friend_context_distributor, context)
 
     def _group_msg_handler(self, msg):
@@ -305,6 +316,8 @@ class Botoy:
                     context = new_context
                 else:
                     return
+        context._host = self.config.host
+        context._port = self.config.port
         self.pool.submit(self._group_context_distributor, context)
 
     def _event_handler(self, msg):
@@ -320,6 +333,8 @@ class Botoy:
                     context = new_context
                 else:
                     return
+        context._host = self.config.host
+        context._port = self.config.port
         self.pool.submit(self._event_context_distributor, context)
 
     ########################################################################
