@@ -45,14 +45,14 @@ _Tips_:
 | `log_file`         | 是否输出日志文件                                                                                       | `True`             |
 
 1. 参数均为可选值
-2. 如果你想通过一个域名连接 bot 的话，将 port 设置为 0 即可
-   如 bot 连接地址为 http://example.com, 设置`host='http://example.com'`, `port=0`
+2. **如果你想通过一个域名连接 bot 的话，将 port 设置为 0 即可
+   如 bot 连接地址为 http://example.com, 设置`host='http://example.com'`, `port=0`**
 
 ## 连接或断开连接时的钩子函数
 
-- 使用`bot.when_connected`和`bot.when_disconnected`绑定 socketio 成功连接或断开连接时运行的函数，
+- 使用`bot.when_connected`和`bot.when_disconnected`绑定 socketio 成功连接或断开连接时运行的函数(可选)
 
-- 有且只能绑定一个，函数不能有参数。
+- 只能绑定**一个**，函数不能有参数。
 
 - 因为 socketio 有自动重连，默认情况下两个函数都只会运行一次，如果需要每次都要运行的话，可以设置装饰器参数`every_time`来决定每次连接或断开连接后是否都运行
 

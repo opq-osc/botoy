@@ -76,6 +76,7 @@ class _PicGroupMsg(_GroupMsg):
 class _AtGroupMsg(_GroupMsg):
     def __init__(self, ctx: GroupMsg):
         super()._carry_properties(ctx)
+        # TODO:
 
 
 class _RedBagGroupMsg(_GroupMsg):
