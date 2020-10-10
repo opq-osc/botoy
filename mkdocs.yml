@@ -6,7 +6,7 @@ theme:
   name: material
 
 nav:
-  - overview.md
+  - index.md
   - client.md
   - config.md
   - middleware.md
