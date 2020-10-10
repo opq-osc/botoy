@@ -1,4 +1,4 @@
-from botoy import FriendMsg, GroupMsg
+from ..model import FriendMsg, GroupMsg
 
 
 def these_msgtypes(*msgtypes):

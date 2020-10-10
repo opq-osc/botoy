@@ -1,4 +1,4 @@
-site_name: BOTOY - OPQ的Python开发助手
+site_name: BOTOY - OPQ的Python助手
 
 repo_url: https://github.com/xiyaowong/botoy
 
@@ -6,7 +6,18 @@ theme:
   name: material
 
 nav:
-  - index.md
+  - overview.md
+  - client.md
+  - config.md
+  - middleware.md
+  - decorators.md
+  - refine.md
+  - action.md
+  - plugin.md
+  - async.md
+  - cli.md
+  - other.md
+  - changelog.md
 
 markdown_extensions:
   - codehilite

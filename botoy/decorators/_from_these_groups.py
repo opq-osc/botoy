@@ -1,4 +1,4 @@
-from botoy import FriendMsg, GroupMsg
+from ..model import FriendMsg, GroupMsg
 
 
 def from_these_groups(*groups):

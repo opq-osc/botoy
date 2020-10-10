@@ -1,8 +1,8 @@
-from botoy import FriendMsg, GroupMsg
+from ..model import FriendMsg, GroupMsg
 
 
-def from_these_users(*users):
-    """仅接受来自这些用户的消息"""
+def ignore_these_users(*users):
+    """忽略这些人的消息"""
 
     def deco(func):
         def inner(ctx):
@@ -12,7 +12,7 @@ def from_these_users(*users):
                 from_user = ctx.FromUserId
             elif isinstance(ctx, FriendMsg):
                 from_user = ctx.FromUin
-            if from_user in users:
+            if from_user not in users:
                 return func(ctx)
             return None
 

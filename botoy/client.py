@@ -33,7 +33,7 @@ class Botoy:
     :param port: 运行端口, 默认为``8888``
     :param host: ip，默认为``http://127.0.0.1``
     :param group_blacklist: 群黑名单, 此名单中的群聊消息不会被处理,默认为``空``
-    :param friend_whitelist: 好友白名单，只有此名单中的好友消息才会被处理，默认为``空``
+    :param friend_blacklist: 好友黑名单，此名单中的好友消息不会被处理，默认为``空``
     :param blocked_users: 用户黑名单，即包括群消息和好友消息, 该用户的消息都不会处理, 默认为``空``
     :param log: 是否开启日志
     :param log_file: 是否输出日志文件
@@ -122,14 +122,17 @@ class Botoy:
     def on_friend_msg(self, receiver: Callable[[FriendMsg], Any]):
         """添加好友消息接收函数"""
         self._friend_msg_receivers.append(receiver)
+        return self  # 包括下面的六个方法是都不需要返回值的, 但返回本身也无妨,可以支持链式初始化
 
     def on_group_msg(self, receiver: Callable[[GroupMsg], Any]):
         """添加群消息接收函数"""
         self._group_msg_receivers.append(receiver)
+        return self
 
     def on_event(self, receiver: Callable[[EventMsg], Any]):
         """添加事件消息接收函数"""
         self._event_receivers.append(receiver)
+        return self
 
     ########################################################################
     # Add context middlewares
@@ -139,14 +142,17 @@ class Botoy:
     ):
         """注册好友消息中间件"""
         self._friend_context_middlewares.append(middleware)
+        return self
 
     def group_context_use(self, middleware: Callable[[GroupMsg], Optional[GroupMsg]]):
         """注册群消息中间件"""
         self._group_context_middlewares.append(middleware)
+        return self
 
     def event_context_use(self, middleware: Callable[[EventMsg], Optional[EventMsg]]):
         """注册事件消息中间件"""
         self._event_context_middlewares.append(middleware)
+        return self
 
     ########################################################################
     # shortcuts to call plugin manager methods

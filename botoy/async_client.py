@@ -1,4 +1,4 @@
-# pylint: disable=W0236,E1133
+# pylint: disable = too-many-instance-attributes, W0212,W0236,E1133
 import asyncio
 import copy
 import sys

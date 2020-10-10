@@ -1,6 +1,6 @@
 import re
+from ..model import FriendMsg, GroupMsg
 
-from botoy import FriendMsg, GroupMsg
 
 
 def with_pattern(pattern: str):

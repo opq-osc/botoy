@@ -1,5 +1,5 @@
-from botoy import FriendMsg, GroupMsg
-from botoy.refine import refine_pic_friend_msg, refine_pic_group_msg
+from ..model import FriendMsg, GroupMsg
+from ..refine import refine_pic_friend_msg, refine_pic_group_msg
 
 
 def equal_content(string: str):
