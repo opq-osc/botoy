@@ -348,6 +348,20 @@ class Action:
             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
         )
 
+    def revokeGroupMsg(
+        self, group: int, msgSeq: int, msgRandom: int, cmd: int = 0
+    ) -> dict:
+        """撤回群消息
+        :param group: 群号
+        :param msgSeq: 消息msgSeq
+        :param msgRandom: 消息msgRandom
+        :param cmd: 0 或 1, 0表示使用: RevokeMsg , 1表示使用: PbMessageSvc.PbMsgWithDraw
+        """
+        return self.post(
+            'RevokeMsg' if cmd == 0 else 'PbMessageSvc.PbMsgWithDraw',
+            {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
+        )
+
     ############################################################################
     def baseRequest(
         self,

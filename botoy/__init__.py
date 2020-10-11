@@ -12,7 +12,6 @@ from botoy.async_client import AsyncBotoy
 from botoy.client import Botoy
 from botoy.model import EventMsg, FriendMsg, GroupMsg
 
-
 __all__ = [
     'refine',
     'decorators',
