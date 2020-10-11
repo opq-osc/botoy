@@ -1,5 +1,6 @@
 from botoy import decorators as deco
 
+
 # 功能: 在收到群消息内容为 test 时, 在控制台打印 ok
 # 如果是机器人本身的消息则忽略
 ########### 一般写法 ##########

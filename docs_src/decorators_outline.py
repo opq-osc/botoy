@@ -31,7 +31,7 @@ def ignore_these_users(*users):
     """忽略这些人的消息"""
 
 
-def is_botself(func=None):
+def from_botself(func=None):
     """只处理机器人自身的消息"""
 
 

@@ -1,7 +1,7 @@
 from ..model import FriendMsg, GroupMsg
 
 
-def is_botself(func=None):
+def from_botself(func=None):
     """只处理机器人自身的消息"""
     if func is None:
         return is_botself
