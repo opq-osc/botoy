@@ -63,7 +63,6 @@ class AsyncBotoy(Botoy):
             if asyncio.iscoroutinefunction(g_receiver):
                 await g_receiver(new_context)
             else:
-                print('==========不是异步=========')
                 self.asyncRun(g_receiver, new_context)
 
     async def _event_context_distributor(self, context: EventMsg):
