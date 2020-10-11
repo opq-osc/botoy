@@ -1,9 +1,14 @@
 site_name: BOTOY - OPQ的Python助手
 
+repo_name: xiyaowong/botoy
 repo_url: https://github.com/xiyaowong/botoy
 
 theme:
   name: material
+  palette:
+    scheme: preference
+    primary: purple
+    accent: amber
 
 nav:
   - index.md
