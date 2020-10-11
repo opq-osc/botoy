@@ -6,7 +6,7 @@ import textwrap
 
 import click
 
-from botoy.util import check_schema
+from .util import check_schema
 
 echo = click.echo
 

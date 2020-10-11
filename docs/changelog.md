@@ -1,3 +1,1 @@
-# Change Log
-
-{!../../CHANGELOG.md!}
+{!../CHANGELOG.md!}

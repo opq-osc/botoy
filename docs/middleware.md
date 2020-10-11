@@ -26,11 +26,11 @@ def _(ctx: GroupMsg):
 ```
 
 添加了上面的中间件后
-
 在所有群消息接收函数中可以通过 `ctx.master`访问该值, 而不是每次需要时都定义一遍
 
-_Tips_:
-三类消息 ctx 在传递给接收函数时，会自动添加 `ctx._host` 和 `ctx._port` 属性，所以这两个为保留值,
-其他保留属性:`_pattern_result`
-
 好友和事件同上
+
+!!!tip
+
+    三类消息 ctx 在传递给接收函数时，会自动添加 <code>ctx._host</code> 和 <code>ctx._port</code> 属性，所以这两个为保留值,
+    其他保留属性:<code>_pattern_result</code>

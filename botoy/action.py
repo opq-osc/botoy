@@ -270,7 +270,7 @@ class Action:
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
-        """设置群头衔"""
+        """设置群成员头衔"""
         return self.post(
             'OidbSvc.0x8fc_2',
             {"GroupID": group, "UserID": user, "NewTitle": title},
