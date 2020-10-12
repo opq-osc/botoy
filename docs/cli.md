@@ -17,6 +17,7 @@ botoy add
 ## 帮助
 
 ```shell
+botoy
 botoy --help
 botoy init --help
 botoy add --help
