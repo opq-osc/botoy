@@ -5,12 +5,12 @@ try:
 except ImportError:
     import json
 
-from botoy import collection, decorators, refine, sugar
-from botoy.action import Action
-from botoy.async_action import AsyncAction
-from botoy.async_client import AsyncBotoy
-from botoy.client import Botoy
-from botoy.model import EventMsg, FriendMsg, GroupMsg
+from . import collection, decorators, refine, sugar
+from .action import Action
+from .async_action import AsyncAction
+from .async_client import AsyncBotoy
+from .client import Botoy
+from .model import EventMsg, FriendMsg, GroupMsg
 
 __all__ = [
     'refine',
