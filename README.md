@@ -1,5 +1,8 @@
 # botoy
 
+[![pypi](https://img.shields.io/pypi/v/botoy?style=flat-square 'pypi')](https://pypi.org/project/botoy/)
+[![python-version](https://img.shields.io/pypi/pyversions/python-iotbot?style=flat-square)](https://pypi.org/project/python-iotbot/)
+
 对机器人框架[OPQ](https://github.com/OPQBOT/OPQ/)接口的 Python 封装,
 因为功能模块耦合度低,
 所以你可以完全使用该框架开发，也可以选取需要的内容到自己的项目中
