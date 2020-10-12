@@ -48,16 +48,17 @@ def Text(text: str, at=False):
     return None
 
 
-def Picture(pic_url='', pic_base64='', pic_path='', text=''):
+def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
     """发送图片 经支持群消息和好友消息接收函数内调用
     :param pic_url: 图片链接
     :param pic_base64: 图片base64编码
     :param pic_path: 图片文件路径
+    :param pic_md5: 已发送图片的MD5
     :param text: 包含的文字消息
 
     ``pic_url, pic_base64, pic_path必须给定一项``
     """
-    assert any([pic_url, pic_base64, pic_path]), '必须给定一项'
+    assert any([pic_url, pic_base64, pic_path, pic_md5]), '必须给定一项'
 
     ctx = None
     f = sys._getframe()
@@ -90,6 +91,9 @@ def Picture(pic_url='', pic_base64='', pic_path='', text=''):
             return action.sendGroupPic(
                 ctx.FromGroupId, content=text, picBase64Buf=file_to_base64(pic_path)
             )
+        elif pic_md5:
+            return action.sendGroupPic(ctx.FromGroupId, content=text, fileMd5=pic_md5)
+
     if isinstance(ctx, FriendMsg):
         if pic_url:
             if ctx.TempUin is not None:
@@ -119,6 +123,13 @@ def Picture(pic_url='', pic_base64='', pic_path='', text=''):
                 return action.sendFriendPic(
                     ctx.FromUin, picBase64Buf=file_to_base64(pic_path), content=text
                 )
+        elif pic_md5:
+            if ctx.TempUin:
+                return action.sendPrivatePic(
+                    ctx.FromUin, ctx.TempUin, content=text, fileMd5=pic_md5
+                )
+            else:
+                return action.sendFriendPic(ctx.FromUin, fileMd5=pic_md5, content=text)
     return None
 
 
