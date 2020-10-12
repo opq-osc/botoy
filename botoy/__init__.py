@@ -5,7 +5,6 @@ try:
 except ImportError:
     import json
 
-from . import collection, decorators, refine, sugar
 from .action import Action
 from .async_action import AsyncAction
 from .async_client import AsyncBotoy
