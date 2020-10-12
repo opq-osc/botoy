@@ -3,7 +3,7 @@ from ..refine import refine_pic_friend_msg, refine_pic_group_msg
 
 
 def startswith(string: str):
-    """Content以指定前缀开头
+    """Content以指定前缀开头  GroupMsg, FriendMsg
     :param string: 前缀字符串, 会解析图片消息的Content
     """
 

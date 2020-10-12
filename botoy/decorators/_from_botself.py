@@ -2,9 +2,9 @@ from ..model import FriendMsg, GroupMsg
 
 
 def from_botself(func=None):
-    """只处理机器人自身的消息"""
+    """只处理机器人自身的消息 GroupMsg, FriendMsg"""
     if func is None:
-        return is_botself
+        return from_botself
 
     def inner(ctx):
         assert isinstance(ctx, (GroupMsg, FriendMsg))

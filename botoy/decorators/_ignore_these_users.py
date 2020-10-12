@@ -2,7 +2,7 @@ from ..model import FriendMsg, GroupMsg
 
 
 def ignore_these_users(*users):
-    """忽略这些人的消息"""
+    """忽略这些人的消息 GroupMsg, FriendMsg"""
 
     def deco(func):
         def inner(ctx):

@@ -7,3 +7,8 @@
 
 - botoy.collection
   模块封装了已知的消息类型(MsgTypes)和事件类型(EventNames)以及部分表情代码(Emoticons)
+
+- 消息上下文的字段命名与原数据完全一致
+
+- 私聊消息比较难处理，如果好友消息 ctx 的 TempUin 不为 None，说明是私聊消息,
+  这个字段是私聊入口群号, 可以用 `ensure_tempMsg`接收函数装饰器确保是私聊消息

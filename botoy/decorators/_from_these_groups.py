@@ -1,13 +1,13 @@
-from ..model import FriendMsg, GroupMsg
+from ..model import GroupMsg
 
 
 def from_these_groups(*groups):
-    """只接受这些群组的消息"""
+    """只接受这些群组的消息 GroupMsg, FriendMsg"""
 
     def deco(func):
         def inner(ctx):
             nonlocal groups
-            assert isinstance(ctx, (GroupMsg, FriendMsg))
+            assert isinstance(ctx, GroupMsg)
             from_group = ctx.FromGroupId
             if from_group in groups:
                 return func(ctx)

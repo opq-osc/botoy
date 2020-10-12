@@ -56,3 +56,7 @@ def with_pattern(pattern: str):
 
     :param pattern: 需要进行匹配的``正则表达式字符串``
     """
+
+
+def ensure_tempMsg(func=None):
+    """只接收私聊信息 FriendMsg"""

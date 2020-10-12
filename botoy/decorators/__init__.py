@@ -10,3 +10,4 @@ from ._in_content import in_content
 from ._startswith import startswith
 from ._these_msgtypes import these_msgtypes
 from ._with_pattern import with_pattern
+from ._ensure_tempMsg import ensure_tempMsg

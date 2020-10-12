@@ -2,7 +2,7 @@ from ..model import FriendMsg, GroupMsg
 
 
 def these_msgtypes(*msgtypes):
-    """仅接受该些类型消息
+    """仅接受该些类型消息  GroupMsg, FriendMsg
     模块collection中定义了这些消息类型
     """
 
