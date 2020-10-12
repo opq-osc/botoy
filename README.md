@@ -4,10 +4,12 @@
 因为功能模块耦合度低,
 所以你可以完全使用该框架开发，也可以选取需要的内容到自己的项目中
 
-如果你配置好了 OPQ，并且配置保持默认，下面一行代码即可监听消息，并在收到群消息内容为 test 时回复 ok
+---
+
+如果你配置好了 OPQ，并且配置保持默认(bot 连接地址http://127.0.0.1:8888)，下面一行代码即可监听消息，并在收到群消息或好友消息内容为 test 时回复 ok
 
 ```python
-__import__('botoy').Botoy().on_group_msg(lambda ctx: __import__('botoy').Action(ctx.CurrentQQ).sendGroupText(ctx.FromGroupId, 'ok') if ctx.Content == 'test' else None).run()
+__import__('botoy').Botoy().on_group_msg(lambda ctx: __import__('botoy').Action(ctx.CurrentQQ).sendGroupText(ctx.FromGroupId, 'ok') if ctx.Content == 'test' else None).on_friend_msg(lambda ctx: __import__('botoy').Action(ctx.CurrentQQ).sendFriendText(ctx.FromUin, 'ok') if ctx.Content == 'test' else None).run()
 ```
 
 # [文档](https://botoy.readthedocs.io/)
