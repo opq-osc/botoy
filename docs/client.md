@@ -9,7 +9,7 @@ bot = Botoy(12345678)
 
 @bot.on_group_msg
 def group(ctx: GroupMsg):
-    print('收到群消息，群号为', ctx.FromGropId)
+    print('收到群消息，群号为', ctx.FromGroupId)
 
 if __name__ == '__main__':
     bot.run()
