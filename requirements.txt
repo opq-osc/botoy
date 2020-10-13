@@ -1,6 +1,7 @@
 httpx
 python-socketio
-websockets
+websocket-client
 loguru
 click
 aiohttp
+prettytable
