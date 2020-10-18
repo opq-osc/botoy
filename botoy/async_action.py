@@ -429,9 +429,13 @@ class AsyncAction:
                 method, httpx.URL(url=path, params=params), json=payload
             )
             resp.raise_for_status()
-        except httpx.RequestError as e:
-            if isinstance(e, httpx.Timeout):
-                logger.warning('响应超时，但不代表处理未成功, 结果未知!')
+        except httpx.HTTPError as e:
+            if isinstance(e, httpx.TimeoutException):
+                logger.warning(f'响应超时，但不代表处理未成功, 结果未知! => {e}')
+            elif isinstance(e, httpx.HTTPStatusError):
+                logger.error(
+                    f"响应码出错 => {resp.status_code}",
+                )
             else:
                 logger.error(f'请求出错: {traceback.format_exc()}')
             return {}
