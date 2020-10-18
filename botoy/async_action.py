@@ -111,7 +111,7 @@ class AsyncAction:
         picBase64Buf: str = '',
         fileMd5: str = '',
         flashPic=False,
-        atUser: Union[int, List[int]],
+        atUser: Union[int, List[int]] = 0,
     ) -> dict:
         """发送群组图片消息"""
         assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
