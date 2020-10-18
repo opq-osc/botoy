@@ -1,6 +1,6 @@
 import io
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 meta = {}
 
@@ -27,7 +27,7 @@ setup(
     url="https://github.com/xiyaowong/botoy",
     license='MIT',
     keywords=['iotbot', 'iotqq', 'OPQ', 'OPQBot'],
-    packages=['botoy', 'decorators', 'refine'],
+    packages=find_packages(),
     install_requires=read_files(['requirements.txt']),
     entry_points='''
         [console_scripts]
