@@ -1,3 +1,4 @@
+import time
 import traceback
 from typing import List, Union
 
@@ -245,6 +246,72 @@ class AsyncAction:
         return await self.post(
             'SendMsgV2',
             {"SendToType": 2, "SendMsgType": "PhoneMsg", "Content": content},
+        )
+
+    async def replyGroupMsg(
+        self,
+        group: int,
+        content: str,
+        msgSeq: int,
+        msgTime: int = None,
+        user: int = 0,
+        rawContent: str = '',
+    ):
+        """发送回复消息, 回复群消息
+        下面的原消息表示需要回复的消息
+        :param group: 原消息的群号
+        :param content: 回复内容
+        :param msgSeq: 原消息的msgSeq, 点击跳转到该条消息位置
+        :param msgTime: 原消息的msgTime, 如果不指定，默认为当前时间戳
+        :param user: 原消息的人的qq号，也可以是其他人，该用户收到消息会提示“有新回复”, 默认为0
+        :param rawContent: 原消息内容，可以任意指定，默认为空
+        """
+        return await self.post(
+            "SendMsg",
+            {
+                "toUser": group,
+                "sendToType": 2,
+                "sendMsgType": "ReplayMsg",
+                "content": content,
+                "replayInfo": {
+                    "MsgSeq": msgSeq,
+                    "MsgTime": msgTime or int(time.time()),
+                    "UserID": user,
+                    "RawContent": rawContent,
+                },
+            },
+        )
+
+    async def replyFriendMsg(
+        self,
+        user: int,
+        content: str,
+        msgSeq: int,
+        msgTime: int = None,
+        rawContent: str = '',
+    ):
+        """发送回复消息, 回复好友消息
+        下面的原消息表示需要回复的消息
+        :param user: 原消息发送人
+        :param content: 回复内容
+        :param msgSeq: 原消息的msgSeq, 点击跳转到该条消息位置
+        :param msgTime: 原消息的msgTime, 如果不指定，默认为当前时间戳
+        :param rawContent: 原消息内容，可以任意指定，默认为空
+        """
+        return await self.post(
+            "SendMsg",
+            {
+                "toUser": user,
+                "sendToType": 1,
+                "sendMsgType": "ReplayMsg",
+                "content": content,
+                "replayInfo": {
+                    "MsgSeq": msgSeq,
+                    "MsgTime": msgTime or int(time.time()),
+                    "UserID": user,
+                    "RawContent": rawContent,
+                },
+            },
         )
 
     async def setUniqueTitle(self, user: int, group: int, title: str):

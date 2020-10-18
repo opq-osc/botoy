@@ -83,6 +83,8 @@ port 和 host 的含义和 Botoy 实例中的一致
 | setGroupAnnounce | 设置群公告                       |
 | toggleGroupAdmin | 设置或取消群管理员               |
 | revokeGroupMsg   | 撤回群消息                       |
+| replyGroupMsg    | 发送回复消息,回复群消息          |
+| replyFriendMsg   | 发送回复消息,回复好友消息,不好用 |
 |                  | 搜索群组                         |
 |                  | 获取群管理列表                   |
 |                  | 获取包括群主在内的所有管理员列表 |
