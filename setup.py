@@ -27,7 +27,7 @@ setup(
     url="https://github.com/xiyaowong/botoy",
     license='MIT',
     keywords=['iotbot', 'iotqq', 'OPQ', 'OPQBot'],
-    packages=['botoy'],
+    packages=['botoy', 'decorators', 'refine'],
     install_requires=read_files(['requirements.txt']),
     entry_points='''
         [console_scripts]
