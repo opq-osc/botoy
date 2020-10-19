@@ -126,7 +126,7 @@ def init(name, qq, host, port):
 @click.option('-e', '--event', is_flag=True, help='是否要接收事件消息?')
 def add(name, friend, group, event):
     """创建插件"""
-    here = pathlib.Path('.').parent
+    here = pathlib.Path('.').absolute()
     if here.name != 'plugins':
         if not os.path.isdir('plugins'):
             sys.exit('插件目录plugins不存在')
