@@ -153,7 +153,7 @@ class AsyncBotoy(Botoy):
 
     ########################################################################
     def __repr__(self):
-        return 'Botoy <{}> <host-{}> <port-{}> <address-{}>'.format(
+        return 'AsyncBotoy <{}> <host-{}> <port-{}> <address-{}>'.format(
             " ".join([str(i) for i in self.qq]),
             self.config.host,
             self.config.port,
