@@ -195,10 +195,8 @@ def run():
     if not pathlib.Path('bot.py').exists():
         sys.exit('该命令只接受入口文件命名为bot.py')
     # look for Botoy client
-    try:
-        module = importlib.import_module('bot')
-    except ModuleNotFoundError:
-        module = importlib.import_module('.bot')
+    sys.path.append(str(pathlib.Path('.').absolute()))
+    module = importlib.import_module('bot')
     client = None
     for item in module.__dict__.values():
         if isinstance(item, (Botoy, AsyncBotoy)):
@@ -209,10 +207,8 @@ def run():
     if client is not None:
         # 先判断子类
         if isinstance(client, AsyncBotoy):
-            echo('异步运行!')
             asyncio.run(client.run())
         else:
-            echo('同步运行!')
             client.run()
 
 
