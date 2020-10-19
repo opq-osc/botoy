@@ -195,7 +195,10 @@ def run():
     if not pathlib.Path('bot.py').exists():
         sys.exit('该命令只接受入口文件命名为bot.py')
     # look for Botoy client
-    module = importlib.import_module('bot')
+    try:
+        module = importlib.import_module('bot')
+    except ModuleNotFoundError:
+        module = importlib.import_module('.bot')
     client = None
     for item in module.__dict__.values():
         if isinstance(item, (Botoy, AsyncBotoy)):
