@@ -1,3 +1,5 @@
+import asyncio
+import importlib
 import json
 import os
 import pathlib
@@ -6,6 +8,8 @@ import textwrap
 
 import click
 
+from .async_client import AsyncBotoy
+from .client import Botoy
 from .util import check_schema
 
 echo = click.echo
@@ -36,6 +40,9 @@ def cli():
     $ botoy add -n test -f -g
 
     可选项为-f -g -e 分别代表是否包含处理好友，群，事件，如果都不传，表示都要！
+
+    3. 启动机器人(要求入口文件名为bot.py)
+    $ botoy run
     """
 
 
@@ -177,6 +184,33 @@ def add(name, friend, group, event):
         f.write('\n\n')
         f.write('\n'.join(receivers))
     echo('ok')
+
+
+@cli.command()
+def run():
+    """启动机器人
+    要求入口文件名为bot.py
+    """
+    # look for bot.py
+    if not pathlib.Path('bot.py').exists():
+        sys.exit('该命令只接受入口文件命名为bot.py')
+    # look for Botoy client
+    module = importlib.import_module('bot')
+    client = None
+    for item in module.__dict__.values():
+        if isinstance(item, (Botoy, AsyncBotoy)):
+            client = item
+            break
+    else:
+        sys.exit('无法找到(Async)Botoy对象')
+    if client is not None:
+        # 先判断子类
+        if isinstance(client, AsyncBotoy):
+            echo('异步运行!')
+            asyncio.run(client.run())
+        else:
+            echo('同步运行!')
+            client.run()
 
 
 if __name__ == "__main__":
