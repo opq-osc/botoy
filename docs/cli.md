@@ -14,6 +14,14 @@ botoy init
 botoy add
 ```
 
+## 启动机器人 run
+
+```shell
+botoy run
+```
+
+要求机器人主文件命名为 bot.py
+
 ## 帮助
 
 ```shell
