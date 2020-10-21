@@ -429,6 +429,45 @@ class Action:
             {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
         )
 
+    def inviteUserJoinGroup(self, group: int, user: int) -> dict:
+        """拉人入群
+        :param group: 哪个群?
+        :param user: 拉谁?
+        """
+        return self.post(
+            'GroupMgr',
+            {"ActionType": 8, "GroupID": group, "ActionUserID": user, "Content": ""},
+        )
+
+    def joinGroup(self, group: int, content: str = "") -> dict:
+        """加入群聊
+        :param group: 哪个群?
+        :param content: 加群理由
+        """
+        return self.post(
+            'GroupMgr',
+            {"ActionType": 1, "GroupID": group, "ActionUserID": 0, "Content": content},
+        )
+
+    def exitGroup(self, group: int) -> dict:
+        """退出群聊
+        :param group: 哪个群?
+        """
+        return self.post(
+            'GroupMgr',
+            {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
+        )
+
+    def driveUserAway(self, group: int, user: int) -> dict:
+        """移出群聊
+        :param group: 哪个群?
+        :param user:把谁踢出去?
+        """
+        return self.post(
+            'GroupMgr',
+            {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
+        )
+
     ############################################################################
     def baseRequest(
         self,

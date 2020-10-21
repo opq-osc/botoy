@@ -409,6 +409,35 @@ class AsyncAction:
             {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
         )
 
+    async def joinGroup(self, group: int, content: str = "") -> dict:
+        """加入群聊
+        :param group: 哪个群?
+        :param content: 加群理由
+        """
+        return await self.post(
+            'GroupMgr',
+            {"ActionType": 1, "GroupID": group, "ActionUserID": 0, "Content": content},
+        )
+
+    async def exitGroup(self, group: int) -> dict:
+        """退出群聊
+        :param group: 哪个群?
+        """
+        return await self.post(
+            'GroupMgr',
+            {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
+        )
+
+    async def driveUserAway(self, group: int, user: int) -> dict:
+        """移出群聊
+        :param group: 哪个群?
+        :param user:把谁踢出去?
+        """
+        return await self.post(
+            'GroupMgr',
+            {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
+        )
+
     async def baseRequest(
         self,
         method: str,
