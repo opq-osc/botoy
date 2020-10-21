@@ -71,3 +71,62 @@ def _():
 ## 实例方法
 
 - `close` 停止运行
+
+## 消息上下文对象
+
+对三类消息及其字段的简要说明
+
+### 群消息(GroupMsg)
+
+| 字段名        | 说明                              |
+| ------------- | --------------------------------- |
+| CurrentQQ     | 当前机器人 qq                     |
+| FromGroupId   | 群号                              |
+| FromGroupName | 群名称                            |
+| FromUserId    | 发送人 QQ                         |
+| FromNickName  | 发送人昵称                        |
+| Content       | 发送内容                          |
+| MsgType       | 消息类型                          |
+| MsgTime       | 消息发送时间                      |
+| MsgSeq        | ~                                 |
+| MsgRandom     | ~                                 |
+| RedBaginfo    | 红包信息相关                      |
+| message       | 由 websocket 穿过来的原始字典数据 |
+| data          | 原始数据中的 Data 字段            |
+
+### 好友消息(FriendMsg)
+
+| 字段名     | 说明                                                                                         |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| CurrentQQ  | 当前机器人 qq                                                                                |
+| FromUin    | 发送人 qq                                                                                    |
+| TempUin    | 如果不为 None，表示为私聊消息，该字段是发起私聊的入口群号。同时 MsggType 就是 TempSessionMsg |
+| ToUin      | 发给谁的，一般就是机器人啦                                                                   |
+| MsgType    | 消息类型                                                                                     |
+| MsgTime    | 消息发送时间                                                                                 |
+| MsgSeq     | ~                                                                                            |
+| Content    | 发送内容                                                                                     |
+| RedBaginfo | 红包信息相关                                                                                 |
+| message    | 由 websocket 穿过来的原始字典数据                                                            |
+| data       | 原始数据中的 Data 字段                                                                       |
+
+### 事件(EventMsg)
+
+| 字段名     | 说明                              |
+| ---------- | --------------------------------- |
+| CurrentQQ  | 当前机器人 qq                     |
+| EventName  | 事件名称                          |
+| EventData  | 事件的具体信息(每个事件都不同)    |
+| EventMsg   | 事件的基本信息(每个事件都有)      |
+| Content    | 事件的内容                        |
+| FromUin    | 可能是群号、好友 qq               |
+| ToUin      | ~                                 |
+| MsgSeq     | ~                                 |
+| RedBaginfo | ~                                 |
+| message    | 由 websocket 穿过来的原始字典数据 |
+| data       | 原始数据中的 Data 字段            |
+
+!!! tip
+
+    - 群消息和好友消息中的Content字段永远是字符串类型，如果是非文本消息，就是json格式字符串数据，需要另外解码
+    - 对字段有疑问请自行打印出来或查看源码对比原数据，字段的命名也是与原数据中命名一致
