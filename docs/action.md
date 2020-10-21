@@ -56,47 +56,53 @@ port 和 host 的含义和 Botoy 实例中的一致
 
 基于以上方法，封装了部分常用的 API
 
-| 名称             | 作用                             |
-| ---------------- | -------------------------------- |
-| sendPhoneText    | 给手机发文字                     |
-| sendFriendText   | 发送好友文本消息                 |
-| sendFriendVoice  | 发送好友语音消息                 |
-| sendFriendPic    | 发送好友图片消息                 |
-| sendGroupText    | 发送群文字消息                   |
-| sendGroupVoice   | 发送群语音                       |
-| sendGroupPic     | 发送群图片                       |
-| sendGroupJson    | 发送群 Json 类型信息             |
-| sendGroupXml     | 发送群 Xml 类型信息              |
-| sendPrivateText  | 发送私聊文字消息                 |
-| sendPrivateVoice | 发送私聊语音                     |
-| sendPrivatePic   | 发送私聊图片                     |
-| getUserInfo      | 获取用户信息                     |
-| getUserList      | \*获取好友列表                   |
-| getCookies       | 获取 cookies                     |
-| getGroupList     | \*获取群聊列表                   |
-| getGroupUserList | \*获取群成员列表                 |
-| setUniqueTitle   | 设置群成员头衔                   |
-| modifyGroupCard  | 修改群名片                       |
-| shutAllUp        | 开启或关闭全员禁言               |
-| shutUserUp       | 设置群成员禁言                   |
-| likeUser         | 点赞                             |
-| setGroupAnnounce | 设置群公告                       |
-| toggleGroupAdmin | 设置或取消群管理员               |
-| revokeGroupMsg   | 撤回群消息                       |
-| replyGroupMsg    | 发送回复消息,回复群消息          |
-| replyFriendMsg   | 发送回复消息,回复好友消息,不好用 |
-|                  | 搜索群组                         |
-|                  | 获取群管理列表                   |
-|                  | 获取包括群主在内的所有管理员列表 |
-|                  | 刷新 key 二次登陆                |
-|                  | 添加好友                         |
-|                  | 处理好友请求                     |
-|                  | 退出 qq                          |
-|                  | 获取登录二维码的 base64 编码     |
-|                  | 获取好友文件下载链接             |
-|                  | 获取群文件下载链接               |
-|                  | 转发视频到群聊                   |
-|                  | 转发视频给好友                   |
+| 名称                | 作用                             |
+| ------------------- | -------------------------------- |
+| sendPhoneText       | 给手机发文字                     |
+| sendFriendText      | 发送好友文本消息                 |
+| sendFriendVoice     | 发送好友语音消息                 |
+| sendFriendPic       | 发送好友图片消息                 |
+| senfFriendXml       | 发送好友 Xml 类型消息            |
+| sendGroupText       | 发送群文字消息                   |
+| sendGroupVoice      | 发送群语音                       |
+| sendGroupPic        | 发送群图片                       |
+| sendGroupJson       | 发送群 Json 类型信息             |
+| sendGroupXml        | 发送群 Xml 类型信息              |
+| sendPrivateText     | 发送私聊文字消息                 |
+| sendPrivateVoice    | 发送私聊语音                     |
+| sendPrivatePic      | 发送私聊图片                     |
+| sendPrivateXml      | 发送私聊 Xml 类型信息            |
+| replyGroupMsg       | 发送回复消息,回复群消息          |
+| replyFriendMsg      | 发送回复消息,回复好友消息,不好用 |
+| getUserInfo         | 获取用户信息                     |
+| getCookies          | 获取 cookies                     |
+| getUserList         | \*获取好友列表                   |
+| getGroupList        | \*获取群聊列表                   |
+| getGroupMembers     | 获取群成员列表                   |
+| getGroupAdminList   | 获取群管理列表                   |
+| setUniqueTitle      | 设置群成员头衔                   |
+| modifyGroupCard     | 修改群名片                       |
+| shutAllUp           | 开启或关闭全员禁言               |
+| shutUserUp          | 设置群成员禁言                   |
+| likeUser            | 点赞                             |
+| setGroupAnnounce    | 设置群公告                       |
+| toggleGroupAdmin    | 设置或取消群管理员               |
+| revokeGroupMsg      | 撤回群消息                       |
+| inviteUserJoinGroup | 拉人入群                         |
+| joinGroup           | 加入群聊                         |
+| exitGroup           | 退出群聊                         |
+| driveUserAway       | 移出群聊                         |
+|                     | 搜索群组                         |
+|                     | 获取包括群主在内的所有管理员列表 |
+|                     | 刷新 key 二次登陆                |
+|                     | 添加好友                         |
+|                     | 处理好友请求                     |
+|                     | 退出 qq                          |
+|                     | 获取登录二维码的 base64 编码     |
+|                     | 获取好友文件下载链接             |
+|                     | 获取群文件下载链接               |
+|                     | 转发视频到群聊                   |
+|                     | 转发视频给好友                   |
 
 - 除特殊说明，API 返回的都是字典类型，如果出错则返回空字典
 - 没有方法名的表示还未封装，说明前面带\*号的表示还不完善

@@ -315,25 +315,64 @@ class Action:
         )
 
     ############获取############
-    def getCookies(self):
+    def getCookies(self) -> dict:
         """获取QQ相关cookie"""
         return self.get('GetUserCook')
 
-    def getUserList(self):  # todo:循环获取
-        """获取好友列表"""
-        return self.post('GetQQUserList', {'StartIndex': 0})
-
-    def getUserInfo(self, UserID: int):
+    def getUserInfo(self, UserID: int) -> dict:
         """获取任意用户信息昵称头像等"""
         return self.post('GetUserInfo', {'UserID': UserID})
 
-    def getGroupList(self):  # todo:循环获取
-        """获取当前bot加入的群列表"""
-        return self.post('GetGroupList', {'NextToken': ''})
+    def getUserList(self) -> list:  # FIXME: 目前只适用于好友较少一次获取就可以的情况，好友较多需要循环获取
+        """获取好友列表"""
+        data = self.post('GetQQUserList', {'StartIndex': 0})
+        if 'Friendlist' in data:
+            return data['Friendlist']
+        return []
 
-    def getGroupUserList(self, group: int):  # todo:循环获取
-        """获取群信息(bot已经加入的,未加入的获取不到)"""
-        return self.post('GetGroupUserList', {'GroupUin': group, 'LastUin': ''})
+    def getGroupList(self) -> list:  # FIXME: 循环获取
+        """获取群列表"""
+        data = self.post('GetGroupList', {'NextToken': ''})
+        if 'TroopList' in data:
+            return data['TroopList']
+        return []
+
+    def getGroupMembers(self, group: int) -> list:
+        """获取群成员列表"""
+        members = []
+        lastUin = 0
+        while True:
+            data = self.post(
+                'GetGroupUserList', {"GroupUin": group, "LastUin": lastUin}
+            )
+            if 'MemberList' in data:
+                members.extend(data['MemberList'])
+            if 'LastUin' not in data or data['LastUin'] == 0:
+                break
+            lastUin = data['LastUin']
+            time.sleep(0.5)
+        return members
+
+    def getGroupAdminList(self, group: int, include_owner=True) -> list:
+        """获取群管理员列表
+        :param group: 群号
+        :param include_owner: 是否包括群主
+        """
+        members = self.getGroupMembers(group)
+        if include_owner:
+            # 获取群主id
+            for groupInfo in self.getGroupList():
+                if groupInfo['GroupId'] == group:
+                    owner = groupInfo['GroupOwner']
+                    break
+            admins = [
+                member
+                for member in members
+                if member['GroupAdmin'] == 1 or member['MemberUin'] == owner
+            ]
+        else:
+            admins = [member for member in members if member['GroupAdmin'] == 1]
+        return admins
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
