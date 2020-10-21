@@ -92,6 +92,7 @@ port 和 host 的含义和 Botoy 实例中的一致
 | joinGroup           | 加入群聊                         |
 | exitGroup           | 退出群聊                         |
 | driveUserAway       | 移出群聊                         |
+| getClusterInfo      | 获取当前集群信息                 |
 |                     | 搜索群组                         |
 |                     | 获取包括群主在内的所有管理员列表 |
 |                     | 刷新 key 二次登陆                |

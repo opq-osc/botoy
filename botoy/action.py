@@ -374,6 +374,10 @@ class Action:
             admins = [member for member in members if member['GroupAdmin'] == 1]
         return admins
 
+    def getClusterInfo(self) -> dict:
+        """获取当前集群信息"""
+        return self.get('', path='/v1/ClusterInfo')
+
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
         """设置群成员头衔"""
