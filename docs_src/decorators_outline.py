@@ -60,3 +60,7 @@ def with_pattern(pattern: str):
 
 def ensure_tempMsg(func=None):
     """只接收私聊信息 FriendMsg"""
+
+
+def from_phone(func=None):
+    """来自手机的消息(给自己发的) FriendMsg"""
