@@ -12,3 +12,5 @@
 
 - 私聊消息比较难处理，如果好友消息 ctx 的 TempUin 不为 None，说明是私聊消息,
   这个字段是私聊入口群号, 可以用 `ensure_tempMsg`接收函数装饰器确保是私聊消息
+
+- [示例](https://github.com/xiyaowong/python--iotbot/tree/master/sample),用法差不多，只是方法名或参数名有一点不同，迁移很方便
