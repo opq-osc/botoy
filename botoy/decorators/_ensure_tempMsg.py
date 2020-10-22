@@ -6,13 +6,10 @@ def ensure_tempMsg(func=None):
     if func is None:
         return ensure_tempMsg
 
-    def deco(func):
-        def inner(ctx):
-            assert isinstance(ctx, FriendMsg)
-            if ctx.TempUin is not None:
-                return func(ctx)
-            return None
+    def inner(ctx):
+        assert isinstance(ctx, FriendMsg)
+        if ctx.TempUin is not None:
+            return func(ctx)
+        return None
 
-        return inner
-
-    return deco
+    return inner

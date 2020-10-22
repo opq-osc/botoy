@@ -134,3 +134,4 @@ dmypy.json
 plugins
 REMOVED_PLUGINS
 local*
+bot.py
