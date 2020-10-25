@@ -25,3 +25,7 @@ __all__ = [
     'GroupMsg',
     'FriendMsg',
 ]
+
+from .__version__ import check_version as __check_version
+
+__check_version()
