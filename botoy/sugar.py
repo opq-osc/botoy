@@ -5,6 +5,7 @@
 import sys
 
 from .action import Action
+from .collection import MsgTypes
 from .exceptions import InvalidContextError
 from .model import FriendMsg, GroupMsg
 from .util import file_to_base64
@@ -41,8 +42,10 @@ def Text(text: str, at=False):
             ctx.FromGroupId, text, atUser=ctx.FromUserId if at else 0
         )
     if isinstance(ctx, FriendMsg):
-        if ctx.TempUin:
+        if ctx.TempUin:  # 私聊消息
             return action.sendPrivateText(ctx.FromUin, ctx.TempUin, text)
+        elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+            return action.sendPhoneText(text)
         else:
             return action.sendFriendText(ctx.FromUin, text)
     return None
@@ -107,6 +110,8 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
                 return action.sendPrivatePic(
                     ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=pic_base64
                 )
+            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+                return None
             else:
                 return action.sendFriendPic(
                     ctx.FromUin, picBase64Buf=pic_base64, content=text
@@ -119,6 +124,8 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
                     content=text,
                     picBase64Buf=file_to_base64(pic_path),
                 )
+            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+                return None
             else:
                 return action.sendFriendPic(
                     ctx.FromUin, picBase64Buf=file_to_base64(pic_path), content=text
@@ -128,6 +135,8 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
                 return action.sendPrivatePic(
                     ctx.FromUin, ctx.TempUin, content=text, fileMd5=pic_md5
                 )
+            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+                return None
             else:
                 return action.sendFriendPic(ctx.FromUin, fileMd5=pic_md5, content=text)
     return None
@@ -176,6 +185,8 @@ def Voice(voice_url='', voice_base64='', voice_path=''):
                 return action.sendPrivateVoice(
                     ctx.FromUin, ctx.TempUin, voiceUrl=voice_url
                 )
+            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+                return None
             else:
                 return action.sendFriendVoice(ctx.FromUin, voiceUrl=voice_url)
         elif voice_base64:
@@ -183,6 +194,8 @@ def Voice(voice_url='', voice_base64='', voice_path=''):
                 return action.sendPrivateVoice(
                     ctx.FromUin, ctx.TempUin, voiceBase64Buf=voice_base64
                 )
+            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+                return None
             else:
                 return action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=voice_base64)
         elif voice_path:
@@ -190,6 +203,8 @@ def Voice(voice_url='', voice_base64='', voice_path=''):
                 return action.sendPrivateVoice(
                     ctx.FromUin, ctx.TempUin, voiceBase64Buf=file_to_base64(voice_path)
                 )
+            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
+                return None
             else:
                 return action.sendFriendVoice(
                     ctx.FromUin, voiceBase64Buf=file_to_base64(voice_path)
