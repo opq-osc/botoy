@@ -91,7 +91,7 @@ def _():
 | MsgSeq        | ~                                 |
 | MsgRandom     | ~                                 |
 | RedBaginfo    | 红包信息相关                      |
-| message       | 由 websocket 穿过来的原始字典数据 |
+| message       | 由 websocket 传过来的原始字典数据 |
 | data          | 原始数据中的 Data 字段            |
 
 ### 好友消息(FriendMsg)
@@ -107,7 +107,7 @@ def _():
 | MsgSeq     | ~                                                                                            |
 | Content    | 发送内容                                                                                     |
 | RedBaginfo | 红包信息相关                                                                                 |
-| message    | 由 websocket 穿过来的原始字典数据                                                            |
+| message    | 由 websocket 传过来的原始字典数据                                                            |
 | data       | 原始数据中的 Data 字段                                                                       |
 
 ### 事件(EventMsg)
@@ -123,7 +123,7 @@ def _():
 | ToUin      | ~                                 |
 | MsgSeq     | ~                                 |
 | RedBaginfo | ~                                 |
-| message    | 由 websocket 穿过来的原始字典数据 |
+| message    | 由 websocket 传过来的原始字典数据 |
 | data       | 原始数据中的 Data 字段            |
 
 !!! tip

@@ -9,6 +9,14 @@
 
 ---
 
+## 安装
+
+```shell
+pip install botoy -i https://pypi.org/simple --upgrade
+```
+
+## 示例
+
 如果你配置好了 OPQ，并且配置保持默认(bot 连接地址`http://127.0.0.1:8888`)，下面一行代码即可监听消息，并在收到群消息或好友消息内容为 test 时回复 ok
 
 ```python
