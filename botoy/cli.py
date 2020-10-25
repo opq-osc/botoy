@@ -8,6 +8,7 @@ import textwrap
 
 import click
 
+from .__version__ import __version__
 from .async_client import AsyncBotoy
 from .client import Botoy
 from .util import check_schema
@@ -44,6 +45,12 @@ def cli():
     3. 启动机器人(要求入口文件名为bot.py)
     $ botoy run
     """
+
+
+@cli.command()
+def version():
+    """版本号"""
+    echo(__version__)
 
 
 @cli.command()
