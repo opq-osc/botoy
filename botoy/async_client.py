@@ -22,8 +22,8 @@ class AsyncBotoy(Botoy):
         self.pool.submit(func, *args)
 
     async def close(self, status=0):
-        self.pool.shutdown(wait=False)
         await self.socketio.disconnect()
+        self.pool.shutdown(wait=False)
         self._exit = True
         sys.exit(status)
 

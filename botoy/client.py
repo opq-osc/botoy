@@ -231,8 +231,9 @@ class Botoy:
                 self._when_disconnected_do = None
 
     def close(self, status=0):
-        self.pool.shutdown(wait=False)
+        # 如果先关线程池，当新消息进入时依然会调用submit方法,此时会报错
         self.socketio.disconnect()
+        self.pool.shutdown(wait=False)
         self._exit = True
         sys.exit(status)
 
