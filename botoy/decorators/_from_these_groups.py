@@ -2,7 +2,7 @@ from ..model import GroupMsg
 
 
 def from_these_groups(*groups):
-    """只接受这些群组的消息 GroupMsg, FriendMsg"""
+    """只接受这些群组的消息 GroupMsg"""
 
     def deco(func):
         def inner(ctx):

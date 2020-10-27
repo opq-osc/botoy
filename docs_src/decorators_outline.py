@@ -1,3 +1,4 @@
+# pylint: disable=W0613
 def equal_content(string: str):
     """发送的内容与指定字符串相等时 GroupMsg, FriendMsg"""
 
@@ -12,37 +13,37 @@ def in_content(string: str, raw: bool = True):
 
 
 def from_these_groups(*groups):
-    """只接受这些群组的消息"""
+    """只接受这些群组的消息 GroupMsg"""
 
 
 def from_these_users(*users):
-    """仅接受来自这些用户的消息"""
+    """仅接受来自这些用户的消息 GroupMsg, FriendMsg"""
 
 
 def ignore_botself(func=None):
-    """忽略机器人自身的消息"""
+    """忽略机器人自身的消息 GroupMsg, FriendMsg"""
 
 
 def ignore_these_groups(*groups):
-    """不接受这些群组的消息"""
+    """不接受这些群组的消息 GroupMsg"""
 
 
 def ignore_these_users(*users):
-    """忽略这些人的消息"""
+    """忽略这些人的消息 GroupMsg, FriendMsg"""
 
 
 def from_botself(func=None):
-    """只处理机器人自身的消息"""
+    """只处理机器人自身的消息 GroupMsg, FriendMsg"""
 
 
 def startswith(string: str):
-    """Content以指定前缀开头
+    """Content以指定前缀开头  GroupMsg, FriendMsg
     :param string: 前缀字符串, 会解析图片消息的Content
     """
 
 
 def these_msgtypes(*msgtypes):
-    """仅接受该些类型消息
+    """仅接受该些类型消息  GroupMsg, FriendMsg
     模块collection中定义了这些消息类型
     """
 
@@ -64,3 +65,8 @@ def ensure_tempMsg(func=None):
 
 def from_phone(func=None):
     """来自手机的消息(给自己发的) FriendMsg"""
+
+
+def from_admin(func=None):
+    """来自群管理员(列表包括群主)的消息 GroupMsg
+    管理员列表会进行``缓存``，调用520次后再次刷新, 所以可以放心使用"""

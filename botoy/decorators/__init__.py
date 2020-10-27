@@ -1,6 +1,7 @@
 """一些用于接收函数的装饰器"""
 from ._ensure_tempMsg import ensure_tempMsg
 from ._equal_content import equal_content
+from ._from_admin import from_admin
 from ._from_botself import from_botself
 from ._from_phone import from_phone
 from ._from_these_groups import from_these_groups
