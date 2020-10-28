@@ -70,3 +70,7 @@ def from_phone(func=None):
 def from_admin(func=None):
     """来自群管理员(列表包括群主)的消息 GroupMsg
     管理员列表会进行``缓存``，调用520次后再次刷新, 所以可以放心使用"""
+
+
+def queued_up(func=None):
+    """队列执行函数, 所有被包装的函数共用同一个队列, 该装饰器适用于所有函数"""
