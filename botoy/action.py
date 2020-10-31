@@ -323,21 +323,21 @@ class Action:
         """获取任意用户信息昵称头像等"""
         return self.post('GetUserInfo', {'UserID': UserID})
 
-    def getUserList(self) -> list:  # FIXME: 目前只适用于好友较少一次获取就可以的情况，好友较多需要循环获取
+    def getUserList(self) -> List[dict]:  # FIXME: 目前只适用于好友较少一次获取就可以的情况，好友较多需要循环获取
         """获取好友列表"""
         data = self.post('GetQQUserList', {'StartIndex': 0})
         if 'Friendlist' in data:
             return data['Friendlist']
         return []
 
-    def getGroupList(self) -> list:  # FIXME: 循环获取
+    def getGroupList(self) -> List[dict]:  # FIXME: 循环获取
         """获取群列表"""
         data = self.post('GetGroupList', {'NextToken': ''})
         if 'TroopList' in data:
             return data['TroopList']
         return []
 
-    def getGroupMembers(self, group: int) -> list:
+    def getGroupMembers(self, group: int) -> List[dict]:
         """获取群成员列表"""
         members = []
         lastUin = 0
@@ -353,7 +353,7 @@ class Action:
             time.sleep(0.5)
         return members
 
-    def getGroupAdminList(self, group: int, include_owner=True) -> list:
+    def getGroupAdminList(self, group: int, include_owner=True) -> List[dict]:
         """获取群管理员列表
         :param group: 群号
         :param include_owner: 是否包括群主
