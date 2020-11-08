@@ -314,14 +314,46 @@ class Action:
             },
         )
 
+    def repostVideo2Group(self, group: int, forwordBuf: str) -> dict:
+        """转发视频到群聊
+        :param group: 群号
+        :param forwordBuf: 原视频的forwordBuf字段
+        """
+        return self.post(
+            'SendMsg',
+            {
+                "toUser": group,
+                "sendToType": 2,
+                "sendMsgType": "ForwordMsg",
+                "forwordBuf": forwordBuf,
+                "forwordField": 19,
+            },
+        )
+
+    def repostVideo2Friend(self, user: int, forwordBuf: str) -> dict:
+        """转发视频到好友
+        :param user: 好友QQ
+        :param forwordBuf: 原视频的forwordBuf字段
+        """
+        return self.post(
+            'SendMsg',
+            {
+                "toUser": user,
+                "sendToType": 1,
+                "sendMsgType": "ForwordMsg",
+                "forwordBuf": forwordBuf,
+                "forwordField": 19,
+            },
+        )
+
     ############获取############
     def getCookies(self) -> dict:
         """获取QQ相关cookie"""
         return self.get('GetUserCook')
 
-    def getUserInfo(self, UserID: int) -> dict:
+    def getUserInfo(self, user: int) -> dict:
         """获取任意用户信息昵称头像等"""
-        return self.post('GetUserInfo', {'UserID': UserID})
+        return self.post('GetUserInfo', {'UserID': user})
 
     def getUserList(self) -> List[dict]:  # FIXME: 目前只适用于好友较少一次获取就可以的情况，好友较多需要循环获取
         """获取好友列表"""
@@ -350,7 +382,7 @@ class Action:
             if 'LastUin' not in data or data['LastUin'] == 0:
                 break
             lastUin = data['LastUin']
-            time.sleep(0.5)
+            time.sleep(0.6)
         return members
 
     def getGroupAdminList(self, group: int, include_owner=True) -> List[dict]:
@@ -510,6 +542,16 @@ class Action:
             'GroupMgr',
             {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
         )
+
+    def refreshKeys(self) -> dict:
+        """刷新key二次登陆"""
+        return self.get('', path='/v1/RefreshKeys')
+
+    def logout(self, flag=False) -> bool:
+        """退出指定QQ
+        :param flag: 是否删除设备信息文件
+        """
+        return self.post('LogOut', {"Flag": flag})
 
     ############################################################################
     def baseRequest(
