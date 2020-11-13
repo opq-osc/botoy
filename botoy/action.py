@@ -1,3 +1,4 @@
+import collections
 import time
 import traceback
 from typing import List, Union
@@ -111,13 +112,26 @@ class Action:
         picUrl: str = '',
         picBase64Buf: str = '',
         fileMd5: str = '',
+        picMd5s: Union[str, List[str]] = '',
         flashPic=False,
         atUser: Union[int, List[int]] = 0,
     ) -> dict:
         """发送群组图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
+        assert any([picUrl, picBase64Buf, fileMd5, picMd5s]), '缺少参数'
         if atUser != 0:
             content = macro.atUser(atUser) + '\n' + content
+        if picMd5s:
+            if not isinstance(picMd5s, collections.Sequence):
+                picMd5s = [picMd5s]
+            return self.post(
+                'SendMsgV2',
+                {
+                    "ToUserUid": group,
+                    "SendToType": 2,
+                    "SendMsgType": "PicMsg",
+                    "PicMd5s": picMd5s,
+                },
+            )
         return self.post(
             'SendMsg',
             {
