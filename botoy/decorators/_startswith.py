@@ -14,7 +14,6 @@ def startswith(string: str):
                 refine_ctx = refine_pic_group_msg(ctx)  # type: _PicGroupMsg
             else:
                 refine_ctx = refine_pic_friend_msg(ctx)  # type:_PicFriendMsg
-            content = refine_ctx.Content  # type:str
             if refine_ctx is not None:
                 content = refine_ctx.Content
             else:
