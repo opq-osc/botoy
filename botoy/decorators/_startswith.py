@@ -18,7 +18,9 @@ def startswith(string: str):
                 content = refine_ctx.Content
             else:
                 content = ctx.Content
-            if content.startswith(string):
+            # 这里的content按理永远不可能为None，但就是碰到了这种情况，startswith用得比较多
+            # 所以先在这里增加一步判断
+            if content is not None and content.startswith(string):
                 return func(ctx)
             return None
 
