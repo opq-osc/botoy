@@ -1,5 +1,5 @@
 httpx
-python-socketio
+python-socketio==4.6.0
 websocket-client
 loguru
 click
