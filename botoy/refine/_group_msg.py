@@ -66,9 +66,11 @@ class _PicGroupMsg(_GroupMsg):
     """群图片/表情包消息"""
 
     def __init__(self, ctx: GroupMsg):
+        judge = {'[群图片]':'GroupPic',
+                 '[好友图片]':'FriendPic'}
         pic_data = json.loads(ctx.Content)
-        self.GroupPic: List[_GroupPic] = [_GroupPic(i) for i in pic_data['GroupPic']]
         self.Tips: str = pic_data['Tips']
+        self.GroupPic: List[_GroupPic] = [_GroupPic(i) for i in pic_data[judge[self.Tips]]]
         super()._carry_properties(ctx)
         self.Content: str = pic_data.get('Content')
 
