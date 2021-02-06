@@ -70,7 +70,10 @@ class _PicGroupMsg(_GroupMsg):
                  '[好友图片]':'FriendPic'}
         pic_data = json.loads(ctx.Content)
         self.Tips: str = pic_data['Tips']
-        self.GroupPic: List[_GroupPic] = [_GroupPic(i) for i in pic_data[judge[self.Tips]]]
+        if self.Tips != '[群消息-QQ闪照]':
+            self.GroupPic: List[_GroupPic] = [_GroupPic(i) for i in pic_data[judge[self.Tips]]]
+        else:
+            self.GroupPic: List[_GroupPic] = [_GroupPic(pic_data)]
         super()._carry_properties(ctx)
         self.Content: str = pic_data.get('Content')
 
