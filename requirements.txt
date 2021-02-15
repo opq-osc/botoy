@@ -5,3 +5,4 @@ loguru
 click
 aiohttp
 prettytable
+python-engineio==3.14.2
