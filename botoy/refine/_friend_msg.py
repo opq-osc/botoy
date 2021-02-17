@@ -1,5 +1,5 @@
 # pylint: disable=R0902,W0231
-from typing import List
+from typing import List, Dict
 
 from botoy import json
 from botoy.collection import MsgTypes
@@ -90,6 +90,19 @@ class _RedBagFriendMsg(_FriendMsg):
         super()._carry_properties(ctx)
 
 
+class _ReplyFriendMsg(_FriendMsg):
+    """好友语音消息"""
+
+    def __init__(self, ctx: FriendMsg):
+        reply_data: Dict = json.loads(ctx.Content)
+        super()._carry_properties(ctx)
+        self.Content: str = reply_data.get('Content', '')
+        self.OriginMsgSeq: int = reply_data.get('MsgSeq', -1)
+        self.SrcContent: str = reply_data.get('SrcContent', '')
+        self.Tips: str = reply_data.get('Tips', '')
+        self.AtUserID: List = reply_data.get('UserID', [])
+
+
 @_copy_ctx
 def refine_voice_friend_msg(ctx: FriendMsg) -> _VoiceFriendMsg:
     """好友语音消息"""
@@ -127,4 +140,14 @@ def refine_RedBag_friend_msg(ctx: FriendMsg) -> _RedBagFriendMsg:
         raise InvalidContextError('Expected `FriendMsg`, but got `%s`' % ctx.__class__)
     if ctx.MsgType == MsgTypes.RedBagMsg:
         return _RedBagFriendMsg(ctx)
+    return None
+
+
+@_copy_ctx
+def refine_reply_friend_msg(ctx: FriendMsg) -> _ReplyFriendMsg:
+    """好友回复消息"""
+    if not isinstance(ctx, FriendMsg):
+        raise InvalidContextError('Expected `FriendMsg`, but got `%s`' % ctx.__class__)
+    if ctx.MsgType in (MsgTypes.ReplyMsg, MsgTypes.ReplyMsgA):
+        return _ReplyFriendMsg(ctx)
     return None
