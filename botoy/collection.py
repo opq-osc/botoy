@@ -5,6 +5,7 @@ class MsgTypes:
     PicMsg = 'PicMsg'
     TextMsg = 'TextMsg'
     ReplyMsg = 'ReplyMsg'
+    ReplyMsgA = 'ReplayMsg'
     VoiceMsg = 'VoiceMsg'
     VideoMsg = 'VideoMsg'
     PhoneMsg = 'PhoneMsg'

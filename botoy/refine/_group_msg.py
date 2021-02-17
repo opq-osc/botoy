@@ -1,5 +1,5 @@
 # pylint: disable=R0902,W0231
-from typing import List
+from typing import List, Dict
 
 from botoy import json
 from botoy.collection import MsgTypes
@@ -51,6 +51,20 @@ class _VideoGroupMsg(_GroupMsg):
         super()._carry_properties(ctx)
 
 
+class _ReplyGroupMsg(_GroupMsg):
+    """群回复消息"""
+
+    def __init__(self, ctx: GroupMsg):
+        reply_data: Dict = json.loads(ctx.Content)
+        super()._carry_properties(ctx)
+        self.Content: str = reply_data.get('Content', '')
+        self.OriginMsgSeq: int = reply_data.get('MsgSeq', -1)
+        self.ReplyContent: str = reply_data.get('ReplayContent', '')
+        self.SrcContent: str = reply_data.get('SrcContent', '')
+        self.Tips: str = reply_data.get('Tips', '')
+        self.AtUserID: List = reply_data.get('UserID', [])
+
+
 class _GroupPic:
     def __init__(self, pic: dict):
         '''[{"FileId":2161733733,"FileMd5":"","FileSize":449416,"ForwordBuf":"","ForwordField":8,"Url":""}'''
@@ -77,8 +91,13 @@ class _PicGroupMsg(_GroupMsg):
 
 class _AtGroupMsg(_GroupMsg):
     def __init__(self, ctx: GroupMsg):
+        at_data: Dict = json.loads(ctx.Content)
         super()._carry_properties(ctx)
-        # TODO:
+        self.Content: str = at_data.get('Content', '')
+        self.OriginMsgSeq: int = at_data.get('MsgSeq', -1)
+        self.SrcContent: str = at_data.get('SrcContent', '')
+        self.Tips: str = at_data.get('Tips', '')
+        self.AtUserID: List = at_data.get('UserID', [])
 
 
 class _RedBagGroupMsg(_GroupMsg):
@@ -137,4 +156,24 @@ def refine_RedBag_group_msg(ctx: GroupMsg) -> _RedBagGroupMsg:
         raise InvalidContextError('Expected `GroupMsg`, but got `%s`' % ctx.__class__)
     if ctx.MsgType == MsgTypes.RedBagMsg:
         return _RedBagGroupMsg(ctx)
+    return None
+
+
+@_copy_ctx
+def refine_reply_group_msg(ctx: GroupMsg) -> _ReplyGroupMsg:
+    """群回复消息"""
+    if not isinstance(ctx, GroupMsg):
+        raise InvalidContextError('Expected `GroupMsg`, but got `%s`' % ctx.__class__)
+    if ctx.MsgType in (MsgTypes.ReplyMsg, MsgTypes.ReplyMsgA):  # Workaround for naming errors
+        return _ReplyGroupMsg(ctx)
+    return None
+
+
+@_copy_ctx
+def refine_at_group_msg(ctx: GroupMsg) -> _AtGroupMsg:
+    """群回复消息"""
+    if not isinstance(ctx, GroupMsg):
+        raise InvalidContextError('Expected `GroupMsg`, but got `%s`' % ctx.__class__)
+    if ctx.MsgType == MsgTypes.AtMsg:
+        return _AtGroupMsg(ctx)
     return None
