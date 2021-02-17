@@ -16,7 +16,7 @@ class _GroupMsg(GroupMsg):
         self.data = ctx.data
 
         self.FromGroupId: int = ctx.FromGroupId
-        self.FromGroupName: str = ctx.FromGroupId
+        self.FromGroupName: str = ctx.FromGroupName
         self.FromUserId: int = ctx.FromUserId
         self.FromNickName: str = ctx.FromNickName
         self.Content: str = ctx.Content
