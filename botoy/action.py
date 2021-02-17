@@ -369,19 +369,35 @@ class Action:
         """获取任意用户信息昵称头像等"""
         return self.post('GetUserInfo', {'UserID': user})
 
-    def getUserList(self) -> List[dict]:  # FIXME: 目前只适用于好友较少一次获取就可以的情况，好友较多需要循环获取
+    def getUserList(self) -> List[dict]:
         """获取好友列表"""
-        data = self.post('GetQQUserList', {'StartIndex': 0})
-        if 'Friendlist' in data:
-            return data['Friendlist']
-        return []
+        friend_list = []
+        start_index = 0
+        while True:
+            data = self.post('GetQQUserList', {'StartIndex': start_index})
+            if 'Friendlist' not in data:
+                break
+            friend_list.extend(data['Friendlist'])
+            if len(friend_list) >= int(data.get('Totoal_friend_count', 0)):  # 这里有个拼写错误
+                break
+            if "GetfriendCount" not in data:
+                break
+            start_index += int(data.get("GetfriendCount", 999999))  # 设置 999999 为了在 API 坏了的情况下能跳出循环
+        return friend_list
 
-    def getGroupList(self) -> List[dict]:  # FIXME: 循环获取
+    def getGroupList(self) -> List[dict]:
         """获取群列表"""
-        data = self.post('GetGroupList', {'NextToken': ''})
-        if 'TroopList' in data:
-            return data['TroopList']
-        return []
+        next_token = ""
+        group_list = []
+        while True:
+            data = self.post('GetGroupList', {'NextToken': next_token})
+            if 'TroopList' not in data:
+                break
+            group_list.extend(data['TroopList'])
+            next_token = data.get('NextToken', '')
+            if not next_token:
+                break
+        return group_list
 
     def getGroupMembers(self, group: int) -> List[dict]:
         """获取群成员列表"""
