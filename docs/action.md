@@ -76,8 +76,8 @@ port 和 host 的含义和 Botoy 实例中的一致
 | replyFriendMsg      | 发送回复消息,回复好友消息,不好用 |
 | getUserInfo         | 获取用户信息                     |
 | getCookies          | 获取 cookies                     |
-| getUserList         | \*获取好友列表                   |
-| getGroupList        | \*获取群聊列表                   |
+| getUserList         | 获取好友列表                     |
+| getGroupList        | 获取群聊列表                     |
 | getGroupMembers     | 获取群成员列表                   |
 | getGroupAdminList   | 获取群管理列表                   |
 | setUniqueTitle      | 设置群成员头衔                   |
