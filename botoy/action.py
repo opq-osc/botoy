@@ -604,7 +604,6 @@ class Action:
         try:
             self.lock.acquire()
             threading.Timer(1, self.release_lock).start()
-            logger.debug(f"Got lock. Try requesting... {locals()}")
             resp = self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
@@ -620,7 +619,6 @@ class Action:
                 logger.error(f'请求出错: {traceback.format_exc()}')
             return {}
 
-        logger.debug(f"Request sent. {locals()}")
         # 处理数据
         try:
             data = resp.json()
