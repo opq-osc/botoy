@@ -109,7 +109,7 @@ class _GroupFileMsg(_GroupMsg):
         super()._carry_properties(ctx)
         self.FileID: str = file_data.get('FileID', '')
         self.FileName: str = file_data.get('FileName', '')
-        self.FileSize: str = file_data.get('FileSize', '')
+        self.FileSize: int = file_data.get('FileSize', -1)
         self.Tips: str = file_data.get('Tips', '')
 
 
