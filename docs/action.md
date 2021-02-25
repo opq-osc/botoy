@@ -99,10 +99,11 @@ port 和 host 的含义和 Botoy 实例中的一致
 |                     | 处理好友请求                     |
 | logout              | 退出指定 qq                      |
 |                     | 获取登录二维码的 base64 编码     |
-|                     | 获取好友文件下载链接             |
-|                     | 获取群文件下载链接               |
+| getFriendFileURL    | 获取好友文件下载链接             |
+| getGroupFileURL     | 获取群文件下载链接               |
 | repostVideo2Group   | 转发视频到群聊                   |
 | repostVideo2Friend  | 转发视频给好友                   |
+| getVideoURL         | 获取短视频链接                   |
 
 - 除特殊说明，API 返回的都是字典类型，如果出错则返回空字典
 - 没有方法名的表示还未封装，说明前面带\*号的表示还不完善

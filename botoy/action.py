@@ -346,6 +346,45 @@ class Action:
             },
         )
 
+    def getVideoURL(self, group: int, videoMD5: str, videoURL: str) -> dict:
+        """获取视频链接
+        :param group: 群号
+        :param videoMD5: 视频的 MD5 值，可以从上报的消息中获得
+        :param videoURL: 上报的消息中传给的 url 值
+        """
+        return self.post(
+            'PttCenterSvr.ShortVideoDownReq',
+            {
+                "GroupID": group,
+                "VideoUrl": videoURL,
+                "VideoMd5": videoMD5
+            },
+        )
+
+    def getFriendFileURL(self, fileID: str) -> dict:
+        """获取好友文件链接
+        :param fileID: 文件 ID，可由上报的消息中获得
+        """
+        return self.post(
+            'OfflineFilleHandleSvr.pb_ftn_CMD_REQ_APPLY_DOWNLOAD-1200',
+            {
+                "FileID": fileID
+            },
+        )
+
+    def getGroupFileURL(self, group: int, fileID: str) -> dict:
+        """获取好友文件链接
+        :param group: 群号
+        :param fileID: 文件 ID，可由上报的消息中获得
+        """
+        return self.post(
+            'OidbSvc.0x6d6_2',
+            {
+                'GroupID': group,
+                "FileID": fileID
+            },
+        )
+
     def repostVideo2Friend(self, user: int, forwordBuf: str) -> dict:
         """转发视频到好友
         :param user: 好友QQ
