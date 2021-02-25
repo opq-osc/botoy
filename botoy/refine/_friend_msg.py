@@ -103,6 +103,17 @@ class _ReplyFriendMsg(_FriendMsg):
         self.AtUserID: List = reply_data.get('UserID', [])
 
 
+class _FriendFileMsg(_FriendMsg):
+    """好友文件消息"""
+
+    def __init__(self, ctx: FriendMsg):
+        file_data: Dict = json.loads(ctx.Content)
+        super()._carry_properties(ctx)
+        self.FileID: str = file_data.get('FileID', '')
+        self.FileName: str = file_data.get('FileName', '')
+        self.FileSize: str = file_data.get('FileSize', '')
+        self.Tips: str = file_data.get('Tips', '')
+
 @_copy_ctx
 def refine_voice_friend_msg(ctx: FriendMsg) -> _VoiceFriendMsg:
     """好友语音消息"""
@@ -150,4 +161,14 @@ def refine_reply_friend_msg(ctx: FriendMsg) -> _ReplyFriendMsg:
         raise InvalidContextError('Expected `FriendMsg`, but got `%s`' % ctx.__class__)
     if ctx.MsgType in (MsgTypes.ReplyMsg, MsgTypes.ReplyMsgA):
         return _ReplyFriendMsg(ctx)
+    return None
+
+
+@_copy_ctx
+def refine_file_friend_msg(ctx: FriendMsg) -> _FriendFileMsg:
+    """好友文件消息"""
+    if not isinstance(ctx, FriendMsg):
+        raise InvalidContextError('Expected `FriendMsg`, but got `%s`' % ctx.__class__)
+    if ctx.MsgType == MsgTypes.FriendFileMsg:
+        return _FriendFileMsg(ctx)
     return None

@@ -11,6 +11,8 @@ class MsgTypes:
     PhoneMsg = 'PhoneMsg'
     RedBagMsg = 'RedBagMsg'
     TempSessionMsg = 'TempSessionMsg'
+    FriendFileMsg = 'FriendFileMsg'
+    GroupFileMsg = 'GroupFileMsg'
 
 
 class EventNames:

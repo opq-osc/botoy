@@ -103,6 +103,16 @@ class _AtGroupMsg(_GroupMsg):
         self.AtUserID: List = at_data.get('UserID', [])
 
 
+class _GroupFileMsg(_GroupMsg):
+    def __init__(self, ctx: GroupMsg):
+        file_data: Dict = json.loads(ctx.Content)
+        super()._carry_properties(ctx)
+        self.FileID: str = file_data.get('FileID', '')
+        self.FileName: str = file_data.get('FileName', '')
+        self.FileSize: str = file_data.get('FileSize', '')
+        self.Tips: str = file_data.get('Tips', '')
+
+
 class _RedBagGroupMsg(_GroupMsg):
     """群红包消息"""
 
@@ -179,4 +189,14 @@ def refine_at_group_msg(ctx: GroupMsg) -> _AtGroupMsg:
         raise InvalidContextError('Expected `GroupMsg`, but got `%s`' % ctx.__class__)
     if ctx.MsgType == MsgTypes.AtMsg:
         return _AtGroupMsg(ctx)
+    return None
+
+
+@_copy_ctx
+def refine_file_group_msg(ctx: GroupMsg) -> _GroupFileMsg:
+    """群文件消息"""
+    if not isinstance(ctx, GroupMsg):
+        raise InvalidContextError('Expected `GroupMsg`, but got `%s`' % ctx.__class__)
+    if ctx.MsgType == MsgTypes.GroupFileMsg:
+        return _GroupFileMsg(ctx)
     return None
