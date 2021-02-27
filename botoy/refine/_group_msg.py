@@ -1,5 +1,5 @@
 # pylint: disable=R0902,W0231
-from typing import List, Dict
+from typing import Dict, List
 
 from botoy import json
 from botoy.collection import MsgTypes
@@ -80,12 +80,13 @@ class _PicGroupMsg(_GroupMsg):
     """群图片/表情包消息"""
 
     def __init__(self, ctx: GroupMsg):
-        judge = {'[群图片]':'GroupPic',
-                 '[好友图片]':'FriendPic'}
+        judge = {'[群图片]': 'GroupPic', '[好友图片]': 'FriendPic'}
         pic_data = json.loads(ctx.Content)
         self.Tips: str = pic_data['Tips']
         if self.Tips != '[群消息-QQ闪照]':
-            self.GroupPic: List[_GroupPic] = [_GroupPic(i) for i in pic_data[judge[self.Tips]]]
+            self.GroupPic: List[_GroupPic] = [
+                _GroupPic(i) for i in pic_data[judge[self.Tips]]
+            ]
         else:
             self.GroupPic: List[_GroupPic] = [_GroupPic(pic_data)]
         super()._carry_properties(ctx)
@@ -177,7 +178,10 @@ def refine_reply_group_msg(ctx: GroupMsg) -> _ReplyGroupMsg:
     """群回复消息"""
     if not isinstance(ctx, GroupMsg):
         raise InvalidContextError('Expected `GroupMsg`, but got `%s`' % ctx.__class__)
-    if ctx.MsgType in (MsgTypes.ReplyMsg, MsgTypes.ReplyMsgA):  # Workaround for naming errors
+    if ctx.MsgType in (
+        MsgTypes.ReplyMsg,
+        MsgTypes.ReplyMsgA,
+    ):  # Workaround for naming errors
         return _ReplyGroupMsg(ctx)
     return None
 

@@ -1,5 +1,5 @@
 # pylint: disable=R0902,W0231
-from typing import List, Dict
+from typing import Dict, List
 
 from botoy import json
 from botoy.collection import MsgTypes
@@ -113,6 +113,7 @@ class _FriendFileMsg(_FriendMsg):
         self.FileName: str = file_data.get('FileName', '')
         self.FileSize: int = file_data.get('FileSize', -1)
         self.Tips: str = file_data.get('Tips', '')
+
 
 @_copy_ctx
 def refine_voice_friend_msg(ctx: FriendMsg) -> _VoiceFriendMsg:

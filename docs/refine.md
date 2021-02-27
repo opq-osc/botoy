@@ -36,10 +36,16 @@
 | video_friend_msg               | 好友视频消息                        | \_VideoFriendMsg              |                                              |
 | pic_friend_msg                 | 好友图片/表情包消息                 | \_PicFriendMsg                | FriendPic 字段是列表，每项是\_FriendPic 类型 |
 | RedBag_friend_msg              | 好友红包消息                        | \_RedBagFriendMsg             |                                              |
+| file_friend_msg                | 好友文件消息                        | \_FriendFileMsg               |                                              |
+| reply_friend_msg               | 好友回复消息                        | \_ReplyFriendMsg              |                                              |
+| at_group_msg                   | 群回复消息                          | \_AtGroupMsg                  |                                              |
+| reply_group_msg                | 群回复消息                          | \_ReplyGroupMsg               |                                              |
+| file_group_msg                 | 群文件消息                          | \_GroupFileMsg                |                                              |
 
 **导入所需的类型配合类型注解获得代码提示**
 
-暂时没有处理 AT 消息，后续将增加
+暂时没有处理 AT 消息，后续将增加,
+现在有大佬贡献了相关代码，具体使用请结合实际情况。
 
 示例:
 

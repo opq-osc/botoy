@@ -3,7 +3,7 @@ import threading
 import time
 import unittest
 
-from botoy import Botoy, Action
+from botoy import Action, Botoy
 
 
 class BotoyTest(unittest.TestCase):

@@ -3,8 +3,6 @@
 import copy
 import functools
 
-# TODO: support AtMsg
-
 
 def _copy_ctx(f):
     @functools.wraps(f)
@@ -33,24 +31,34 @@ from ._event import (
     refine_group_shut_event_msg
 )
 from ._friend_msg import (
+    _FriendFileMsg,
     _FriendPic,
     _PicFriendMsg,
     _RedBagFriendMsg,
+    _ReplyFriendMsg,
     _VideoFriendMsg,
     _VoiceFriendMsg,
+    refine_file_friend_msg,
     refine_pic_friend_msg,
     refine_RedBag_friend_msg,
+    refine_reply_friend_msg,
     refine_video_friend_msg,
     refine_voice_friend_msg
 )
 from ._group_msg import (
+    _AtGroupMsg,
+    _GroupFileMsg,
     _GroupPic,
     _PicGroupMsg,
     _RedBagGroupMsg,
+    _ReplyGroupMsg,
     _VideoGroupMsg,
     _VoiceGroupMsg,
+    refine_at_group_msg,
+    refine_file_group_msg,
     refine_pic_group_msg,
     refine_RedBag_group_msg,
+    refine_reply_group_msg,
     refine_video_group_msg,
     refine_voice_group_msg
 )

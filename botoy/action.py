@@ -354,11 +354,7 @@ class Action:
         """
         return self.post(
             'PttCenterSvr.ShortVideoDownReq',
-            {
-                "GroupID": group,
-                "VideoUrl": videoURL,
-                "VideoMd5": videoMD5
-            },
+            {"GroupID": group, "VideoUrl": videoURL, "VideoMd5": videoMD5},
         )
 
     def getFriendFileURL(self, fileID: str) -> dict:
@@ -367,9 +363,7 @@ class Action:
         """
         return self.post(
             'OfflineFilleHandleSvr.pb_ftn_CMD_REQ_APPLY_DOWNLOAD-1200',
-            {
-                "FileID": fileID
-            },
+            {"FileID": fileID},
         )
 
     def getGroupFileURL(self, group: int, fileID: str) -> dict:
@@ -379,10 +373,7 @@ class Action:
         """
         return self.post(
             'OidbSvc.0x6d6_2',
-            {
-                'GroupID': group,
-                "FileID": fileID
-            },
+            {'GroupID': group, "FileID": fileID},
         )
 
     def repostVideo2Friend(self, user: int, forwordBuf: str) -> dict:
@@ -423,7 +414,9 @@ class Action:
                 break
             if "GetfriendCount" not in data:
                 break
-            start_index += int(data.get("GetfriendCount", 999999))  # 设置 999999 为了在 API 坏了的情况下能跳出循环
+            start_index += int(
+                data.get("GetfriendCount", 999999)
+            )  # 设置 999999 为了在 API 坏了的情况下能跳出循环
         return friend_list
 
     def getGroupList(self) -> List[dict]:
