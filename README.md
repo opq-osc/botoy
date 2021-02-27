@@ -30,6 +30,7 @@ __import__('botoy').Botoy().on_group_msg(lambda ctx: __import__('botoy').Action(
 # 感谢
 
 [yuban10703](https://github.com/yuban10703)
+[milkice](https://github.com/milkice233)
 
 # LICENSE
 
