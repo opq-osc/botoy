@@ -54,6 +54,7 @@ class Config:
                 self.host = 'http://127.0.0.1'
             else:
                 self.host = check_schema(host)
+        self.host = self.host.strip('/')  # 防止手动设置host，末尾是/符号，而报错
 
         # port
         if self.port is None:
