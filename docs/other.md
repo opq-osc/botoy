@@ -6,7 +6,8 @@
   由此导致的频率和数据安全问题，请自行解决。旧版库[python-iotbot](https://github.com/xiyaowong/python--iotbot)里的 Action 提供了队列发送功能
 
   版本 `0.0.13`提供了`queued_up`装饰器让函数实现简单的排队执行功能
-  版本 `0.0.20`通过线程锁控制请求频率，使用同一个 Action 对象进行连续操作即可
+  版本 `0.0.20`通过线程锁控制请求频率，使用同一个 Action 对象进行连续操作即可,
+  推荐!
 
 - botoy.collection
   模块封装了已知的消息类型(MsgTypes)和事件类型(EventNames)以及部分表情代码(Emoticons)
