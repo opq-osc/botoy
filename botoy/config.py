@@ -44,7 +44,7 @@ class Config:
                 _c = json.load(f)
         except FileNotFoundError:
             pass
-        except json.JSONDecodeError as e:
+        except Exception as e:
             raise InvalidConfigError('配置文件不规范') from e
 
         # host

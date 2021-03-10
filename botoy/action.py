@@ -654,7 +654,7 @@ class Action:
         # 处理数据
         try:
             data = resp.json()
-        except json.JSONDecodeError as e:
+        except Exception as e:
             logger.error('API响应结果非json格式')
             return {}
 
