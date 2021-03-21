@@ -422,8 +422,12 @@ class Action:
         return self.get('GetUserCook')
 
     def getUserInfo(self, user: int) -> dict:
-        """获取任意用户信息昵称头像等"""
+        """获取用户信息昵称头像等"""
         return self.post('GetUserInfo', {'UserID': user})
+
+    def getSummaryCard(self, user: int) -> dict:
+        """获取企鹅卡片资料"""
+        return self.post('SummaryCard.ReqSummaryCard', {'UserID': user})
 
     def getUserList(self) -> List[dict]:
         """获取好友列表"""
