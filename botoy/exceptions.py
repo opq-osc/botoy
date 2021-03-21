@@ -2,8 +2,8 @@ class BotoyError(BaseException):
     pass
 
 
-class ThreadPoolError(BotoyError):
-    """线程池任务错误"""
+# class ThreadPoolError(BotoyError):
+#     """线程池任务错误"""
 
 
 class InvalidContextError(BotoyError):

@@ -1,6 +1,6 @@
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 
-from botoy.exceptions import ThreadPoolError
 from botoy.log import logger
 
 
@@ -11,7 +11,10 @@ class WorkerPool(ThreadPoolExecutor):
     def callback(self, worker):
         worker_exception = worker.exception()
         if worker_exception:
-            logger.exception(ThreadPoolError(worker_exception))
+            try:
+                raise worker_exception
+            except Exception:
+                logger.error(traceback.format_exc())
 
     def submit(self, *args, **kwargs):
         super().submit(*args, **kwargs).add_done_callback(self.callback)
