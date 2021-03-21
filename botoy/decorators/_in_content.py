@@ -27,8 +27,6 @@ def in_content(string: str, raw: bool = True):
                     content = pic_ctx.Content
                 else:
                     content = ctx.Content
-                if content is None:
-                    content = ''
                 if re.match(string, content):
                     return func(ctx)
             return None

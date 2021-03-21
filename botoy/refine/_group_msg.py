@@ -90,7 +90,7 @@ class _PicGroupMsg(_GroupMsg):
         else:
             self.GroupPic: List[_GroupPic] = [_GroupPic(pic_data)]
         super()._carry_properties(ctx)
-        self.Content: str = pic_data.get('Content')
+        self.Content: str = pic_data.get('Content') or ''
 
 
 class _AtGroupMsg(_GroupMsg):

@@ -68,7 +68,7 @@ class _PicFriendMsg(_FriendMsg):
         ]
         self.Tips: str = pic_data['Tips']
         super()._carry_properties(ctx)
-        self.Content = pic_data.get('Content')
+        self.Content = pic_data.get('Content') or ''
 
 
 class _RedBagFriendMsg(_FriendMsg):
