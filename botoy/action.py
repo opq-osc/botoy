@@ -90,6 +90,18 @@ class Action:
             },
         )
 
+    def sendFriendTeXiaoText(self, user: int, text: str) -> dict:
+        """发送好友特效文本消息"""
+        return self.post(
+            'SendMsgV2',
+            {
+                "ToUserUid": user,
+                "SendToType": 1,
+                "SendMsgType": "TeXiaoTextMsg",
+                "Content": text,
+            },
+        )
+
     def sendGroupText(
         self, group: int, content: str, atUser: Union[int, List[int]] = 0
     ) -> dict:
@@ -185,6 +197,18 @@ class Action:
                 "SendToType": 2,
                 "SendMsgType": "JsonMsg",
                 "Content": content,
+            },
+        )
+
+    def sendGroupTeXiaoText(self, group: int, text: str) -> dict:
+        """发送群组特效文本消息"""
+        return self.post(
+            'SendMsgV2',
+            {
+                "ToUserUid": group,
+                "SendToType": 2,
+                "SendMsgType": "TeXiaoTextMsg",
+                "Content": text,
             },
         )
 
