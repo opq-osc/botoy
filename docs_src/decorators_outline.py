@@ -76,3 +76,7 @@ def queued_up(func=None, *, name='default'):
     """队列执行函数
     :param name: 指定队列分组, 不同的名称用不同的队列
     """
+
+
+def ignore_tempMsg(func=None):
+    """忽略私聊信息 FriendMsg"""
