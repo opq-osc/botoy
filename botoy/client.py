@@ -194,6 +194,15 @@ class Botoy:
         '''已停用的插件名列表'''
         return self.plugMgr.removed_plugins
 
+    @property
+    def plugin_help(self):
+        '''返回所有已启用插件的帮助信息'''
+        return self.plugMgr.help
+
+    def get_plugin_help(self, plugin_name: str):
+        '''返回指定插件的帮助信息，如果插件不存在，则返回空'''
+        return self.plugMgr.get_plugin_help(plugin_name)
+
     ##########################################################################
     # decorators for registering hook function when connected or disconnected
     ##########################################################################

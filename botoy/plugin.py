@@ -13,6 +13,32 @@ class Plugin:
     def __init__(self, module: ModuleType):
         self.module = module
 
+        # plugin help
+        with open(self.module.__file__, encoding='utf8') as f:
+            line_one = f.readline().strip()
+        if line_one.startswith('#'):
+            self.help = line_one[1:].strip()
+        else:
+            self.help = ""
+
+    # @property
+    # def help(self):
+    #     # plugin help
+    #     with open(self.module.__file__, encoding='utf8') as f:
+    #         line_one = f.readline().strip()
+    #     if line_one.startswith('#'):
+    #         helpStr = line_one[1:].strip()
+    #         workMsgs = []
+    #         if self.receive_friend_msg is not None:
+    #             workMsgs.append('好友消息')
+    #         if self.receive_group_msg is not None:
+    #             workMsgs.append('群消息')
+    #         if self.receive_events is not None:
+    #             workMsgs.append('事件')
+    #         helpStr += '(' + '、'.join(workMsgs) + ')'
+    #         return helpStr
+    #     return ""
+
     def reload(self):
         self.module = importlib.reload(self.module)
 
@@ -35,9 +61,9 @@ class Plugin:
 
 class PluginManager:
     def __init__(self, plugin_dir: str = 'plugins'):
-        self.plugin_dir = plugin_dir
-        self._plugins: Dict[str, Plugin] = dict()
-        self._removed_plugins: Dict[str, Plugin] = dict()
+        self.plugin_dir = plugin_dir  # 插件文件夹
+        self._plugins: Dict[str, Plugin] = dict()  # 已启用的插件
+        self._removed_plugins: Dict[str, Plugin] = dict()  # 已停用的插件
 
         # 本地缓存的停用的插件名称列表
         self._load_removed_plugin_names()
@@ -194,3 +220,17 @@ class PluginManager:
         table_removed = PrettyTable(['Removed Plugins'])
         table_removed.add_row(['/'.join(self.removed_plugins)])
         return str(table) + '\n' + str(table_removed)
+
+    @property
+    def help(self) -> str:
+        """返回已启用插件的帮助信息"""
+        return "\n".join(
+            ['※ ' + plugin.help for plugin in self._plugins.values() if plugin.help]
+        )
+
+    def get_plugin_help(self, plugin_name: str) -> str:
+        """返回指定插件的帮助信息，如果插件不存在，则返回空"""
+        plugin = {**self._plugins, **self._removed_plugins}.get(plugin_name)
+        if plugin is not None:
+            return plugin.help
+        return ""
