@@ -239,12 +239,11 @@ class Botoy:
             if not self._when_disconnected_do[1]:
                 self._when_disconnected_do = None
 
-    def close(self, status=0):
+    def close(self):
         # 如果先关线程池，当新消息进入时依然会调用submit方法,此时会报错
         self.socketio.disconnect()
         self.pool.shutdown(wait=False)
         self._exit = True
-        sys.exit(status)
 
     def run(self):
         logger.info('Connecting to the server...')
@@ -252,7 +251,8 @@ class Botoy:
             self.socketio.connect(self.config.address, transports=['websocket'])
         except Exception:
             logger.error(traceback.format_exc())
-            self.close(1)
+            self.close()
+            return 1
         else:
             try:
                 self.socketio.wait()
@@ -260,7 +260,8 @@ class Botoy:
                 pass
             finally:
                 print('bye~')
-                self.close(0)
+                self.close()
+                return 0
 
     ########################################################################
     # context distributor
