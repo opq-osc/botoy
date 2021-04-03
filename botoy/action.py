@@ -656,7 +656,7 @@ class Action:
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
-            params = params.update({'funcname': funcname})
+            params.update({'funcname': funcname})
         else:
             params = {'funcname': funcname}
 

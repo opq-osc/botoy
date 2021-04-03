@@ -21,24 +21,25 @@ class AsyncBotoy(Botoy):
     def asyncRun(self, func: Callable, *args):
         self.pool.submit(func, *args)
 
-    async def close(self, status=0):
+    async def close(self):
         await self.socketio.disconnect()
         self.pool.shutdown(wait=False)
         self._exit = True
-        sys.exit(status)
 
     async def run(self):
         try:
             await self.socketio.connect(self.config.address, transports=['websocket'])
         except Exception:
             logger.error(traceback.format_exc())
-            await self.close(1)
+            await self.close()
+            return 1
         else:
             try:
                 await self.socketio.wait()
             finally:
                 print('bye~')
-                await self.close(0)
+                await self.close()
+                return 0
 
     ########################################################################
     # context distributor
