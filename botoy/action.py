@@ -416,6 +416,15 @@ class Action:
             },
         )
 
+    def poke(self, user: int, group=0):
+        """戳一戳，未设置群ID就是戳好友"""
+        payload = {"UserID": user, "GroupID": group}
+        if group == 0:
+            payload['Type'] = 0
+        else:
+            payload['Type'] = 1
+        return self.post('OidbSvc.0xed3_1', payload)
+
     ############获取############
     def getCookies(self) -> dict:
         """获取QQ相关cookie"""
@@ -663,7 +672,7 @@ class Action:
         # 发送请求
         try:
             self.lock.acquire()
-            threading.Timer(1, self.release_lock).start()
+            threading.Timer(1.5, self.release_lock).start()
             resp = self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
@@ -687,7 +696,7 @@ class Action:
             return {}
 
         if data is None:
-            logger.error('返回为null')
+            logger.error('返回为null, 该类情况多数是因为响应超时或者该API不存在，或服务端操作超时(此时不代表未成功)')
             return {}
 
         # 返回码提示

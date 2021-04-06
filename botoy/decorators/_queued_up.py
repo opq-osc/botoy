@@ -20,7 +20,9 @@ class TaskThread(Thread):
                 self.tasks.get()()
             except Exception as e:
                 logger.warning(f'queued_up装饰器: 队列任务出错{e}')
-            time.sleep(0.6)
+            finally:
+                self.tasks.task_done()
+            time.sleep(1)
 
     def put_task(self, target, *args):
         task = functools.partial(target, *args)
