@@ -1,7 +1,6 @@
 # pylint: disable = too-many-instance-attributes, W0212
 import copy
 import functools
-import sys
 import traceback
 from collections.abc import Sequence
 from typing import Any, Callable, List, Optional, Tuple, Union
@@ -252,7 +251,6 @@ class Botoy:
         except Exception:
             logger.error(traceback.format_exc())
             self.close()
-            return 1
         else:
             try:
                 self.socketio.wait()
@@ -261,7 +259,6 @@ class Botoy:
             finally:
                 print('bye~')
                 self.close()
-                return 0
 
     ########################################################################
     # context distributor

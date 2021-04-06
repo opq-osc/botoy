@@ -4,7 +4,7 @@ from typing import List, Union
 
 import httpx
 
-from botoy import json, macro
+from botoy import macro
 from botoy.config import Config
 from botoy.log import logger
 

@@ -1,7 +1,6 @@
 # pylint: disable = too-many-instance-attributes, W0212,W0236,E1133
 import asyncio
 import copy
-import sys
 import traceback
 from typing import Callable
 
@@ -32,14 +31,12 @@ class AsyncBotoy(Botoy):
         except Exception:
             logger.error(traceback.format_exc())
             await self.close()
-            return 1
         else:
             try:
                 await self.socketio.wait()
             finally:
                 print('bye~')
                 await self.close()
-                return 0
 
     ########################################################################
     # context distributor

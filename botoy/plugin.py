@@ -1,5 +1,7 @@
+import copy
 import importlib
 import os
+import pathlib
 import re
 from types import ModuleType
 from typing import Dict, List
@@ -21,24 +23,6 @@ class Plugin:
         else:
             self.help = ""
 
-    # @property
-    # def help(self):
-    #     # plugin help
-    #     with open(self.module.__file__, encoding='utf8') as f:
-    #         line_one = f.readline().strip()
-    #     if line_one.startswith('#'):
-    #         helpStr = line_one[1:].strip()
-    #         workMsgs = []
-    #         if self.receive_friend_msg is not None:
-    #             workMsgs.append('好友消息')
-    #         if self.receive_group_msg is not None:
-    #             workMsgs.append('群消息')
-    #         if self.receive_events is not None:
-    #             workMsgs.append('事件')
-    #         helpStr += '(' + '、'.join(workMsgs) + ')'
-    #         return helpStr
-    #     return ""
-
     def reload(self):
         self.module = importlib.reload(self.module)
 
@@ -59,6 +43,20 @@ class Plugin:
         return self.module.__dict__.get('receive_events')
 
 
+def read_json_file(path) -> dict:
+    with open(path, encoding='utf8') as f:
+        return json.load(f)
+
+
+def write_json_file(path, data) -> None:
+    with open(path, 'w', encoding='utf8') as f:
+        json.dump(data, f, ensure_ascii=False)
+
+
+REMOVED_PLUGINS_FILE = pathlib.Path('REMOVED_PLUGINS')
+REMOVED_PLUGINS_TEMPLATE = {'tips': '用于存储已停用插件信息,请不要修改这个文件', 'plugins': []}
+
+
 class PluginManager:
     def __init__(self, plugin_dir: str = 'plugins'):
         self.plugin_dir = plugin_dir  # 插件文件夹
@@ -69,27 +67,18 @@ class PluginManager:
         self._load_removed_plugin_names()
 
     def _load_removed_plugin_names(self):
-        """读取已移除插件名文件，初始化_removed_plugins属性，后面刷新插件时不再加载"""
-        if os.path.exists('REMOVED_PLUGINS'):
-            with open('REMOVED_PLUGINS', encoding='utf8') as f:
-                self._removed_plugin_names = json.load(f)['plugins']
+        """读取已移除插件名文件，用来读取插件时对插件进行分类，后面刷新插件时不再加载"""
+        if REMOVED_PLUGINS_FILE.exists():
+            self._removed_plugin_names = read_json_file(REMOVED_PLUGINS_FILE)['plugins']
         else:
-            with open('REMOVED_PLUGINS', 'w', encoding='utf8') as f:
-                json.dump(
-                    {'tips': '用于存储已停用插件信息,请不要修改这个文件', 'plugins': []},
-                    f,
-                    ensure_ascii=False,
-                )
+            write_json_file(REMOVED_PLUGINS_FILE, REMOVED_PLUGINS_TEMPLATE)
             self._removed_plugin_names = []
 
     def _update_removed_plugin_names(self):
         """更新已移除插件名文件"""
-        data = {
-            'tips': '用于存储已停用插件信息,请不要修改这个文件',
-            'plugins': list(set(self._removed_plugin_names)),  # 去重，虽然显得多余
-        }
-        with open('REMOVED_PLUGINS', 'w', encoding='utf8') as f:
-            json.dump(data, f, ensure_ascii=False)
+        removed_plugins_data = copy.deepcopy(REMOVED_PLUGINS_TEMPLATE)
+        removed_plugins_data['plugins'] = list(set(self._removed_plugin_names))
+        write_json_file(REMOVED_PLUGINS_FILE, removed_plugins_data)
 
     def load_plugins(self, plugin_dir: str = None) -> None:
         """加载插件，只会加载新插件"""
