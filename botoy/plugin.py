@@ -58,16 +58,18 @@ REMOVED_PLUGINS_TEMPLATE = {'tips': '用于存储已停用插件信息,请不要
 
 
 class PluginManager:
+    """通用插件管理类"""
+
     def __init__(self, plugin_dir: str = 'plugins'):
         self.plugin_dir = plugin_dir  # 插件文件夹
         self._plugins: Dict[str, Plugin] = dict()  # 已启用的插件
         self._removed_plugins: Dict[str, Plugin] = dict()  # 已停用的插件
 
-        # 本地缓存的停用的插件名称列表
-        self._load_removed_plugin_names()
+        # 停用的插件名列表
+        self._removed_plugin_names = []
 
     def _load_removed_plugin_names(self):
-        """读取已移除插件名文件，用来读取插件时对插件进行分类，后面刷新插件时不再加载"""
+        """读取已移除插件名文件，初始化_removed_plugin_names，后面刷新插件时不再加载"""
         if REMOVED_PLUGINS_FILE.exists():
             self._removed_plugin_names = read_json_file(REMOVED_PLUGINS_FILE)['plugins']
         else:
@@ -81,7 +83,9 @@ class PluginManager:
         write_json_file(REMOVED_PLUGINS_FILE, removed_plugins_data)
 
     def load_plugins(self, plugin_dir: str = None) -> None:
-        """加载插件，只会加载新插件"""
+        """加载插件，只会加载新插件, 在调用其他方法前必须调用该方法一次"""
+        self._load_removed_plugin_names()
+
         if plugin_dir is None:
             plugin_dir = self.plugin_dir
         plugin_files = (
