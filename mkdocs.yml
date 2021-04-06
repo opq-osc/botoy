@@ -17,6 +17,7 @@ nav:
   - refine.md
   - action.md
   - plugin.md
+  - session.md
   - webhook.md
   - async.md
   - cli.md
