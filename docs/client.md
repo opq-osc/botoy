@@ -42,12 +42,13 @@ if __name__ == '__main__':
 | `group_blacklist`  | 群黑名单, 此名单中的群聊消息不会被处理                                                                 | `[]`               |
 | `friend_blacklist` | 好友黑名单 , 此名单中的好友消息不会被处理                                                              | `[]`               |
 | `blocked_users`    | 屏蔽用户名单 ,忽略该名单内用户的消息                                                                   | `[]`               |
-| `log`              | 是否开启日志                                                                                           | `True`             |
-| `log_file`         | 是否输出日志文件                                                                                       | `True`             |
+| `log`              | 该参数控制控制台日志等级,为 True 输出 INFO 等级日志,为 False 输出 EROOR 等级的日志                     | `True`             |
+| `log_file`         | 该参数控制日志文件开与关,为 True 输出 INFO 等级日志的文件,为 False 关闭输出日志文件                    | `False`            |
 
 1. 参数均为可选值
 2. **如果你想通过一个域名连接 bot 的话，将 port 设置为 0 即可
    如 bot 连接地址为 http://example.com, 设置`host='http://example.com'`, `port=0`**
+3. 关于日志，环境变量`BOTOY_LOG_LEVEL`拥有最高优先级，如果设置了该环境变量，所有 log handler 的等级都以此为准.
 
 ## 连接或断开连接时的钩子函数
 

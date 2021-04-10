@@ -8,7 +8,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 import socketio
 
 from botoy.config import Config
-from botoy.log import enble_log_file, logger
+from botoy.log import logger
 from botoy.model import EventMsg, FriendMsg, GroupMsg
 from botoy.plugin import PluginManager
 from botoy.pool import WorkerPool
@@ -34,8 +34,8 @@ class Botoy:
     :param group_blacklist: 群黑名单, 此名单中的群聊消息不会被处理,默认为``空``
     :param friend_blacklist: 好友黑名单，此名单中的好友消息不会被处理，默认为``空``
     :param blocked_users: 用户黑名单，即包括群消息和好友消息, 该用户的消息都不会处理, 默认为``空``
-    :param log: 是否开启日志
-    :param log_file: 是否输出日志文件
+    :param log: 该参数控制控制台日志等级,为True输出INFO等级日志,为False输出EROOR等级的日志
+    :param log_file: 该参数控制日志文件开与关,为True输出INFO等级日志的文件,为False关闭输出日志文件
     """
 
     def __init__(
@@ -49,7 +49,7 @@ class Botoy:
         friend_blacklist: List[int] = None,
         blocked_users: List[int] = None,
         log: bool = True,
-        log_file: bool = True,
+        log_file: bool = False,
     ):
         if qq is not None:
             if isinstance(qq, Sequence):
@@ -59,7 +59,6 @@ class Botoy:
         else:
             self.qq = None
 
-        self.use_plugins = use_plugins
         self.config = Config(
             host, port, group_blacklist, friend_blacklist, blocked_users
         )
@@ -67,11 +66,8 @@ class Botoy:
         # 作为程序是否应该退出的标志，以便后续用到
         self._exit = False
 
-        if log:
-            if log_file:
-                enble_log_file()
-        else:
-            logger.disable(__name__)
+        # 日志
+        logger._init(log, log_file)
 
         # 消息接收函数列表
         # 这里只储存主体文件中通过装饰器或函数添加的接收函数
