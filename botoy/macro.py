@@ -13,6 +13,11 @@ def atUser(users: Union[List[int], int]) -> str:
     return '[ATUSER(%s)]' % ','.join([str(i) for i in users])
 
 
+def atAll() -> str:
+    """艾特全体成员(ATALL), 该项腾讯有次数限制，被限制后将无法发送消息"""
+    return '[ATALL()]'
+
+
 def picFlag() -> str:
     """改变图片顺序"""
     return '[PICFLAG]'
