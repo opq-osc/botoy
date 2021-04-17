@@ -8,7 +8,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 import socketio
 
 from botoy.config import Config
-from botoy.log import logger
+from botoy.log import logger, logger_init
 from botoy.model import EventMsg, FriendMsg, GroupMsg
 from botoy.plugin import PluginManager
 from botoy.pool import WorkerPool
@@ -67,7 +67,7 @@ class Botoy:
         self._exit = False
 
         # 日志
-        logger._init(log, log_file)
+        logger_init(log, log_file)
 
         # 消息接收函数列表
         # 这里只储存主体文件中通过装饰器或函数添加的接收函数
