@@ -32,5 +32,12 @@ def _(ctx: GroupMsg):
 
 !!!tip
 
-    三类消息 ctx 在传递给接收函数时，会自动添加 <code>ctx._host</code> 和 <code>ctx._port</code> 属性，所以这两个为保留值,
-    其他保留属性:<code>_pattern_result</code>
+    三类消息 ctx 在传递给接收函数时，会自动添加部分属性
+    - <code>ctx._host</code>
+    - <code>ctx._port</code>
+    - <code>ctx._client</code> 机器人client对象
+
+    所以这些为保留值,
+
+    其他保留属性:
+    - <code>_pattern_result</code> 由装饰器`pattern_with`自动添加
