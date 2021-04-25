@@ -265,7 +265,6 @@ class Botoy:
             *self.plugMgr.friend_msg_receivers,
         ]:
             distributive_context = copy.deepcopy(context)
-            distributive_context._client = self
             self.pool.submit(f_receiver, distributive_context)
 
     def _group_context_distributor(self, context: GroupMsg):
@@ -274,7 +273,6 @@ class Botoy:
             *self.plugMgr.group_msg_receivers,
         ]:
             distributive_context = copy.deepcopy(context)
-            distributive_context._client = self
             self.pool.submit(g_receiver, distributive_context)
 
     def _event_context_distributor(self, context: EventMsg):
@@ -283,7 +281,6 @@ class Botoy:
             *self.plugMgr.event_receivers,
         ]:
             distributive_context = copy.deepcopy(context)
-            distributive_context._client = self
             self.pool.submit(e_receiver, distributive_context)
 
     ########################################################################

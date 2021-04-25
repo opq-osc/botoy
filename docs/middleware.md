@@ -35,7 +35,6 @@ def _(ctx: GroupMsg):
     三类消息 ctx 在传递给接收函数时，会自动添加部分属性
     - <code>ctx._host</code>
     - <code>ctx._port</code>
-    - <code>ctx._client</code> 机器人client对象
 
     所以这些为保留值,
 
