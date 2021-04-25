@@ -1,4 +1,4 @@
-import collections
+# pylint: disable=R0904
 import threading
 import time
 import traceback
@@ -135,7 +135,7 @@ class Action:
         if atUser != 0:
             content = macro.atUser(atUser) + '\n' + content
         if picMd5s:
-            if not isinstance(picMd5s, collections.Sequence):
+            if isinstance(picMd5s, str):
                 picMd5s = [picMd5s]
             return self.post(
                 'SendMsgV2',
