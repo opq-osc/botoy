@@ -56,7 +56,7 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
     :param pic_url: 图片链接
     :param pic_base64: 图片base64编码
     :param pic_path: 图片文件路径
-    :param pic_md5: 已发送图片的MD5
+    :param pic_md5: 已发送图片的MD5, 如果是发给群聊，可以传入图片MD5列表
     :param text: 包含的文字消息
 
     ``pic_url, pic_base64, pic_path必须给定一项``
@@ -95,7 +95,7 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
                 ctx.FromGroupId, content=text, picBase64Buf=file_to_base64(pic_path)
             )
         elif pic_md5:
-            return action.sendGroupPic(ctx.FromGroupId, content=text, fileMd5=pic_md5)
+            return action.sendGroupPic(ctx.FromGroupId, content=text, picMd5s=pic_md5)
 
     if isinstance(ctx, FriendMsg):
         if pic_url:
