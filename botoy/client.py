@@ -264,21 +264,27 @@ class Botoy:
             *self._friend_msg_receivers,
             *self.plugMgr.friend_msg_receivers,
         ]:
-            self.pool.submit(f_receiver, copy.deepcopy(context))
+            distributive_context = copy.deepcopy(context)
+            distributive_context._client = self
+            self.pool.submit(f_receiver, distributive_context)
 
     def _group_context_distributor(self, context: GroupMsg):
         for g_receiver in [
             *self._group_msg_receivers,
             *self.plugMgr.group_msg_receivers,
         ]:
-            self.pool.submit(g_receiver, copy.deepcopy(context))
+            distributive_context = copy.deepcopy(context)
+            distributive_context._client = self
+            self.pool.submit(g_receiver, distributive_context)
 
     def _event_context_distributor(self, context: EventMsg):
         for e_receiver in [
             *self._event_receivers,
             *self.plugMgr.event_receivers,
         ]:
-            self.pool.submit(e_receiver, copy.deepcopy(context))
+            distributive_context = copy.deepcopy(context)
+            distributive_context._client = self
+            self.pool.submit(e_receiver, distributive_context)
 
     ########################################################################
     # message handler
@@ -303,7 +309,6 @@ class Botoy:
                 else:
                     return
         # 传递几个数据供(插件中的)接收函数调用, 其他不再注释
-        context._client = self
         context._host = self.config.host
         context._port = self.config.port
         self.pool.submit(self._friend_context_distributor, context)
@@ -327,7 +332,6 @@ class Botoy:
                     context = new_context
                 else:
                     return
-        context._client = self
         context._host = self.config.host
         context._port = self.config.port
         self.pool.submit(self._group_context_distributor, context)
@@ -345,7 +349,6 @@ class Botoy:
                     context = new_context
                 else:
                     return
-        context._client = self
         context._host = self.config.host
         context._port = self.config.port
         self.pool.submit(self._event_context_distributor, context)
