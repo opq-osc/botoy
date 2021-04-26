@@ -20,6 +20,7 @@ nav:
   - session.md
   - webhook.md
   - async.md
+  - util.md
   - cli.md
   - other.md
   - changelog.md
