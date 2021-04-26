@@ -132,6 +132,13 @@ def init(name, qq, host, port):
         if not os.path.isdir('plugins'):
             os.makedirs('plugins')
 
+    if click.confirm('是否修改或生成.gitignore文件', default=False, show_default=True):
+        ignore = '\n'.join(
+            ['\n# Botoy', 'botoy.json', 'REMOVED_PLUGINS', 'botoy-cache']
+        )
+        with open('.gitignore', 'a' if os.path.exists('.gitignore') else 'w') as f:
+            f.write(ignore)
+
 
 @cli.command()
 @click.option('-n', '--name', prompt='插件名', required=True)
