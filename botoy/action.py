@@ -672,7 +672,7 @@ class Action:
         # 发送请求
         try:
             self.lock.acquire()
-            threading.Timer(1.5, self.release_lock).start()
+            threading.Timer(2.5, self.release_lock).start()
             resp = self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
