@@ -30,7 +30,7 @@ def Text(text: str, at=False):
                 ctx = v
                 break
     if ctx is None:
-        raise InvalidContextError('经支持群消息和好友消息接收函数内调用')
+        raise InvalidContextError('仅支持群消息和好友消息接收函数内调用')
 
     if hasattr(ctx, '_host') and hasattr(ctx, '_port'):
         action = Action(ctx.CurrentQQ, port=ctx._port, host=ctx._host)
@@ -75,7 +75,7 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
                 ctx = v
                 break
     if ctx is None:
-        raise InvalidContextError('经支持群消息和好友消息接收函数内调用')
+        raise InvalidContextError('仅支持群消息和好友消息接收函数内调用')
 
     if hasattr(ctx, '_host') and hasattr(ctx, '_port'):
         action = Action(ctx.CurrentQQ, port=ctx._port, host=ctx._host)
@@ -163,7 +163,7 @@ def Voice(voice_url='', voice_base64='', voice_path=''):
                 ctx = v
                 break
     if ctx is None:
-        raise InvalidContextError('经支持群消息和好友消息接收函数内调用')
+        raise InvalidContextError('仅支持群消息和好友消息接收函数内调用')
 
     if hasattr(ctx, '_host') and hasattr(ctx, '_port'):
         action = Action(ctx.CurrentQQ, port=ctx._port, host=ctx._host)
