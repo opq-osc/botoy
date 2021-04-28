@@ -15,16 +15,12 @@ class Plugin:
     def __init__(self, module: ModuleType):
         self.module = module
 
-        # plugin help
-        with open(self.module.__file__, encoding='utf8') as f:
-            line_one = f.readline().strip()
-        if line_one.startswith('#'):
-            self.help = line_one[1:].strip()
-        else:
-            self.help = ""
-
     def reload(self):
         self.module = importlib.reload(self.module)
+
+    @property
+    def help(self):
+        return self.module.__doc__
 
     @property
     def name(self):
