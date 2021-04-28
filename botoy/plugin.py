@@ -1,8 +1,8 @@
 import copy
 import importlib
 import os
-import pathlib
 import re
+from pathlib import Path
 from types import ModuleType
 from typing import Dict, List
 
@@ -49,7 +49,7 @@ def write_json_file(path, data) -> None:
         json.dump(data, f, ensure_ascii=False)
 
 
-REMOVED_PLUGINS_FILE = pathlib.Path('REMOVED_PLUGINS')
+REMOVED_PLUGINS_FILE = Path('REMOVED_PLUGINS')
 REMOVED_PLUGINS_TEMPLATE = {'tips': '用于存储已停用插件信息,请不要修改这个文件', 'plugins': []}
 
 
@@ -57,7 +57,7 @@ class PluginManager:
     """通用插件管理类"""
 
     def __init__(self, plugin_dir: str = 'plugins'):
-        self.plugin_dir = plugin_dir  # 插件文件夹
+        self.plugin_dir: Path = Path(plugin_dir)  # 插件文件夹
         self._plugins: Dict[str, Plugin] = dict()  # 已启用的插件
         self._removed_plugins: Dict[str, Plugin] = dict()  # 已停用的插件
 
@@ -78,33 +78,37 @@ class PluginManager:
         removed_plugins_data['plugins'] = list(set(self._removed_plugin_names))
         write_json_file(REMOVED_PLUGINS_FILE, removed_plugins_data)
 
-    def load_plugins(self, plugin_dir: str = None) -> None:
+    def load_plugins(self) -> None:
         """加载插件，只会加载新插件, 在调用其他方法前必须调用该方法一次"""
         self._load_removed_plugin_names()
 
-        if plugin_dir is None:
-            plugin_dir = self.plugin_dir
-        plugin_files = (
-            i for i in os.listdir(plugin_dir) if re.search(r'^bot_\w+\.py$', i)
+        suspected_plugin_list = (
+            i for i in os.listdir(self.plugin_dir) if re.search(r'bot_\w+', i)
         )
-        for plugin_file in plugin_files:
-            module = importlib.import_module(
-                '{}.{}'.format(plugin_dir.replace('/', '.'), plugin_file.split('.')[0])
-            )
+        for suspected_plugin in suspected_plugin_list:
+            if os.path.isdir(self.plugin_dir / suspected_plugin):
+                import_path = '{}.{}'.format(self.plugin_dir, suspected_plugin)
+            elif re.search(r'bot_\w+\.py', suspected_plugin):
+                import_path = '{}.{}'.format(
+                    self.plugin_dir, suspected_plugin.split('.')[0]
+                )
+            else:
+                continue
+            module = importlib.import_module(import_path)
             plugin = Plugin(module)
             if plugin.name in self._removed_plugin_names:
                 self._removed_plugins[plugin.name] = plugin
             else:
                 self._plugins[plugin.name] = plugin
 
-    def reload_plugins(self, plugin_dir: str = None) -> None:
+    def reload_plugins(self) -> None:
         """加载新插件并刷新旧插件"""
         # reload old
         old_plugins = self._plugins.copy()
         for old_plugin in old_plugins.values():
             old_plugins[old_plugin.name].reload()
         # load new
-        self.load_plugins(plugin_dir)
+        self.load_plugins()
         # tidy
         self._plugins.update(old_plugins)
 
@@ -115,25 +119,19 @@ class PluginManager:
 
     def remove_plugin(self, plugin_name: str) -> None:
         """移除指定插件, 不会报错"""
-        try:
-            if plugin_name in self._plugins:
-                self._removed_plugins[plugin_name] = self._plugins.pop(plugin_name)
-                # 缓存到本地
-                self._removed_plugin_names.append(plugin_name)
-                self._update_removed_plugin_names()
-        except KeyError:  # 可能由self._removed_plugins[plugin_name]引发
-            pass
+        if plugin_name in self._plugins:
+            self._removed_plugins[plugin_name] = self._plugins.pop(plugin_name)
+            # 缓存到本地
+            self._removed_plugin_names.append(plugin_name)
+            self._update_removed_plugin_names()
 
     def recover_plugin(self, plugin_name: str) -> None:
         """重新开启指定插件, 不会报错"""
-        try:
-            if plugin_name in self._removed_plugins:
-                self._plugins[plugin_name] = self._removed_plugins.pop(plugin_name)
-                if plugin_name in self._removed_plugin_names:
-                    self._removed_plugin_names.remove(plugin_name)
-                    self._update_removed_plugin_names()
-        except KeyError:
-            pass
+        if plugin_name in self._removed_plugins:
+            self._plugins[plugin_name] = self._removed_plugins.pop(plugin_name)
+            if plugin_name in self._removed_plugin_names:
+                self._removed_plugin_names.remove(plugin_name)
+                self._update_removed_plugin_names()
 
     @property
     def plugins(self) -> List[str]:

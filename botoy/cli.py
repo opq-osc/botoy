@@ -155,9 +155,10 @@ def add(name, friend, group, event):
     else:
         plugin_dir = here
 
-    plugin_path = plugin_dir / f'bot_{name}.py'
-    if os.path.exists(plugin_path):
-        sys.exit('该插件已使用，请换一个插件名')
+    plugin_path_file = plugin_dir / f'bot_{name}.py'
+    plugin_path_folder = plugin_dir / f'bot_{name}'
+    if plugin_path_file.exists() or plugin_path_folder.exists():
+        sys.exit('该插件名已被使用，请换一个插件名')
     if not any([friend, group, event]):
         friend = group = event = True
 
@@ -193,7 +194,17 @@ def add(name, friend, group, event):
                 """
             )
         )
-    with open(plugin_path, 'w', encoding='utf8') as f:
+
+    use_file = click.confirm(
+        '插件使用单文件还是文件夹形式, 默认选是表示单文件', default=True, show_default=True
+    )
+    if use_file:
+        write_file = plugin_path_file
+    else:
+        plugin_path_folder.mkdir()
+        write_file = plugin_path_folder / '__init__.py'
+
+    with open(write_file, 'w', encoding='utf8') as f:
         f.write('from botoy import {}'.format(', '.join(imports)))
         f.write('\n\n')
         f.write('\n'.join(receivers))
