@@ -11,7 +11,7 @@ import click
 from .__version__ import __version__
 from .async_client import AsyncBotoy
 from .client import Botoy
-from .util import check_schema
+from .contrib import check_schema
 
 echo = click.echo
 

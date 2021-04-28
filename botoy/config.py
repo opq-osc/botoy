@@ -1,8 +1,8 @@
 from typing import List
 
 from botoy import json
+from botoy.contrib import check_schema
 from botoy.exceptions import InvalidConfigError
-from botoy.util import check_schema
 
 # | host             | ip或域名                           | 127.0.0.1 |
 # | port             | 端口，也可以不需要                 | 8888      |
