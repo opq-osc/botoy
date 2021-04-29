@@ -46,7 +46,7 @@ if __name__ == '__main__':
 | `log_file`         | 该参数控制日志文件开与关,为 True 输出 INFO 等级日志的文件,为 False 关闭输出日志文件                    | `False`            |
 
 1. 参数均为可选值
-2. **如果你想通过一个域名连接 bot 的话，将 port 设置为 0 即可
+2. **如果你想通过一个域名连接 bot 的话，将 port 设置为 0 或 80 即可
    如 bot 连接地址为 http://example.com, 设置`host='http://example.com'`, `port=0`**
 3. 关于日志，环境变量`BOTOY_LOG_LEVEL`拥有最高优先级，如果设置了该环境变量，所有 log handler 的等级都以此为准.
 
