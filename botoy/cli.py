@@ -149,9 +149,10 @@ def add(name, friend, group, event):
     """创建插件"""
     here = pathlib.Path('.').absolute()
     if here.name != 'plugins':
-        if not os.path.isdir('plugins'):
-            sys.exit('插件目录plugins不存在')
         plugin_dir = here / 'plugins'
+        if not os.path.isdir('plugins'):
+            plugin_dir.mkdir()
+            echo('插件目录plugins不存在, 已自动创建')
     else:
         plugin_dir = here
 
