@@ -19,6 +19,7 @@ nav:
   - plugin.md
   - session.md
   - webhook.md
+  - schedule.md
   - contrib.md
   - async.md
   - cli.md
