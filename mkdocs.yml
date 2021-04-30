@@ -4,10 +4,21 @@ repo_name: xiyaowong/botoy
 repo_url: https://github.com/xiyaowong/botoy
 
 theme:
+  language: zh
   name: material
   palette:
-    primary: deep purple
-    accent: teal
+    - scheme: default
+      primary: deep purple
+      accent: teal
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: blue grey
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
   font:
     text: Open Sans
     code: Fira Code
