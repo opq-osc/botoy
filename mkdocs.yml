@@ -6,8 +6,11 @@ repo_url: https://github.com/xiyaowong/botoy
 theme:
   name: material
   palette:
-    primary: purple
-
+    primary: deep purple
+    accent: teal
+  font:
+    text: Open Sans
+    code: Fira Code
 nav:
   - index.md
   - client.md
@@ -27,7 +30,9 @@ nav:
   - changelog.md
 
 markdown_extensions:
-  - codehilite
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
   - admonition
   - tables
   - toc:
