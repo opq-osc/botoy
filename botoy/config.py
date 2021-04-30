@@ -24,6 +24,16 @@ DEFAULT_WEBHOOK_TIMEOUT = 20
 
 # parametor > config file > default
 class Config:
+    # read botoy.json configuration
+    jconfig = {}
+    try:
+        with open('botoy.json', encoding='utf-8') as f:
+            jconfig = json.load(f)
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        raise InvalidConfigError('配置文件不规范') from e
+
     def __init__(
         self,
         host: str = None,
@@ -35,16 +45,7 @@ class Config:
         webhook_post_url: str = None,
         webhook_timeout: int = None,
     ):
-        # read botoy.json configuration
-        jconfig = {}
-        try:
-            with open('botoy.json', encoding='utf-8') as f:
-                jconfig = json.load(f)
-        except FileNotFoundError:
-            pass
-        except Exception as e:
-            raise InvalidConfigError('配置文件不规范') from e
-
+        jconfig = self.jconfig
         self.host: str = check_schema(
             host or jconfig.get('host') or DEFAULT_HOST
         ).strip('/')
@@ -75,3 +76,15 @@ class Config:
         if self.port in (0, 80):
             return self.host
         return f'{self.host}:{self.port}'
+
+    def get_jconfig(self, config_name):
+        """获取botoy.json内的配置, 如果不存在就返回None
+        :config_name: 配置的名称
+        """
+        return self.jconfig.get(config_name)
+
+    def __getattr__(self, attr):
+        return self.jconfig.get(attr)
+
+
+jconfig = Config()

@@ -5,31 +5,16 @@ try:
 except ImportError:
     import json
 
-from . import decorators, macro, refine, session
+from .__version__ import check_version
 from .action import Action
 from .async_action import AsyncAction
 from .async_client import AsyncBotoy
 from .client import Botoy
+from .collection import Emoticons, EventNames, MsgTypes
+from .config import jconfig
 from .log import logger
 from .model import EventMsg, FriendMsg, GroupMsg
+from .sugar import Picture, Text, Voice
 
-__all__ = [
-    'logger',
-    'macro',
-    'session',
-    'refine',
-    'decorators',
-    'sugar',
-    'collection',
-    'Action',
-    'AsyncAction',
-    'Botoy',
-    'AsyncBotoy',
-    'EventMsg',
-    'GroupMsg',
-    'FriendMsg',
-]
-
-from .__version__ import check_version as __check_version
-
-__check_version()
+check_version()
+del check_version
