@@ -6,3 +6,4 @@ loguru
 click
 aiohttp
 prettytable
+apscheduler
