@@ -12,11 +12,21 @@ from botoy import json
 
 
 class Plugin:
-    def __init__(self, module: ModuleType):
-        self.module = module
+    def __init__(self, import_path: str):
+        self.import_path = import_path
+        self.module: ModuleType = None
+
+    @property
+    def loaded(self):
+        return self.module is not None
+
+    def load(self):
+        self.module = importlib.import_module(self.import_path)
+        return self
 
     def reload(self):
         self.module = importlib.reload(self.module)
+        return self
 
     @property
     def help(self):
@@ -94,12 +104,12 @@ class PluginManager:
                 )
             else:
                 continue
-            module = importlib.import_module(import_path)
-            plugin = Plugin(module)
-            if plugin.name in self._removed_plugin_names:
-                self._removed_plugins[plugin.name] = plugin
+            plugin_name = re.findall(r'bot_(\w+)', suspected_plugin)[0]
+            plugin = Plugin(import_path)
+            if plugin_name in self._removed_plugin_names:
+                self._removed_plugins[plugin_name] = plugin
             else:
-                self._plugins[plugin.name] = plugin
+                self._plugins[plugin_name] = plugin.load()
 
     def reload_plugins(self) -> None:
         """加载新插件并刷新旧插件"""
@@ -128,7 +138,10 @@ class PluginManager:
     def recover_plugin(self, plugin_name: str) -> None:
         """重新开启指定插件, 不会报错"""
         if plugin_name in self._removed_plugins:
-            self._plugins[plugin_name] = self._removed_plugins.pop(plugin_name)
+            plugin = self._removed_plugins.pop(plugin_name)
+            if not plugin.loaded:
+                plugin.load()
+            self._plugins[plugin_name] = plugin
             if plugin_name in self._removed_plugin_names:
                 self._removed_plugin_names.remove(plugin_name)
                 self._update_removed_plugin_names()
@@ -172,41 +185,24 @@ class PluginManager:
 
     @property
     def info_table(self) -> str:
-        table = PrettyTable(['Receiver', 'Count', 'Info'])
-        table.add_row(
-            [
-                'Friend Msg Receiver',
-                len(self.friend_msg_receivers),
-                '/'.join(
-                    [
-                        f'{p.name}'
-                        for p in self._plugins.values()
-                        if p.receive_friend_msg
-                    ]
-                ),
-            ]
+        enabled_plugin_table = PrettyTable(
+            ['', 'PLUGIN', 'GROUP MESSAGE', 'FRIEND MESSAGE', 'EVENT', 'HELP']
         )
-        table.add_row(
-            [
-                'Group  Msg Receiver',
-                len(self.group_msg_receivers),
-                '/'.join(
-                    [f'{p.name}' for p in self._plugins.values() if p.receive_group_msg]
-                ),
-            ]
-        )
-        table.add_row(
-            [
-                'Event      Receiver',
-                len(self.event_receivers),
-                '/'.join(
-                    [f'{p.name}' for p in self._plugins.values() if p.receive_events]
-                ),
-            ]
-        )
-        table_removed = PrettyTable(['Removed Plugins'])
-        table_removed.add_row(['/'.join(self.removed_plugins)])
-        return str(table) + '\n' + str(table_removed)
+        for idx, plugin in enumerate(self._plugins.values()):  # type: Plugin
+            enabled_plugin_table.add_row(
+                [
+                    str(idx + 1),
+                    plugin.name,
+                    '√' if plugin.receive_group_msg else "",
+                    '√' if plugin.receive_friend_msg else "",
+                    '√' if plugin.receive_events else "",
+                    plugin.help or "",
+                ]
+            )
+        removed_plugin_table = PrettyTable(['', 'REMOVED PLUGINS'])
+        for idx, plugin_name in enumerate(self.removed_plugins):
+            removed_plugin_table.add_row([str(idx + 1), plugin_name])
+        return str(enabled_plugin_table) + '\n' + str(removed_plugin_table)
 
     @property
     def help(self) -> str:
