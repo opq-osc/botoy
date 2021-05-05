@@ -136,3 +136,4 @@ REMOVED_PLUGINS
 local*
 bot.py
 .nvimlog
+botoy-cache
