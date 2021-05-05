@@ -181,5 +181,5 @@ def _(name, age):
 
 #### 声明
 
-该部分内容有借鉴[nonebot](https://github.com/nonebot/nonebot2),
+该部分在API样子上有借鉴[nonebot](https://github.com/nonebot/nonebot2),
 部分内容看起来类似，但具体使用是完全不同的
