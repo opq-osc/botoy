@@ -21,6 +21,9 @@ class GroupMsg:
     def __getitem__(self, key):
         return self.message[key]
 
+    def __repr__(self):
+        return f'GroupMsg {self.data}'
+
 
 class FriendMsg:
     def __init__(self, message: dict):
@@ -42,6 +45,9 @@ class FriendMsg:
 
     def __getitem__(self, key):
         return self.message[key]
+
+    def __repr__(self):
+        return f'FriendMsg {self.data}'
 
 
 class EventMsg:
@@ -65,6 +71,9 @@ class EventMsg:
 
     def __getitem__(self, key):
         return self.message[key]
+
+    def __repr__(self):
+        return f'EventMsg {self.data}'
 
 
 model_map = {'OnGroupMsgs': GroupMsg, 'OnFriendMsgs': FriendMsg, 'OnEvents': EventMsg}
