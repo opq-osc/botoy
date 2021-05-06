@@ -10,21 +10,21 @@
 
 类似字典类型, 作用中提到的数据指键值对数据中的键
 
-| 方法        | 作用                                                 |
-| ----------- | ---------------------------------------------------- |
-| get         | 获取数据                                             |
-| pop         | 获取数据,返回后马上移除                              |
-| set         | 设置数据                                             |
-| has         | 查看数据是否存在                                     |
-| clear       | 清除所有数据                                         |
-| remove      | 清除指定的数据                                       |
-| waiting     | 判断是否正在等待数据被设置                           |
-| wait_for    | 主动添加需要被设置的数据                             |
-| do_not_wait | 主动删除需要被设置的数据                             |
-| close       | 关闭该 session                                       |
-| want        | 与 get 相似，但支持设置参数来快速对 session 进行回复 |
-| send_text   | 对该 session 发送文字                                |
-| send_pic    | 对该 session 发送图片                                |
+| 方法        | 作用                                                                                           |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| get         | 获取数据                                                                                       |
+| pop         | 获取数据,返回后马上移除                                                                        |
+| set         | 设置数据                                                                                       |
+| has         | 查看数据是否存在                                                                               |
+| clear       | 清除所有数据                                                                                   |
+| remove      | 清除指定的数据                                                                                 |
+| waiting     | 判断是否正在等待数据被设置                                                                     |
+| wait_for    | 主动添加需要被设置的数据                                                                       |
+| do_not_wait | 主动删除需要被设置的数据                                                                       |
+| close       | 关闭该 session                                                                                 |
+| want        | 与 get 相似，但支持设置参数来快速对 session 进行回复 , 如果设置参数 pop 为 True，则与 pop 类似 |
+| send_text   | 对该 session 发送文字                                                                          |
+| send_pic    | 对该 session 发送图片                                                                          |
 
 | 属性     | 作用                                        |
 | -------- | ------------------------------------------- |
@@ -179,7 +179,23 @@ def _(name, age):
 {!../docs_src/session_search.py!}
 ```
 
+## Prompt
+
+少部分方法支持设置`prompt`参数，该参数具体见注释。其中支持的类型就是`Prompt`(`botoy.session.Prompt`)
+
+这里提出是为了说明有这个东西。内容很少
+
+用例:
+
+```python
+from botoy.session import Prompt
+
+example_handler.finish(Prompt.group_picture(...))
+```
+
+**因为`OPQ`的宏系统很简单，所以这个功能不好实现也不好用**
+
 #### 声明
 
-该部分在API样子上有借鉴[nonebot](https://github.com/nonebot/nonebot2),
+该部分在 API 样子上有借鉴[nonebot](https://github.com/nonebot/nonebot2),
 部分内容看起来类似，但具体使用是完全不同的

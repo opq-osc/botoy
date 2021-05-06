@@ -1,12 +1,13 @@
 # pylint: disable=R0915
 import inspect
-from typing import Union
+import traceback
+from typing import Callable, Union
 
-from botoy.log import logger
-from botoy.model import FriendMsg, GroupMsg
-
+from ..log import logger
+from ..model import FriendMsg, GroupMsg
 from .base import Session, SessionController
 from .globals import _ctx, _session
+from .prompt import Prompt
 
 FILTER_SUCCESS = 'filter successfully'
 
@@ -20,9 +21,8 @@ class FinishException(Exception):
 
 
 class ConditionHandler:
-    def __init__(self, keys, prompt, target):
+    def __init__(self, keys, target):
         self.keys = keys
-        self.prompt = prompt
         self.target = target
         self.retired = False
 
@@ -47,22 +47,40 @@ class SessionHandler:
         # self.parse
         self.parser = None
 
-    def got(self, *keys, prompt=None):
+    def got(self, *keys):
+        """注册一个condition_handler
+
+        当session存在所有keys数据时，将被调用。
+        函数参数可选，将``keys``中的任意一个作为函数参数名，运行时将自动传入对应值
+        """
+
         def deco(target):
-            self.condition_handlers.append(ConditionHandler(keys, prompt, target))
+            self.condition_handlers.append(ConditionHandler(keys, target))
 
         return deco
 
     def parse(self, parser):
+        """注册parser, 参数为新消息ctx
+
+        session 开启后，自动设置给等待数据的值为parser的返回值"""
         self.parser = parser
 
     def receive(self, receiver):
+        """注册receiver, 无参数
+
+        session 开启后，每次接收到新消息都会运行该函数
+        """
         self.receiver = receiver
 
     def handle(self, handler):
+        """注册handler, 无参数
+
+        在 session 被新建后运行, 并且在 session 存在期间只会运行一次
+        """
         self.handler = handler
 
     def message_receiver(self, msg_ctx: Union[GroupMsg, FriendMsg]):
+        """消息接收函数"""
         # 过滤机器人自身消息
         if msg_ctx.CurrentQQ == (
             msg_ctx.FromUserId if isinstance(msg_ctx, GroupMsg) else msg_ctx.FromUin
@@ -131,8 +149,6 @@ class SessionHandler:
                     if not session.has(need_key):
                         break
                 else:
-                    # TODO
-                    # 处理prompt
                     logger.debug(f'running condition handler {c_h}')
                     try:
                         c_h.retire()
@@ -152,19 +168,41 @@ class SessionHandler:
                     except FinishException:
                         pass
 
-    def reject(self):
-        raise RejectException
+    def reject(self, prompt: Union[str, Prompt, Callable] = None, **kwargs):
+        """该方法调用对应session的resolve_prompt方法
+        :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
+                        如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
+        :param kwargs: 如果prompt是函数类型，该参数将传递给prompt运行
+        """
+        try:
+            _session.get().resolve_prompt(prompt, **kwargs)
+        except Exception:
+            logger.error(traceback.format_exc())
+        finally:
+            raise RejectException
 
-    def finish(self):
-        raise FinishException
+    def finish(self, prompt: Union[str, Prompt, Callable] = None, **kwargs):
+        """该方法调用对应session的resolve_prompt方法
+        :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
+                        如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
+        :param kwargs: 如果prompt是函数类型，该参数将传递给prompt运行
+        """
+        try:
+            _session.get().resolve_prompt(prompt, **kwargs)
+        except Exception:
+            logger.error(traceback.format_exc())
+        finally:
+            raise FinishException
 
     def receive_group_msg(self):
+        """接收该插件的群消息"""
         inspect.currentframe().f_back.f_globals.update(
             receive_group_msg=self.message_receiver
         )
         return self
 
     def receive_friend_msg(self):
+        """接收该插件的好友消息"""
         inspect.currentframe().f_back.f_globals.update(
             receive_friend_msg=self.message_receiver
         )

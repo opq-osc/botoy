@@ -1,10 +1,11 @@
-import functools
 import threading
 import time
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
-from botoy.action import Action
-from botoy.model import FriendMsg, GroupMsg
+from ..action import Action
+from ..log import logger
+from ..model import FriendMsg, GroupMsg
+from .prompt import Prompt
 
 DEFAULT_TIMEOUT = 5 * 60
 DEFAULT_EXPIRATION = 10 * 60
@@ -26,8 +27,9 @@ class SessionBase:
     def get(self, key: str, wait: bool = True, timeout: int = None, default=None):
         """获取数据, 该函数会等待至取到数据或超时，返回默认值
         :param key: 数据键名
+        :param wait: 是否阻塞等待
         :param timeout: 等待的时间
-        :param default: 超时返回的默认值
+        :param default: 返回的默认值
         """
         self._last_work = time.monotonic()
         if wait:
@@ -50,8 +52,9 @@ class SessionBase:
     def pop(self, key: str, wait: bool = True, timeout: int = None, default=None):
         """获取数据,然后删除, 该函数会等待至取到数据或超时，返回默认值
         :param key: 数据键名
+        :param wait: 是否阻塞等待
         :param timeout: 等待的时间
-        :param default: 超时返回的默认值
+        :param default: 返回的默认值
         """
         self._last_work = time.monotonic()
         value = self.get(key, wait, timeout, default)
@@ -95,7 +98,7 @@ class SessionBase:
         return self._waitings
 
     def waiting(self, key=None) -> bool:
-        """判断是否在等待某项数据, 当使用get_and_wait方法时，所需数据的键名会自动保存直到方法结束等待
+        """判断是否在等待某项数据
         :param key: 需要判断是否在等待该键名的数据, 如果不设置, 则只要存在正在等待的数据，就会返回True
         """
         self._last_work = time.monotonic()
@@ -119,7 +122,7 @@ class SessionBase:
 
     @property
     def empty(self):
-        '''session数据是否为空'''
+        '''是否为空'''
         return bool(self._state)
 
     def close(self):
@@ -143,12 +146,44 @@ class Session(SessionBase):
         self.ctx = ctx
         self.action = Action(ctx.CurrentQQ, host=ctx._host, port=ctx._port)
 
+    def send(self, method: str, *args, **kwargs):
+        """调用与session对应的action的方法
+
+        该方法会将命名参数中所有值为 '[user]' 和 '[group]'
+        分别替换成该session对应的 user_id 和 group_id
+
+        :param method: 方法名
+        :param args: 该方法可设置的位置参数
+        :param kwargs: 该方法可设置的命名参数
+        """
+        if isinstance(self.ctx, FriendMsg):
+            user = self.ctx.FromUin
+            group = self.ctx.TempUin or 0
+        else:
+            user = self.ctx.FromUserId
+            group = self.ctx.FromGroupId
+        for k, v in kwargs.copy().items():
+            if v == '[user]':
+                kwargs[k] = user
+            if v == '[group]':
+                kwargs[k] = group
+        return getattr(self.action, method)(*args, **kwargs)
+
     def send_text(self, text: str):
+        """发送session文字消息
+        :param text: 文字内容
+        """
         if isinstance(self.ctx, FriendMsg):
             return self.action.sendFriendText(self.ctx.FromUin, text)
         return self.action.sendGroupText(self.ctx.FromGroupId, text)
 
     def send_pic(self, url: str = "", base64: str = "", md5: str = "", text: str = ""):
+        """发送session图片消息
+        :param url: 图片URL
+        :param base64: 图片base64
+        :param md5: 图片MD5
+        :param text: 图片附带文字
+        """
         if isinstance(self.ctx, FriendMsg):
             return self.action.sendFriendPic(
                 self.ctx.FromUin,
@@ -165,19 +200,45 @@ class Session(SessionBase):
             content=text,
         )
 
+    def resolve_prompt(self, prompt: Union[str, Prompt, Callable] = None, **kwargs):
+        """用于统一处理prompt参数
+        :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
+                        如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
+        :param kwargs: 如果prompt是函数类型，该参数将传递给prompt运行
+        """
+        if prompt is None:
+            return None
+        elif isinstance(prompt, str):
+            return self.send_text(prompt)
+        elif isinstance(prompt, Prompt):
+            return self.send(prompt.method, *prompt.args, **prompt.kwargs)
+        elif callable(prompt):
+            return prompt(**kwargs)
+        else:
+            logger.warning(f'Unknown prompt! => {prompt}')
+        return None
+
     def want(
         self,
         key,
-        prompt=None,
+        prompt: Union[str, Prompt, Callable] = None,
+        pop: bool = False,
         timeout: int = None,
         default: Any = None,
+        **kwargs,
     ):
-        if prompt is not None:
-            if isinstance(prompt, str):
-                self.send_text(prompt)
-            else:
-                # TODO: catch exceptions
-                prompt(self.ctx)
+        """包装get和pop方法，增加prompt参数, 该方法一定会阻塞等待数据
+        :param key: 需要的数据键名
+        :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
+                        如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
+        :param pop: 如果为``True``, 则调用pop方法，默认为``False``,使用get方法
+        :param timeout: 等待的时间
+        :param default: 等待超时返回该默认值
+        :param kwargs: 如果prompt是函数类型，该参数将传递给prompt运行
+        """
+        self.resolve_prompt(prompt=prompt, **kwargs)
+        if pop:
+            return self.pop(key, wait=True, timeout=timeout, default=default)
         return self.get(key, wait=True, timeout=timeout, default=default)
 
 
@@ -214,6 +275,7 @@ class SessionController:
         return sid
 
     def remove_session(self, ctx: Union[FriendMsg, GroupMsg], single_user: bool = True):
+        """移除对应session"""
         sid = self.define_session_id(ctx, single_user)
         if sid in self.session_storage:
             self.session_storage.remove(sid)
@@ -221,6 +283,7 @@ class SessionController:
     def session_existed(
         self, ctx: Union[FriendMsg, GroupMsg], single_user: bool = True
     ):
+        """判断对应session是否存在"""
         sid = self.define_session_id(ctx, single_user)
         return sid in self.session_storage
 
@@ -230,6 +293,9 @@ class SessionController:
         single_user: bool = True,
         create: bool = True,
     ) -> Optional[Session]:
+        """获取session
+        :param create: ``True``表示session不存在时，则新建
+        """
         sid = self.define_session_id(ctx, single_user)
         if sid in self.session_storage:
             return self.session_storage[sid]
