@@ -4,27 +4,31 @@ __version__ = '4.0'
 
 def check_version():
     def _check_version():
-        import re
+        import sys
         from distutils.version import LooseVersion as V
+        from xml.etree import ElementTree
 
         import httpx
 
         try:
-            resp = httpx.get(
-                'https://mirrors.aliyun.com/pypi/simple/botoy/', timeout=10
+            latest_version = V(
+                ElementTree.fromstring(
+                    httpx.get(
+                        'https://pypi.org/rss/project/botoy/releases.xml', timeout=10
+                    ).text
+                )
+                .find('channel')
+                .find('item')
+                .find('title')
+                .text
             )
-            resp.raise_for_status()
         except Exception:
             pass
         else:
-            versions = re.findall(r'botoy-(.*?)\.tar\.gz', resp.text)
-            if versions:
-                versions = set(versions)
-            local_v = V(__version__)
-            latest_version = max(V(v) for v in versions)
-            if local_v < latest_version:
-                info = f'\033[33m==== 当前版本为: \033[31m{local_v}\033[33m, 已有最新版本: \033[31m{latest_version}\033[33m, 请及时更新! ====\033[0m'
-                print(info)
+            local_version = V(__version__)
+            if local_version < latest_version:
+                info = f'\n\033[33m==== 当前版本为: \033[31m{local_version}\033[33m, 已有最新版本: \033[31m{latest_version}\033[33m, 请及时更新! ====\033[0m\n'
+                sys.stdout.write(info)
 
     from threading import Thread
 
