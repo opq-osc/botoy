@@ -23,10 +23,10 @@ def start_scheduler():
             }
         )
         scheduler.start()
-        logger.info('定时任务已启动')
+        logger.info("定时任务已启动")
 
 
 if jconfig.apscheduler_autostart is None or jconfig.apscheduler_autostart:
     start_scheduler()
 
-__all__ = ['scheduler', 'start_scheduler']
+__all__ = ["scheduler", "start_scheduler"]

@@ -155,47 +155,47 @@ class Botoy:
     # 只推荐使用这几个方法，其他的更细致的方法需要通过 plugMgr 对象访问
     # 原始plugMgr提供了自由度更高的方法
     def load_plugins(self):
-        '''加载新插件'''
+        """加载新插件"""
         return self.plugMgr.load_plugins()
 
     def reload_plugins(self):
-        '''重载旧插件，加载新插件'''
+        """重载旧插件，加载新插件"""
         return self.plugMgr.reload_plugins()
 
     def reload_plugin(self, plugin_name: str):
-        '''重载指定插件'''
+        """重载指定插件"""
         return self.plugMgr.reload_plugin(plugin_name)
 
     def remove_plugin(self, plugin_name: str):
-        '''停用指定插件'''
+        """停用指定插件"""
         return self.plugMgr.remove_plugin(plugin_name)
 
     def recover_plugin(self, plugin_name: str):
-        '''启用指定插件'''
+        """启用指定插件"""
         return self.plugMgr.recover_plugin(plugin_name)
 
     @property
     def plugin_status(self):
-        '''插件启用状态'''
+        """插件启用状态"""
         return self.plugMgr.info_table
 
     @property
     def plugins(self):
-        '''插件名列表'''
+        """插件名列表"""
         return self.plugMgr.plugins
 
     @property
     def removed_plugins(self):
-        '''已停用的插件名列表'''
+        """已停用的插件名列表"""
         return self.plugMgr.removed_plugins
 
     @property
     def plugin_help(self):
-        '''返回所有已启用插件的帮助信息'''
+        """返回所有已启用插件的帮助信息"""
         return self.plugMgr.help
 
     def get_plugin_help(self, plugin_name: str):
-        '''返回指定插件的帮助信息，如果插件不存在，则返回空'''
+        """返回指定插件的帮助信息，如果插件不存在，则返回空"""
         return self.plugMgr.get_plugin_help(plugin_name)
 
     ##########################################################################
@@ -217,7 +217,7 @@ class Botoy:
     # about socketio
     ########################################################################
     def connect(self):
-        logger.success('Connected to the server successfully!')
+        logger.success("Connected to the server successfully!")
 
         # 连接成功执行用户定义的函数，如果有
         if self._when_connected_do is not None:
@@ -227,7 +227,7 @@ class Botoy:
                 self._when_connected_do = None
 
     def disconnect(self):
-        logger.warning('Disconnected to the server!')
+        logger.warning("Disconnected to the server!")
         # 断开连接后执行用户定义的函数，如果有
         if self._when_disconnected_do is not None:
             self._when_disconnected_do[0]()
@@ -241,9 +241,9 @@ class Botoy:
         self._exit = True
 
     def run(self):
-        logger.info('Connecting to the server...')
+        logger.info("Connecting to the server...")
         try:
-            self.socketio.connect(self.config.address, transports=['websocket'])
+            self.socketio.connect(self.config.address, transports=["websocket"])
         except Exception:
             logger.error(traceback.format_exc())
             self.close()
@@ -253,7 +253,7 @@ class Botoy:
             except KeyboardInterrupt:
                 pass
             finally:
-                print('bye~')
+                print("bye~")
                 self.close()
 
     ########################################################################
@@ -290,7 +290,7 @@ class Botoy:
         context = FriendMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
             return
-        logger.info(f'{context.__class__.__name__} ->  {context.data}')
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
         # 黑名单
         if context.FromUin in self.config.friend_blacklist:
             return
@@ -314,7 +314,7 @@ class Botoy:
         context = GroupMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
             return
-        logger.info(f'{context.__class__.__name__} ->  {context.data}')
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
         # 黑名单
         if context.FromGroupId in self.config.group_blacklist:
             return
@@ -337,7 +337,7 @@ class Botoy:
         context = EventMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
             return
-        logger.info(f'{context.__class__.__name__} ->  {context.data}')
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
         # 中间件
         if self._event_context_middlewares:
             for middleware in self._event_context_middlewares:
@@ -359,13 +359,13 @@ class Botoy:
         self.socketio.event()(self.disconnect)
 
     def _initialize_handlers(self):
-        self.socketio.on('OnGroupMsgs')(self._group_msg_handler)
-        self.socketio.on('OnFriendMsgs')(self._friend_msg_handler)
-        self.socketio.on('OnEvents')(self._event_handler)
+        self.socketio.on("OnGroupMsgs")(self._group_msg_handler)
+        self.socketio.on("OnFriendMsgs")(self._friend_msg_handler)
+        self.socketio.on("OnEvents")(self._event_handler)
 
     ########################################################################
     def __repr__(self):
-        return 'Botoy <{}> <host-{}> <port-{}> <address-{}>'.format(
+        return "Botoy <{}> <host-{}> <port-{}> <address-{}>".format(
             " ".join([str(i) for i in self.qq]),
             self.config.host,
             self.config.port,

@@ -72,7 +72,7 @@ def from_admin(func=None):
     管理员列表会进行``缓存``，调用520次后再次刷新, 所以可以放心使用"""
 
 
-def queued_up(func=None, *, name='default'):
+def queued_up(func=None, *, name="default"):
     """队列执行函数
     :param name: 指定队列分组, 不同的名称用不同的队列
     """

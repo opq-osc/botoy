@@ -94,7 +94,7 @@ class SessionBase:
 
     @property
     def waitings(self) -> List[str]:
-        '''正在等待的数据'''
+        """正在等待的数据"""
         return self._waitings
 
     def waiting(self, key=None) -> bool:
@@ -107,13 +107,13 @@ class SessionBase:
         return key in self._waitings
 
     def wait_for(self, key):
-        '''手动增加需要等待的数据'''
+        """手动增加需要等待的数据"""
         self._last_work = time.monotonic()
         if not self.waiting(key):
             self._waitings.append(key)
 
     def do_not_wait(self, key):
-        '''手动删除正在等待的数据'''
+        """手动删除正在等待的数据"""
         # FIXME: _waitings 使用集合则无序，使用列表可能会同一个数据多次添加
         # 多次添加的需求可能存在，但是此时remove会清除所有的数据
         self._last_work = time.monotonic()
@@ -122,14 +122,14 @@ class SessionBase:
 
     @property
     def empty(self):
-        '''是否为空'''
+        """是否为空"""
         return bool(self._state)
 
     def close(self):
         """关闭该Session
         Session的关闭只是一个标志，即使被关闭，Session的其他方法依然能使用
         """
-        self._last_work = float('-inf')
+        self._last_work = float("-inf")
 
     @property
     def closed(self) -> bool:
@@ -137,7 +137,7 @@ class SessionBase:
         return (time.monotonic() - self._last_work) >= self._expiration
 
     def __repr__(self):
-        return f'Session@{self._state}'
+        return f"Session@{self._state}"
 
 
 class Session(SessionBase):
@@ -163,9 +163,9 @@ class Session(SessionBase):
             user = self.ctx.FromUserId
             group = self.ctx.FromGroupId
         for k, v in kwargs.copy().items():
-            if v == '[user]':
+            if v == "[user]":
                 kwargs[k] = user
-            if v == '[group]':
+            if v == "[group]":
                 kwargs[k] = group
         return getattr(self.action, method)(*args, **kwargs)
 
@@ -215,7 +215,7 @@ class Session(SessionBase):
         elif callable(prompt):
             return prompt(**kwargs)
         else:
-            logger.warning(f'Unknown prompt! => {prompt}')
+            logger.warning(f"Unknown prompt! => {prompt}")
         return None
 
     def want(
@@ -249,7 +249,7 @@ class SessionController:
 
     @property
     def session_storage(self) -> dict:
-        '''返回所有未关闭的session'''
+        """返回所有未关闭的session"""
         self._session_storage = {
             sid: s for sid, s in self._session_storage.items() if not s.closed
         }
@@ -263,7 +263,7 @@ class SessionController:
         """
         if isinstance(ctx, GroupMsg):
             if single_user:
-                sid = '{group_id}-{user_id}'.format(
+                sid = "{group_id}-{user_id}".format(
                     group_id=ctx.FromGroupId, user_id=ctx.FromUserId
                 )
             else:
@@ -271,7 +271,7 @@ class SessionController:
         elif isinstance(ctx, FriendMsg):
             sid = ctx.FromUin
         else:
-            raise ValueError('Type of ctx must be GroupMsg or FriendMsg.')
+            raise ValueError("Type of ctx must be GroupMsg or FriendMsg.")
         return sid
 
     def remove_session(self, ctx: Union[FriendMsg, GroupMsg], single_user: bool = True):
@@ -306,4 +306,4 @@ class SessionController:
         return None
 
     def __repr__(self):
-        return f'SessionController@{self.session_storage}'
+        return f"SessionController@{self.session_storage}"

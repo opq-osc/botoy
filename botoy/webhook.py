@@ -16,18 +16,18 @@ def receive_friend_msg(ctx: FriendMsg):
     try:
         _c.post(httpx.URL(), json=ctx.message)
     except Exception as e:
-        logger.warning('Webhook请求中的错误: %s' % e)
+        logger.warning("Webhook请求中的错误: %s" % e)
 
 
 def receive_group_msg(ctx: GroupMsg):
     try:
         _c.post(httpx.URL(), json=ctx.message)
     except Exception as e:
-        logger.warning('Webhook请求中的错误: %s' % e)
+        logger.warning("Webhook请求中的错误: %s" % e)
 
 
 def receive_events(ctx: EventMsg):
     try:
         _c.post(httpx.URL(), json=ctx.message)
     except Exception as e:
-        logger.warning('Webhook请求中的错误: %s' % e)
+        logger.warning("Webhook请求中的错误: %s" % e)

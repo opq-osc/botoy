@@ -22,17 +22,17 @@ def Text(text: str, at=False):
     f = sys._getframe()
     upper = f.f_back
     upper_locals = upper.f_locals
-    if 'ctx' in upper_locals and isinstance(upper_locals['ctx'], (FriendMsg, GroupMsg)):
-        ctx = upper_locals['ctx']
+    if "ctx" in upper_locals and isinstance(upper_locals["ctx"], (FriendMsg, GroupMsg)):
+        ctx = upper_locals["ctx"]
     else:
         for v in upper_locals.values():
             if isinstance(v, (GroupMsg, FriendMsg)):
                 ctx = v
                 break
     if ctx is None:
-        raise InvalidContextError('仅支持群消息和好友消息接收函数内调用')
+        raise InvalidContextError("仅支持群消息和好友消息接收函数内调用")
 
-    if hasattr(ctx, '_host') and hasattr(ctx, '_port'):
+    if hasattr(ctx, "_host") and hasattr(ctx, "_port"):
         action = Action(ctx.CurrentQQ, port=ctx._port, host=ctx._host)
     else:
         action = Action(ctx.CurrentQQ)
@@ -51,7 +51,7 @@ def Text(text: str, at=False):
     return None
 
 
-def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
+def Picture(pic_url="", pic_base64="", pic_path="", pic_md5="", text=""):
     """发送图片 经支持群消息和好友消息接收函数内调用
     :param pic_url: 图片链接
     :param pic_base64: 图片base64编码
@@ -61,23 +61,23 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
 
     ``pic_url, pic_base64, pic_path必须给定一项``
     """
-    assert any([pic_url, pic_base64, pic_path, pic_md5]), '必须给定一项'
+    assert any([pic_url, pic_base64, pic_path, pic_md5]), "必须给定一项"
 
     ctx = None
     f = sys._getframe()
     upper = f.f_back
     upper_locals = upper.f_locals
-    if 'ctx' in upper_locals and isinstance(upper_locals['ctx'], (FriendMsg, GroupMsg)):
-        ctx = upper_locals['ctx']
+    if "ctx" in upper_locals and isinstance(upper_locals["ctx"], (FriendMsg, GroupMsg)):
+        ctx = upper_locals["ctx"]
     else:
         for v in upper_locals.values():
             if isinstance(v, (FriendMsg, GroupMsg)):
                 ctx = v
                 break
     if ctx is None:
-        raise InvalidContextError('仅支持群消息和好友消息接收函数内调用')
+        raise InvalidContextError("仅支持群消息和好友消息接收函数内调用")
 
-    if hasattr(ctx, '_host') and hasattr(ctx, '_port'):
+    if hasattr(ctx, "_host") and hasattr(ctx, "_port"):
         action = Action(ctx.CurrentQQ, port=ctx._port, host=ctx._host)
     else:
         action = Action(ctx.CurrentQQ)
@@ -142,30 +142,30 @@ def Picture(pic_url='', pic_base64='', pic_path='', pic_md5='', text=''):
     return None
 
 
-def Voice(voice_url='', voice_base64='', voice_path=''):
+def Voice(voice_url="", voice_base64="", voice_path=""):
     """发送语音 经支持群消息和好友消息接收函数内调用
     :param voice_url: 语音链接
     :param voice_base64: 语音base64编码
     :param voice_path: 语音文件路径
     voice_url, voice_base64, voice_path必须给定一项
     """
-    assert any([voice_url, voice_base64, voice_path]), '必须给定一项'
+    assert any([voice_url, voice_base64, voice_path]), "必须给定一项"
 
     ctx = None
     f = sys._getframe()
     upper = f.f_back
     upper_locals = upper.f_locals
-    if 'ctx' in upper_locals and isinstance(upper_locals['ctx'], (FriendMsg, GroupMsg)):
-        ctx = upper_locals['ctx']
+    if "ctx" in upper_locals and isinstance(upper_locals["ctx"], (FriendMsg, GroupMsg)):
+        ctx = upper_locals["ctx"]
     else:
         for v in upper_locals.values():
             if isinstance(v, (GroupMsg, FriendMsg)):
                 ctx = v
                 break
     if ctx is None:
-        raise InvalidContextError('仅支持群消息和好友消息接收函数内调用')
+        raise InvalidContextError("仅支持群消息和好友消息接收函数内调用")
 
-    if hasattr(ctx, '_host') and hasattr(ctx, '_port'):
+    if hasattr(ctx, "_host") and hasattr(ctx, "_port"):
         action = Action(ctx.CurrentQQ, port=ctx._port, host=ctx._host)
     else:
         action = Action(ctx.CurrentQQ)

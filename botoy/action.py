@@ -16,10 +16,10 @@ class Action:
         self.qq = qq
         self.config = Config(host=host, port=port)
         self.c = httpx.Client(
-            headers={'Content-Type': 'application/json'},
+            headers={"Content-Type": "application/json"},
             timeout=timeout + 5,
             base_url=self.config.address,
-            params={'qq': self.qq, 'timeout': timeout},
+            params={"qq": self.qq, "timeout": timeout},
         )
         self.lock = threading.Lock()
 
@@ -27,7 +27,7 @@ class Action:
     def sendFriendText(self, user: int, content: str) -> dict:
         """发送好友文本消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": user,
                 "SendToType": 1,
@@ -40,16 +40,16 @@ class Action:
         self,
         user: int,
         *,
-        picUrl: str = '',
-        picBase64Buf: str = '',
-        fileMd5: str = '',
-        content: str = '',
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        fileMd5: str = "",
+        content: str = "",
         flashPic=False,
     ):
         """发送好友图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
+        assert any([picUrl, picBase64Buf, fileMd5]), "缺少参数"
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": user,
                 "sendToType": 1,
@@ -63,12 +63,12 @@ class Action:
         )
 
     def sendFriendVoice(
-        self, user: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+        self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ):
         """发送好友语音消息"""
-        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": user,
                 "sendToType": 1,
@@ -81,7 +81,7 @@ class Action:
     def sendFriendXml(self, user: int, content: str) -> dict:
         """发送好友Xml消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": user,
                 "SendToType": 1,
@@ -93,7 +93,7 @@ class Action:
     def sendFriendTeXiaoText(self, user: int, text: str) -> dict:
         """发送好友特效文本消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": user,
                 "SendToType": 1,
@@ -107,9 +107,9 @@ class Action:
     ) -> dict:
         """发送群组文本消息"""
         if atUser != 0:
-            content = macro.atUser(atUser) + '\n' + content
+            content = macro.atUser(atUser) + "\n" + content
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": group,
                 "SendToType": 2,
@@ -122,23 +122,23 @@ class Action:
         self,
         group: int,
         *,
-        content: str = '',
-        picUrl: str = '',
-        picBase64Buf: str = '',
-        fileMd5: str = '',
-        picMd5s: Union[str, List[str]] = '',
+        content: str = "",
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        fileMd5: str = "",
+        picMd5s: Union[str, List[str]] = "",
         flashPic=False,
         atUser: Union[int, List[int]] = 0,
     ) -> dict:
         """发送群组图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5, picMd5s]), '缺少参数'
+        assert any([picUrl, picBase64Buf, fileMd5, picMd5s]), "缺少参数"
         if atUser != 0:
-            content = macro.atUser(atUser) + '\n' + content
+            content = macro.atUser(atUser) + "\n" + content
         if picMd5s:
             if isinstance(picMd5s, str):
                 picMd5s = [picMd5s]
             return self.post(
-                'SendMsgV2',
+                "SendMsgV2",
                 {
                     "ToUserUid": group,
                     "SendToType": 2,
@@ -147,7 +147,7 @@ class Action:
                 },
             )
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": group,
                 "sendToType": 2,
@@ -161,12 +161,12 @@ class Action:
         )
 
     def sendGroupVoice(
-        self, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+        self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
         """发送群组语音消息"""
-        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": group,
                 "sendToType": 2,
@@ -179,7 +179,7 @@ class Action:
     def sendGroupXml(self, group: int, content: str) -> dict:
         """发送群组Xml消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": group,
                 "SendToType": 2,
@@ -191,7 +191,7 @@ class Action:
     def sendGroupJson(self, group: int, content: str) -> dict:
         """发送群组Json消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": group,
                 "SendToType": 2,
@@ -203,7 +203,7 @@ class Action:
     def sendGroupTeXiaoText(self, group: int, text: str) -> dict:
         """发送群组特效文本消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": group,
                 "SendToType": 2,
@@ -215,7 +215,7 @@ class Action:
     def sendPrivateText(self, user: int, group: int, content: str) -> dict:
         """发送私聊文本消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": user,
                 "GroupID": group,
@@ -228,7 +228,7 @@ class Action:
     def sendPrivateXml(self, user: int, group: int, content: str) -> dict:
         """发送私聊Xml消息"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {
                 "ToUserUid": user,
                 "GroupID": group,
@@ -239,11 +239,11 @@ class Action:
         )
 
     def sendPrivateVoice(
-        self, user: int, group: int, *, voiceUrl: str = '', voiceBase64Buf: str = ''
+        self, user: int, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
-        assert any([voiceUrl, voiceBase64Buf]), '缺少参数'
+        assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": user,
                 "sendToType": 3,
@@ -259,16 +259,16 @@ class Action:
         self,
         user: int,
         group: int,
-        content: str = '',
+        content: str = "",
         *,
-        picUrl: str = '',
-        picBase64Buf: str = '',
-        fileMd5: str = '',
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        fileMd5: str = "",
     ) -> dict:
         """发送私聊图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5]), '缺少参数'
+        assert any([picUrl, picBase64Buf, fileMd5]), "缺少参数"
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": user,
                 "sendToType": 3,
@@ -284,7 +284,7 @@ class Action:
     def sendPhoneText(self, content: str):
         """给手机发文字"""
         return self.post(
-            'SendMsgV2',
+            "SendMsgV2",
             {"SendToType": 2, "SendMsgType": "PhoneMsg", "Content": content},
         )
 
@@ -295,7 +295,7 @@ class Action:
         msgSeq: int,
         msgTime: int = None,
         user: int = 0,
-        rawContent: str = '',
+        rawContent: str = "",
     ):
         """发送回复消息, 回复群消息
         下面的原消息表示需要回复的消息
@@ -328,7 +328,7 @@ class Action:
         content: str,
         msgSeq: int,
         msgTime: int = None,
-        rawContent: str = '',
+        rawContent: str = "",
     ):
         """发送回复消息, 回复好友消息
         下面的原消息表示需要回复的消息
@@ -360,7 +360,7 @@ class Action:
         :param forwordBuf: 原视频的forwordBuf字段
         """
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": group,
                 "sendToType": 2,
@@ -377,7 +377,7 @@ class Action:
         :param videoURL: 上报的消息中传给的 url 值
         """
         return self.post(
-            'PttCenterSvr.ShortVideoDownReq',
+            "PttCenterSvr.ShortVideoDownReq",
             {"GroupID": group, "VideoUrl": videoURL, "VideoMd5": videoMD5},
         )
 
@@ -386,7 +386,7 @@ class Action:
         :param fileID: 文件 ID，可由上报的消息中获得
         """
         return self.post(
-            'OfflineFilleHandleSvr.pb_ftn_CMD_REQ_APPLY_DOWNLOAD-1200',
+            "OfflineFilleHandleSvr.pb_ftn_CMD_REQ_APPLY_DOWNLOAD-1200",
             {"FileID": fileID},
         )
 
@@ -396,8 +396,8 @@ class Action:
         :param fileID: 文件 ID，可由上报的消息中获得
         """
         return self.post(
-            'OidbSvc.0x6d6_2',
-            {'GroupID': group, "FileID": fileID},
+            "OidbSvc.0x6d6_2",
+            {"GroupID": group, "FileID": fileID},
         )
 
     def repostVideo2Friend(self, user: int, forwordBuf: str) -> dict:
@@ -406,7 +406,7 @@ class Action:
         :param forwordBuf: 原视频的forwordBuf字段
         """
         return self.post(
-            'SendMsg',
+            "SendMsg",
             {
                 "toUser": user,
                 "sendToType": 1,
@@ -420,34 +420,34 @@ class Action:
         """戳一戳，未设置群ID就是戳好友"""
         payload = {"UserID": user, "GroupID": group}
         if group == 0:
-            payload['Type'] = 0
+            payload["Type"] = 0
         else:
-            payload['Type'] = 1
-        return self.post('OidbSvc.0xed3_1', payload)
+            payload["Type"] = 1
+        return self.post("OidbSvc.0xed3_1", payload)
 
     ############获取############
     def getCookies(self) -> dict:
         """获取QQ相关cookie"""
-        return self.get('GetUserCook')
+        return self.get("GetUserCook")
 
     def getUserInfo(self, user: int) -> dict:
         """获取用户信息昵称头像等"""
-        return self.post('GetUserInfo', {'UserID': user})
+        return self.post("GetUserInfo", {"UserID": user})
 
     def getSummaryCard(self, user: int) -> dict:
         """获取企鹅卡片资料"""
-        return self.post('SummaryCard.ReqSummaryCard', {'UserID': user})
+        return self.post("SummaryCard.ReqSummaryCard", {"UserID": user})
 
     def getUserList(self) -> List[dict]:
         """获取好友列表"""
         friend_list = []
         start_index = 0
         while True:
-            data = self.post('GetQQUserList', {'StartIndex': start_index})
-            if 'Friendlist' not in data:
+            data = self.post("GetQQUserList", {"StartIndex": start_index})
+            if "Friendlist" not in data:
                 break
-            friend_list.extend(data['Friendlist'])
-            if len(friend_list) >= int(data.get('Totoal_friend_count', 0)):  # 这里有个拼写错误
+            friend_list.extend(data["Friendlist"])
+            if len(friend_list) >= int(data.get("Totoal_friend_count", 0)):  # 这里有个拼写错误
                 break
             if "GetfriendCount" not in data:
                 break
@@ -461,11 +461,11 @@ class Action:
         next_token = ""
         group_list = []
         while True:
-            data = self.post('GetGroupList', {'NextToken': next_token})
-            if 'TroopList' not in data:
+            data = self.post("GetGroupList", {"NextToken": next_token})
+            if "TroopList" not in data:
                 break
-            group_list.extend(data['TroopList'])
-            next_token = data.get('NextToken', '')
+            group_list.extend(data["TroopList"])
+            next_token = data.get("NextToken", "")
             if not next_token:
                 break
         return group_list
@@ -476,13 +476,13 @@ class Action:
         lastUin = 0
         while True:
             data = self.post(
-                'GetGroupUserList', {"GroupUin": group, "LastUin": lastUin}
+                "GetGroupUserList", {"GroupUin": group, "LastUin": lastUin}
             )
-            if 'MemberList' in data:
-                members.extend(data['MemberList'])
-            if 'LastUin' not in data or data['LastUin'] == 0:
+            if "MemberList" in data:
+                members.extend(data["MemberList"])
+            if "LastUin" not in data or data["LastUin"] == 0:
                 break
-            lastUin = data['LastUin']
+            lastUin = data["LastUin"]
             time.sleep(0.6)
         return members
 
@@ -495,45 +495,45 @@ class Action:
         if include_owner:
             # 获取群主id
             for groupInfo in self.getGroupList():
-                if groupInfo['GroupId'] == group:
-                    owner = groupInfo['GroupOwner']
+                if groupInfo["GroupId"] == group:
+                    owner = groupInfo["GroupOwner"]
                     break
             admins = [
                 member
                 for member in members
-                if member['GroupAdmin'] == 1 or member['MemberUin'] == owner
+                if member["GroupAdmin"] == 1 or member["MemberUin"] == owner
             ]
         else:
-            admins = [member for member in members if member['GroupAdmin'] == 1]
+            admins = [member for member in members if member["GroupAdmin"] == 1]
         return admins
 
     def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return self.get('', path='/v1/ClusterInfo')
+        return self.get("", path="/v1/ClusterInfo")
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
         """设置群成员头衔"""
         return self.post(
-            'OidbSvc.0x8fc_2',
+            "OidbSvc.0x8fc_2",
             {"GroupID": group, "UserID": user, "NewTitle": title},
         )
 
     def modifyGroupCard(self, user: int, group: int, nick: str) -> dict:
         """修改群名片"""
         return self.post(
-            'ModifyGroupCard', {'UserID': user, 'GroupID': group, 'NewNick': nick}
+            "ModifyGroupCard", {"UserID": user, "GroupID": group, "NewNick": nick}
         )
 
     def shutUserUp(self, groupID: int, userid: int, ShutTime: int) -> dict:
         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
         return self.post(
-            'ShutUp',
+            "ShutUp",
             {
-                'ShutUpType': 0,
-                'GroupID': groupID,
-                'ShutUid': userid,
-                'ShutTime': ShutTime,
+                "ShutUpType": 0,
+                "GroupID": groupID,
+                "ShutUid": userid,
+                "ShutTime": ShutTime,
             },
         )
 
@@ -542,7 +542,7 @@ class Action:
         :param switch: 1 开启; 0 关闭, 默认为1即开启全体禁言
         """
         return self.post(
-            'OidbSvc.0x89a_0',
+            "OidbSvc.0x89a_0",
             {"GroupID": group, "Switch": 0 if switch == 0 else 1},
         )
 
@@ -551,7 +551,7 @@ class Action:
         group: int,
         text: str,
         pinned: bool = False,
-        title: str = '',
+        title: str = "",
         typ: bool = True,
     ):
         """设置群公告
@@ -562,8 +562,8 @@ class Action:
         :param typ: 是否发送新成员
         """
         return self.post(
-            path='/v1/Group/Announce',
-            funcname='',
+            path="/v1/Group/Announce",
+            funcname="",
             payload={
                 "GroupID": group,
                 "Title": title,
@@ -578,7 +578,7 @@ class Action:
         :param user: 用户QQ号
         :param cmd: 发送包选项, 0 或 1; 0表示使用``QQZan``; 1表示使用``OidbSvc.0x7e5_4``, 默认为0
         """
-        return self.post('QQZan' if cmd == 0 else 'OidbSvc.0x7e5_4', {"UserID": user})
+        return self.post("QQZan" if cmd == 0 else "OidbSvc.0x7e5_4", {"UserID": user})
 
     def toggleGroupAdmin(self, user: int, group: int, flag=1) -> dict:
         """设置和取消群管理员
@@ -587,7 +587,7 @@ class Action:
         :param flag: 1 或 0, 1表示设置为管理员; 0 表示取消管理员, 默认为1
         """
         return self.post(
-            'OidbSvc.0x55c_1',
+            "OidbSvc.0x55c_1",
             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
         )
 
@@ -601,7 +601,7 @@ class Action:
         :param cmd: 0 或 1, 0表示使用: RevokeMsg , 1表示使用: PbMessageSvc.PbMsgWithDraw
         """
         return self.post(
-            'RevokeMsg' if cmd == 0 else 'PbMessageSvc.PbMsgWithDraw',
+            "RevokeMsg" if cmd == 0 else "PbMessageSvc.PbMsgWithDraw",
             {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
         )
 
@@ -611,7 +611,7 @@ class Action:
         :param user: 拉谁?
         """
         return self.post(
-            'GroupMgr',
+            "GroupMgr",
             {"ActionType": 8, "GroupID": group, "ActionUserID": user, "Content": ""},
         )
 
@@ -621,7 +621,7 @@ class Action:
         :param content: 加群理由
         """
         return self.post(
-            'GroupMgr',
+            "GroupMgr",
             {"ActionType": 1, "GroupID": group, "ActionUserID": 0, "Content": content},
         )
 
@@ -630,7 +630,7 @@ class Action:
         :param group: 哪个群?
         """
         return self.post(
-            'GroupMgr',
+            "GroupMgr",
             {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
         )
 
@@ -640,19 +640,19 @@ class Action:
         :param user:把谁踢出去?
         """
         return self.post(
-            'GroupMgr',
+            "GroupMgr",
             {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
         )
 
     def refreshKeys(self) -> dict:
         """刷新key二次登陆"""
-        return self.get('', path='/v1/RefreshKeys')
+        return self.get("", path="/v1/RefreshKeys")
 
     def logout(self, flag=False) -> bool:
         """退出指定QQ
         :param flag: 是否删除设备信息文件
         """
-        return self.post('LogOut', {"Flag": flag})
+        return self.post("LogOut", {"Flag": flag})
 
     ############################################################################
     def baseRequest(
@@ -665,9 +665,9 @@ class Action:
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
-            params.update({'funcname': funcname})
+            params.update({"funcname": funcname})
         else:
-            params = {'funcname': funcname}
+            params = {"funcname": funcname}
 
         # 发送请求
         try:
@@ -679,43 +679,43 @@ class Action:
             resp.raise_for_status()
         except httpx.HTTPError as e:
             if isinstance(e, httpx.TimeoutException):
-                logger.warning(f'响应超时，但不代表处理未成功, 结果未知! => {e}')
+                logger.warning(f"响应超时，但不代表处理未成功, 结果未知! => {e}")
             elif isinstance(e, httpx.HTTPStatusError):
                 logger.error(
                     f"响应码出错 => {resp.status_code}",
                 )
             else:
-                logger.error(f'请求出错: {traceback.format_exc()}')
+                logger.error(f"请求出错: {traceback.format_exc()}")
             return {}
 
         # 处理数据
         try:
             data = resp.json()
         except Exception as e:
-            logger.error('API响应结果非json格式')
+            logger.error("API响应结果非json格式")
             return {}
 
         if data is None:
-            logger.error('返回为null, 该类情况多数是因为响应超时或者该API不存在，或服务端操作超时(此时不代表未成功)')
+            logger.error("返回为null, 该类情况多数是因为响应超时或者该API不存在，或服务端操作超时(此时不代表未成功)")
             return {}
 
         # 返回码提示
-        if 'Ret' in data:
-            ret = data.get('Ret')
+        if "Ret" in data:
+            ret = data.get("Ret")
             if ret == 0:
                 pass
             elif ret == 34:
-                logger.error(f'未知错误，跟消息长度似乎无关，可以尝试分段重新发送 => {data}')
+                logger.error(f"未知错误，跟消息长度似乎无关，可以尝试分段重新发送 => {data}")
             elif ret == 110:
-                logger.error(f'发送失败，你已被移出该群，请重新加群 => {data}')
+                logger.error(f"发送失败，你已被移出该群，请重新加群 => {data}")
             elif ret == 120:
-                logger.error(f'机器人被禁言 => {data}')
+                logger.error(f"机器人被禁言 => {data}")
             elif ret == 241:
-                logger.error(f'消息发送频率过高，对同一个群或好友，建议发消息的最小间隔控制在1100ms以上 => {data}')
+                logger.error(f"消息发送频率过高，对同一个群或好友，建议发消息的最小间隔控制在1100ms以上 => {data}")
             elif ret == 299:
-                logger.error(f'超过群发言频率限制 => {data}')
+                logger.error(f"超过群发言频率限制 => {data}")
             else:
-                logger.error(f'请求发送成功, 但处理失败 => {data}')
+                logger.error(f"请求发送成功, 但处理失败 => {data}")
 
         return data
 
@@ -724,21 +724,21 @@ class Action:
         funcname: str,
         payload: dict,
         params: dict = None,
-        path: str = '/v1/LuaApiCaller',
+        path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装常用的post操作"""
         return self.baseRequest(
-            'POST', funcname=funcname, path=path, payload=payload, params=params
+            "POST", funcname=funcname, path=path, payload=payload, params=params
         )
 
     def get(
         self,
         funcname: str,
         params: dict = None,
-        path: str = '/v1/LuaApiCaller',
+        path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装get操作"""
-        return self.baseRequest('GET', funcname=funcname, path=path, params=params)
+        return self.baseRequest("GET", funcname=funcname, path=path, params=params)
 
     def release_lock(self):
         self.lock.release()

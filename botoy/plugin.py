@@ -34,39 +34,39 @@ class Plugin:
 
     @property
     def name(self):
-        return self.module.__name__.split('.')[-1][4:]
+        return self.module.__name__.split(".")[-1][4:]
 
     @property
     def receive_group_msg(self):
-        return self.module.__dict__.get('receive_group_msg')
+        return self.module.__dict__.get("receive_group_msg")
 
     @property
     def receive_friend_msg(self):
-        return self.module.__dict__.get('receive_friend_msg')
+        return self.module.__dict__.get("receive_friend_msg")
 
     @property
     def receive_events(self):
-        return self.module.__dict__.get('receive_events')
+        return self.module.__dict__.get("receive_events")
 
 
 def read_json_file(path) -> dict:
-    with open(path, encoding='utf8') as f:
+    with open(path, encoding="utf8") as f:
         return json.load(f)
 
 
 def write_json_file(path, data) -> None:
-    with open(path, 'w', encoding='utf8') as f:
+    with open(path, "w", encoding="utf8") as f:
         json.dump(data, f, ensure_ascii=False)
 
 
-REMOVED_PLUGINS_FILE = Path('REMOVED_PLUGINS')
-REMOVED_PLUGINS_TEMPLATE = {'tips': '用于存储已停用插件信息,请不要修改这个文件', 'plugins': []}
+REMOVED_PLUGINS_FILE = Path("REMOVED_PLUGINS")
+REMOVED_PLUGINS_TEMPLATE = {"tips": "用于存储已停用插件信息,请不要修改这个文件", "plugins": []}
 
 
 class PluginManager:
     """通用插件管理类"""
 
-    def __init__(self, plugin_dir: str = 'plugins'):
+    def __init__(self, plugin_dir: str = "plugins"):
         self.plugin_dir: Path = Path(plugin_dir)  # 插件文件夹
         self._plugins: Dict[str, Plugin] = dict()  # 已启用的插件
         self._removed_plugins: Dict[str, Plugin] = dict()  # 已停用的插件
@@ -77,7 +77,7 @@ class PluginManager:
     def _load_removed_plugin_names(self):
         """读取已移除插件名文件，初始化_removed_plugin_names，后面刷新插件时不再加载"""
         if REMOVED_PLUGINS_FILE.exists():
-            self._removed_plugin_names = read_json_file(REMOVED_PLUGINS_FILE)['plugins']
+            self._removed_plugin_names = read_json_file(REMOVED_PLUGINS_FILE)["plugins"]
         else:
             write_json_file(REMOVED_PLUGINS_FILE, REMOVED_PLUGINS_TEMPLATE)
             self._removed_plugin_names = []
@@ -85,7 +85,7 @@ class PluginManager:
     def _update_removed_plugin_names(self):
         """更新已移除插件名文件"""
         removed_plugins_data = copy.deepcopy(REMOVED_PLUGINS_TEMPLATE)
-        removed_plugins_data['plugins'] = list(set(self._removed_plugin_names))
+        removed_plugins_data["plugins"] = list(set(self._removed_plugin_names))
         write_json_file(REMOVED_PLUGINS_FILE, removed_plugins_data)
 
     def load_plugins(self) -> None:
@@ -93,18 +93,18 @@ class PluginManager:
         self._load_removed_plugin_names()
 
         suspected_plugin_list = (
-            i for i in os.listdir(self.plugin_dir) if re.search(r'bot_\w+', i)
+            i for i in os.listdir(self.plugin_dir) if re.search(r"bot_\w+", i)
         )
         for suspected_plugin in suspected_plugin_list:
             if os.path.isdir(self.plugin_dir / suspected_plugin):
-                import_path = '{}.{}'.format(self.plugin_dir, suspected_plugin)
-            elif re.search(r'bot_\w+\.py', suspected_plugin):
-                import_path = '{}.{}'.format(
-                    self.plugin_dir, suspected_plugin.split('.')[0]
+                import_path = "{}.{}".format(self.plugin_dir, suspected_plugin)
+            elif re.search(r"bot_\w+\.py", suspected_plugin):
+                import_path = "{}.{}".format(
+                    self.plugin_dir, suspected_plugin.split(".")[0]
                 )
             else:
                 continue
-            plugin_name = re.findall(r'bot_(\w+)', suspected_plugin)[0]
+            plugin_name = re.findall(r"bot_(\w+)", suspected_plugin)[0]
             plugin = Plugin(import_path)
             if plugin_name in self._removed_plugin_names:
                 self._removed_plugins[plugin_name] = plugin
@@ -148,17 +148,17 @@ class PluginManager:
 
     @property
     def plugins(self) -> List[str]:
-        '''return a list of plugin name'''
+        """return a list of plugin name"""
         return list(self._plugins)
 
     @property
     def removed_plugins(self) -> List[str]:
-        '''return a list of removed plugin name'''
+        """return a list of removed plugin name"""
         return list(self._removed_plugins)
 
     @property
     def friend_msg_receivers(self):
-        '''funcs to handle (friend msg)context'''
+        """funcs to handle (friend msg)context"""
         return [
             plugin.receive_friend_msg
             for plugin in self._plugins.values()
@@ -167,7 +167,7 @@ class PluginManager:
 
     @property
     def group_msg_receivers(self):
-        '''funcs to handle (group msg)context'''
+        """funcs to handle (group msg)context"""
         return [
             plugin.receive_group_msg
             for plugin in self._plugins.values()
@@ -176,7 +176,7 @@ class PluginManager:
 
     @property
     def event_receivers(self):
-        '''funcs to handle (event msg)context'''
+        """funcs to handle (event msg)context"""
         return [
             plugin.receive_events
             for plugin in self._plugins.values()
@@ -186,29 +186,29 @@ class PluginManager:
     @property
     def info_table(self) -> str:
         enabled_plugin_table = PrettyTable(
-            ['', 'PLUGIN', 'GROUP MESSAGE', 'FRIEND MESSAGE', 'EVENT', 'HELP']
+            ["", "PLUGIN", "GROUP MESSAGE", "FRIEND MESSAGE", "EVENT", "HELP"]
         )
         for idx, plugin in enumerate(self._plugins.values()):  # type: Plugin
             enabled_plugin_table.add_row(
                 [
                     str(idx + 1),
                     plugin.name,
-                    '√' if plugin.receive_group_msg else "",
-                    '√' if plugin.receive_friend_msg else "",
-                    '√' if plugin.receive_events else "",
+                    "√" if plugin.receive_group_msg else "",
+                    "√" if plugin.receive_friend_msg else "",
+                    "√" if plugin.receive_events else "",
                     plugin.help or "",
                 ]
             )
-        removed_plugin_table = PrettyTable(['', 'REMOVED PLUGINS'])
+        removed_plugin_table = PrettyTable(["", "REMOVED PLUGINS"])
         for idx, plugin_name in enumerate(self.removed_plugins):
             removed_plugin_table.add_row([str(idx + 1), plugin_name])
-        return str(enabled_plugin_table) + '\n' + str(removed_plugin_table)
+        return str(enabled_plugin_table) + "\n" + str(removed_plugin_table)
 
     @property
     def help(self) -> str:
         """返回已启用插件的帮助信息"""
         return "\n".join(
-            ['※ ' + plugin.help for plugin in self._plugins.values() if plugin.help]
+            ["※ " + plugin.help for plugin in self._plugins.values() if plugin.help]
         )
 
     def get_plugin_help(self, plugin_name: str) -> str:

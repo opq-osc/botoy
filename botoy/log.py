@@ -7,9 +7,9 @@ from loguru import logger as _logger
 
 logger = _logger
 
-CONSOLE_LOG_FORMAT = '{level.icon} {time:MM-DD HH:mm:ss} <lvl>{level}\t{message}</lvl>'
-FILE_LOG_FORMAT = '{time:YYYY-MM-DD HH:mm} {level}\t{message}'
-FILE_LOG_PATH_NAMING = './logs/{time}.log'
+CONSOLE_LOG_FORMAT = "{level.icon} {time:MM-DD HH:mm:ss} <lvl>{level}\t{message}</lvl>"
+FILE_LOG_FORMAT = "{time:YYYY-MM-DD HH:mm} {level}\t{message}"
+FILE_LOG_PATH_NAMING = "./logs/{time}.log"
 
 
 def logger_init(console_log=True, file_log=False):
@@ -21,29 +21,29 @@ def logger_init(console_log=True, file_log=False):
     """
     logger.remove()
 
-    BOTOY_LOG_LEVEL = os.getenv('BOTOY_LOG_LEVEL')
+    BOTOY_LOG_LEVEL = os.getenv("BOTOY_LOG_LEVEL")
     if console_log:
         logger.add(
             sys.stdout,
             format=CONSOLE_LOG_FORMAT,
             colorize=True,
-            level=BOTOY_LOG_LEVEL or 'INFO',
+            level=BOTOY_LOG_LEVEL or "INFO",
         )
     else:
         logger.add(
             sys.stdout,
             format=CONSOLE_LOG_FORMAT,
             colorize=True,
-            level=BOTOY_LOG_LEVEL or 'ERROR',
+            level=BOTOY_LOG_LEVEL or "ERROR",
         )
 
     if file_log:
         logger.add(
             FILE_LOG_PATH_NAMING,
             format=FILE_LOG_FORMAT,
-            rotation='1 day',
-            encoding='utf-8',
-            level=BOTOY_LOG_LEVEL or 'INFO',
+            rotation="1 day",
+            encoding="utf-8",
+            level=BOTOY_LOG_LEVEL or "INFO",
         )
 
 

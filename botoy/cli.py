@@ -54,15 +54,15 @@ def version():
 
 
 @cli.command()
-@click.option('-n', '--name', prompt="程序入口文件名", default='bot', show_default=True)
-@click.option('-q', '--qq', prompt="机器人qq号", type=int, required=True)
+@click.option("-n", "--name", prompt="程序入口文件名", default="bot", show_default=True)
+@click.option("-q", "--qq", prompt="机器人qq号", type=int, required=True)
 @click.option(
-    '--host', prompt='机器人运行host', default='http://127.0.0.1', show_default=True
+    "--host", prompt="机器人运行host", default="http://127.0.0.1", show_default=True
 )
-@click.option('--port', prompt='机器人运行端口', default=8888, show_default=True, type=int)
+@click.option("--port", prompt="机器人运行端口", default=8888, show_default=True, type=int)
 def init(name, qq, host, port):
     """创建程序入口文件和配置文件"""
-    plug = click.confirm('是否使用插件功能', default=True, show_default=True)
+    plug = click.confirm("是否使用插件功能", default=True, show_default=True)
     template = textwrap.dedent(
         """
         from botoy import Action, Botoy, EventMsg, FriendMsg, GroupMsg
@@ -96,17 +96,17 @@ def init(name, qq, host, port):
 
     # main
     confirm = click.confirm(
-        f'将生成 程序入口文件{name}.py 和 配置文件botoy.json, 这是覆盖写操作，是否继续?',
+        f"将生成 程序入口文件{name}.py 和 配置文件botoy.json, 这是覆盖写操作，是否继续?",
         default=False,
         show_default=True,
     )
     if not confirm:
-        echo('操作已取消')
+        echo("操作已取消")
         sys.exit()
 
-    with open(f'{name}.py', 'w', encoding='utf8') as f:
+    with open(f"{name}.py", "w", encoding="utf8") as f:
         f.write(template)
-    echo(f'已生成{name}.py')
+    echo(f"已生成{name}.py")
     echo(
         f"""
     运行如下命令:
@@ -125,48 +125,48 @@ def init(name, qq, host, port):
         "webhook_post_url": "http://127.0.0.1:5000",
         "webhook_timeout": 20,
     }
-    with open('botoy.json', 'w', encoding='utf8') as f:
-        json.dump(config, f, indent='  ')
+    with open("botoy.json", "w", encoding="utf8") as f:
+        json.dump(config, f, indent="  ")
 
     if plug:
-        if not os.path.isdir('plugins'):
-            os.makedirs('plugins')
+        if not os.path.isdir("plugins"):
+            os.makedirs("plugins")
 
-    if click.confirm('是否修改或生成.gitignore文件', default=False, show_default=True):
-        ignore = '\n'.join(
-            ['\n# Botoy', 'botoy.json', 'REMOVED_PLUGINS', 'botoy-cache']
+    if click.confirm("是否修改或生成.gitignore文件", default=False, show_default=True):
+        ignore = "\n".join(
+            ["\n# Botoy", "botoy.json", "REMOVED_PLUGINS", "botoy-cache"]
         )
-        with open('.gitignore', 'a' if os.path.exists('.gitignore') else 'w') as f:
+        with open(".gitignore", "a" if os.path.exists(".gitignore") else "w") as f:
             f.write(ignore)
 
 
 @cli.command()
-@click.option('-n', '--name', prompt='插件名', required=True)
-@click.option('-f', '--friend', is_flag=True, help='是否要接收好友消息?')
-@click.option('-g', '--group', is_flag=True, help='是否要接收群消息?')
-@click.option('-e', '--event', is_flag=True, help='是否要接收事件消息?')
+@click.option("-n", "--name", prompt="插件名", required=True)
+@click.option("-f", "--friend", is_flag=True, help="是否要接收好友消息?")
+@click.option("-g", "--group", is_flag=True, help="是否要接收群消息?")
+@click.option("-e", "--event", is_flag=True, help="是否要接收事件消息?")
 def add(name, friend, group, event):
     """创建插件"""
-    here = pathlib.Path('.').absolute()
-    if here.name != 'plugins':
-        plugin_dir = here / 'plugins'
-        if not os.path.isdir('plugins'):
+    here = pathlib.Path(".").absolute()
+    if here.name != "plugins":
+        plugin_dir = here / "plugins"
+        if not os.path.isdir("plugins"):
             plugin_dir.mkdir()
-            echo('插件目录plugins不存在, 已自动创建')
+            echo("插件目录plugins不存在, 已自动创建")
     else:
         plugin_dir = here
 
-    plugin_path_file = plugin_dir / f'bot_{name}.py'
-    plugin_path_folder = plugin_dir / f'bot_{name}'
+    plugin_path_file = plugin_dir / f"bot_{name}.py"
+    plugin_path_folder = plugin_dir / f"bot_{name}"
     if plugin_path_file.exists() or plugin_path_folder.exists():
-        sys.exit('该插件名已被使用，请换一个插件名')
+        sys.exit("该插件名已被使用，请换一个插件名")
     if not any([friend, group, event]):
         friend = group = event = True
 
-    imports = ['Action']
+    imports = ["Action"]
     receivers = []
     if friend:
-        imports.append('FriendMsg')
+        imports.append("FriendMsg")
         receivers.append(
             textwrap.dedent(
                 """
@@ -176,7 +176,7 @@ def add(name, friend, group, event):
             )
         )
     if group:
-        imports.append('GroupMsg')
+        imports.append("GroupMsg")
         receivers.append(
             textwrap.dedent(
                 """
@@ -186,7 +186,7 @@ def add(name, friend, group, event):
             )
         )
     if event:
-        imports.append('EventMsg')
+        imports.append("EventMsg")
         receivers.append(
             textwrap.dedent(
                 """
@@ -197,19 +197,19 @@ def add(name, friend, group, event):
         )
 
     use_file = click.confirm(
-        '插件使用单文件还是文件夹形式, 默认选是表示单文件', default=True, show_default=True
+        "插件使用单文件还是文件夹形式, 默认选是表示单文件", default=True, show_default=True
     )
     if use_file:
         write_file = plugin_path_file
     else:
         plugin_path_folder.mkdir()
-        write_file = plugin_path_folder / '__init__.py'
+        write_file = plugin_path_folder / "__init__.py"
 
-    with open(write_file, 'w', encoding='utf8') as f:
-        f.write('from botoy import {}'.format(', '.join(imports)))
-        f.write('\n\n')
-        f.write('\n'.join(receivers))
-    echo('ok')
+    with open(write_file, "w", encoding="utf8") as f:
+        f.write("from botoy import {}".format(", ".join(imports)))
+        f.write("\n\n")
+        f.write("\n".join(receivers))
+    echo("ok")
 
 
 @cli.command()
@@ -218,18 +218,18 @@ def run():
     要求入口文件名为bot.py
     """
     # look for bot.py
-    if not pathlib.Path('bot.py').exists():
-        sys.exit('该命令只接受入口文件命名为bot.py')
+    if not pathlib.Path("bot.py").exists():
+        sys.exit("该命令只接受入口文件命名为bot.py")
     # look for Botoy client
-    sys.path.append(str(pathlib.Path('.').absolute()))
-    module = importlib.import_module('bot')
+    sys.path.append(str(pathlib.Path(".").absolute()))
+    module = importlib.import_module("bot")
     client = None
     for item in module.__dict__.values():
         if isinstance(item, (Botoy, AsyncBotoy)):
             client = item
             break
     else:
-        sys.exit('无法找到(Async)Botoy对象')
+        sys.exit("无法找到(Async)Botoy对象")
     if client is not None:
         # 先判断子类
         if isinstance(client, AsyncBotoy):

@@ -9,7 +9,7 @@ from .base import Session, SessionController
 from .globals import _ctx, _session
 from .prompt import Prompt
 
-FILTER_SUCCESS = 'filter successfully'
+FILTER_SUCCESS = "filter successfully"
 
 
 class RejectException(Exception):
@@ -85,7 +85,7 @@ class SessionHandler:
         if msg_ctx.CurrentQQ == (
             msg_ctx.FromUserId if isinstance(msg_ctx, GroupMsg) else msg_ctx.FromUin
         ):
-            logger.debug('忽略自身消息')
+            logger.debug("忽略自身消息")
             return
         filters = self.filters.copy()
         ret = FILTER_SUCCESS
@@ -109,7 +109,7 @@ class SessionHandler:
         if ret == FILTER_SUCCESS:
             if not self.sc.session_existed(msg_ctx, self.single_user):
                 session: Session = self.sc.get_session(msg_ctx, self.single_user)
-                logger.debug(f'新建session => {session}')
+                logger.debug(f"新建session => {session}")
                 _ctx.set(msg_ctx)
                 _session.set(session)
                 try:
@@ -121,12 +121,12 @@ class SessionHandler:
         # 如果session存在，则需要对该消息进行各种操作
         if self.sc.session_existed(msg_ctx, self.single_user):
             session = self.sc.get_session(msg_ctx, self.single_user)
-            logger.debug(f'存在session => {session}')
+            logger.debug(f"存在session => {session}")
             _ctx.set(msg_ctx)
             _session.set(session)
             # 1. 执行receiver
             if self.receiver is not None:
-                logger.debug('执行receiver')
+                logger.debug("执行receiver")
                 self.receiver()
             # 2. 自动设置session数据
             if session.waitings:
@@ -134,22 +134,22 @@ class SessionHandler:
                     data = msg_ctx.Content
                 else:
                     data = self.parser(data)
-                logger.debug(f'有正在等待的数据，开始自动设置 {session.waitings[0]} => {data}')
+                logger.debug(f"有正在等待的数据，开始自动设置 {session.waitings[0]} => {data}")
                 session.set(session.waitings[0], data)
             # 3. 执行condition handler
-            logger.debug('checking condition handler')
-            if not hasattr(session, '_condition_handlers'):
-                setattr(session, '_condition_handlers', self.condition_handlers.copy())
+            logger.debug("checking condition handler")
+            if not hasattr(session, "_condition_handlers"):
+                setattr(session, "_condition_handlers", self.condition_handlers.copy())
             for c_h in [
                 c_h
-                for c_h in getattr(session, '_condition_handlers')
+                for c_h in getattr(session, "_condition_handlers")
                 if not c_h.retired
             ]:  # type: ConditionHandler
                 for need_key in c_h.keys:
                     if not session.has(need_key):
                         break
                 else:
-                    logger.debug(f'running condition handler {c_h}')
+                    logger.debug(f"running condition handler {c_h}")
                     try:
                         c_h.retire()
                         ###########

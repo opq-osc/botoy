@@ -27,7 +27,7 @@ class AsyncBotoy(Botoy):
 
     async def run(self):
         try:
-            await self.socketio.connect(self.config.address, transports=['websocket'])
+            await self.socketio.connect(self.config.address, transports=["websocket"])
         except Exception:
             logger.error(traceback.format_exc())
             await self.close()
@@ -35,7 +35,7 @@ class AsyncBotoy(Botoy):
             try:
                 await self.socketio.wait()
             finally:
-                print('bye~')
+                print("bye~")
                 await self.close()
 
     ########################################################################
@@ -81,7 +81,7 @@ class AsyncBotoy(Botoy):
         context = FriendMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
             return
-        logger.info(f'{context.__class__.__name__} ->  {context.data}')
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
         # 黑名单
         if context.FromUin in self.config.friend_blacklist:
             return
@@ -107,7 +107,7 @@ class AsyncBotoy(Botoy):
         context = GroupMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
             return
-        logger.info(f'{context.__class__.__name__} ->  {context.data}')
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
         # 黑名单
         if context.FromGroupId in self.config.group_blacklist:
             return
@@ -133,7 +133,7 @@ class AsyncBotoy(Botoy):
         context = EventMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
             return
-        logger.info(f'{context.__class__.__name__} ->  {context.data}')
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
         # 中间件
         if self._event_context_middlewares:
             for middleware in self._event_context_middlewares:
@@ -151,7 +151,7 @@ class AsyncBotoy(Botoy):
 
     ########################################################################
     def __repr__(self):
-        return 'AsyncBotoy <{}> <host-{}> <port-{}> <address-{}>'.format(
+        return "AsyncBotoy <{}> <host-{}> <port-{}> <address-{}>".format(
             " ".join([str(i) for i in self.qq]),
             self.config.host,
             self.config.port,

@@ -9,8 +9,8 @@ class Prompt:
         cls, url: str = "", base64: str = "", md5: str = "", text: str = ""
     ) -> "Prompt":
         return cls(
-            'sendFriendPic',
-            user='[user]',
+            "sendFriendPic",
+            user="[user]",
             picUrl=url,
             picBase64Buf=base64,
             fileMd5=md5,
@@ -22,8 +22,8 @@ class Prompt:
         cls, url: str = "", base64: str = "", md5: str = "", text: str = ""
     ) -> "Prompt":
         return cls(
-            'sendGroupPic',
-            group='[group]',
+            "sendGroupPic",
+            group="[group]",
             picUrl=url,
             picBase64Buf=base64,
             fileMd5=md5,

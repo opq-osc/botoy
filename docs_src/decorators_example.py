@@ -6,13 +6,13 @@ from botoy import decorators as deco
 ########### 一般写法 ##########
 @bot.on_group_msg
 def group(ctx: GroupMsg):
-    if ctx.FromUserId != ctx.CurrentQQ and ctx.Content == 'test':
-        print('ok')
+    if ctx.FromUserId != ctx.CurrentQQ and ctx.Content == "test":
+        print("ok")
 
 
 ########### 使用装饰器 ##########
 @bot.on_group_msg
 @deco.ignore_botself
-@deco.equal_content('test')
+@deco.equal_content("test")
 def group_(ctx: GroupMsg):
-    print('ok')
+    print("ok")

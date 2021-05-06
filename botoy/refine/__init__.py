@@ -28,7 +28,7 @@ from ._event import (
     refine_group_exit_event_msg,
     refine_group_join_event_msg,
     refine_group_revoke_event_msg,
-    refine_group_shut_event_msg
+    refine_group_shut_event_msg,
 )
 from ._friend_msg import (
     _FriendFileMsg,
@@ -43,7 +43,7 @@ from ._friend_msg import (
     refine_RedBag_friend_msg,
     refine_reply_friend_msg,
     refine_video_friend_msg,
-    refine_voice_friend_msg
+    refine_voice_friend_msg,
 )
 from ._group_msg import (
     _AtGroupMsg,
@@ -60,5 +60,5 @@ from ._group_msg import (
     refine_RedBag_group_msg,
     refine_reply_group_msg,
     refine_video_group_msg,
-    refine_voice_group_msg
+    refine_voice_group_msg,
 )

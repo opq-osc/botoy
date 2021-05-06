@@ -19,7 +19,7 @@ class TaskThread(Thread):
             try:
                 self.tasks.get()()
             except Exception as e:
-                logger.warning(f'queued_up装饰器: 队列任务出错{e}')
+                logger.warning(f"queued_up装饰器: 队列任务出错{e}")
             finally:
                 self.tasks.task_done()
             time.sleep(1)
@@ -32,7 +32,7 @@ class TaskThread(Thread):
 taskThread_dict = defaultdict(TaskThread)
 
 
-def queued_up(func=None, *, name='default'):
+def queued_up(func=None, *, name="default"):
     """队列执行函数
     :param name: 指定队列分组, 不同的名称用不同的队列
     """

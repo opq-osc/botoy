@@ -1,1 +1,1 @@
-black . && isort . -m3
+black . && isort .

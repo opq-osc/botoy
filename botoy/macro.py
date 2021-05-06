@@ -10,17 +10,17 @@ def atUser(users: Union[List[int], int]) -> str:
     """
     if not isinstance(users, Sequence):
         users = [users]
-    return '[ATUSER(%s)]' % ','.join([str(i) for i in users])
+    return "[ATUSER(%s)]" % ",".join([str(i) for i in users])
 
 
 def atAll() -> str:
     """艾特全体成员(ATALL), 该项腾讯有次数限制，被限制后将无法发送消息"""
-    return '[ATALL()]'
+    return "[ATALL()]"
 
 
 def picFlag() -> str:
     """改变图片顺序"""
-    return '[PICFLAG]'
+    return "[PICFLAG]"
 
 
 def showPic(code: int = None) -> str:
@@ -32,9 +32,9 @@ def showPic(code: int = None) -> str:
     """
     if code is None:
         code = random.randint(40000, 40007)
-    return '[秀图%d]' % code
+    return "[秀图%d]" % code
 
 
 def getUserNick(user: int) -> str:
     """获取用户昵称"""
-    return '[GETUSERNICK(%d)]' % user
+    return "[GETUSERNICK(%d)]" % user
