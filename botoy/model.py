@@ -1,79 +1,127 @@
 # pylint: disable=too-many-instance-attributes
+from typing import Optional
+
+
 class GroupMsg:
+    message: dict  # raw message
+    CurrentQQ: int  # bot qq
+    data: dict  # Data
+    # data items
+    FromGroupId: int
+    FromGroupName: str
+    FromUserId: int
+    FromNickName: str
+    Content: str
+    MsgType: str
+    MsgTime: int
+    MsgSeq: int
+    MsgRandom: int
+    RedBaginfo: Optional[dict]
+
     def __init__(self, message: dict):
-        self.message: dict = message
-        self.CurrentQQ: int = message.get("CurrentQQ")
+        data = message["CurrentPacket"]["Data"]
 
-        temp = message.get("CurrentPacket")
-        self.data: dict = temp.get("Data") if temp is not None else {}
+        # basic
+        for name, value in dict(
+            message=message,
+            CurrentQQ=message["CurrentQQ"],
+            data=data,
+        ).items():
+            self.__setattr__(name, value)
 
-        self.FromGroupId: int = self.data.get("FromGroupId")
-        self.FromGroupName: str = self.data.get("FromGroupName")
-        self.FromUserId: int = self.data.get("FromUserId")
-        self.FromNickName: str = self.data.get("FromNickName")
-        self.Content: str = self.data.get("Content")
-        self.MsgType: str = self.data.get("MsgType")
-        self.MsgTime: int = self.data.get("MsgTime")
-        self.MsgSeq: int = self.data.get("MsgSeq")
-        self.MsgRandom: int = self.data.get("MsgRandom")
-        self.RedBaginfo: dict = self.data.get("RedBaginfo")
-
-    def __getitem__(self, key):
-        return self.message[key]
+        # set Data items
+        for name in [
+            "FromGroupId",
+            "FromGroupName",
+            "FromUserId",
+            "FromNickName",
+            "Content",
+            "MsgType",
+            "MsgTime",
+            "MsgSeq",
+            "MsgRandom",
+            "RedBaginfo",
+        ]:
+            self.__setattr__(name, data.get(name))
 
     def __repr__(self):
-        return f"GroupMsg {self.data}"
+        return f"GroupMsg => {self.data}"
 
 
 class FriendMsg:
+    message: dict  # raw message
+    CurrentQQ: int  # bot qq
+    data: dict  # Data
+    # data items
+    FromUin: int
+    ToUin: int
+    Content: str
+    MsgType: str
+    MsgSeq: int
+    TempUin: int  # 私聊(临时会话)特有, 入口群聊ID
+    RedBaginfo: Optional[dict]
+
     def __init__(self, message: dict):
-        self.message: dict = message
-        self.CurrentQQ: int = message.get("CurrentQQ")
+        data = message["CurrentPacket"]["Data"]
 
-        temp = message.get("CurrentPacket")
-        self.data: dict = temp.get("Data") if temp is not None else {}
+        # basic
+        for name, value in dict(
+            message=message,
+            CurrentQQ=message["CurrentQQ"],
+            data=data,
+        ).items():
+            self.__setattr__(name, value)
 
-        self.FromUin: int = self.data.get("FromUin")
-        self.ToUin: int = self.data.get("ToUin")
-        self.MsgType: str = self.data.get("MsgType")
-        self.MsgSeq: int = self.data.get("MsgSeq")
-        self.Content: str = self.data.get("Content")
-        self.RedBaginfo: dict = self.data.get("RedBaginfo")
-
-        # 私聊(临时会话)特有
-        self.TempUin: int = self.data.get("TempUin")  # 入口群聊ID
-
-    def __getitem__(self, key):
-        return self.message[key]
+        # set Data items
+        for name in [
+            "FromUin",
+            "ToUin",
+            "Content",
+            "MsgType",
+            "MsgSeq",
+            "RedBaginfo",
+            "TempUin",
+        ]:
+            self.__setattr__(name, data.get(name))
 
     def __repr__(self):
-        return f"FriendMsg {self.data}"
+        return f"FriendMsg => {self.data}"
 
 
 class EventMsg:
+    message: dict  # raw message
+    CurrentQQ: int  # bot qq
+    data: dict  # Data
+    # Data items
+    EventName: str
+    EventData: dict
+    EventMsg: dict
+    # EventMsg items
+    Content: str
+    FromUin: int
+    MsgSeq: int
+    MsgType: str
+    ToUin: int
+    RedBaginfo: Optional[dict]
+
     def __init__(self, message: dict):
-        self.message: dict = message
-        self.CurrentQQ: int = message.get("CurrentQQ")
+        data = message["CurrentPacket"]["Data"]
 
-        temp = message.get("CurrentPacket")
-        self.data: dict = temp.get("Data") if temp is not None else {}
+        # basic
+        for name, value in dict(
+            message=message,
+            CurrentQQ=message["CurrentQQ"],
+            data=data,
+        ).items():
+            self.__setattr__(name, value)
 
-        self.EventName: str = self.data.get("EventName")
-        self.EventData: dict = self.data.get("EventData")
-        self.EventMsg: dict = self.data.get("EventMsg")
-
-        self.Content: str = self.EventMsg.get("Content")
-        self.FromUin: int = self.EventMsg.get("FromUin")
-        self.MsgSeq: int = self.EventMsg.get("MsgSeq")
-        self.MsgType: str = self.EventMsg.get("MsgType")
-        self.ToUin: int = self.EventMsg.get("ToUin")
-        self.RedBaginfo = self.EventMsg.get("RedBaginfo")
-
-    def __getitem__(self, key):
-        return self.message[key]
+        # set Data items
+        for name in ["EventName", "EventData", "EventMsg"]:
+            self.__setattr__(name, data.get(name))
+        # set EventMsg items
+        eventMsg = data["EventMsg"]
+        for name in ["Content", "FromUin", "MsgSeq", "MsgType", "ToUin", "RedBaginfo"]:
+            self.__setattr__(name, eventMsg.get(name))
 
     def __repr__(self):
-        return f"EventMsg {self.data}"
-
-
-model_map = {"OnGroupMsgs": GroupMsg, "OnFriendMsgs": FriendMsg, "OnEvents": EventMsg}
+        return f"EventMsg => {self.data}"
