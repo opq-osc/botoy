@@ -33,10 +33,15 @@ def _(ctx: GroupMsg):
 !!!tip
 
     三类消息 ctx 在传递给接收函数时，会自动添加部分属性
-    - <code>ctx._host</code>
-    - <code>ctx._port</code>
+
+    - <code>ctx._host</code> 客户端使用的`host`
+
+    - <code>ctx._port</code> 客户端使用的`port`
 
     所以这些为保留值,
 
     其他保留属性:
+
     - <code>_pattern_result</code> 由装饰器`pattern_with`自动添加
+
+    - <code>_match</code> 由装饰器`on_regexp`自动添加

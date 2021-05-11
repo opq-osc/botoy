@@ -2,7 +2,29 @@
 
 这个模块提供了一些常用操作的装饰器, 像判断文字中是否存在关键字、只处理特定的消息类型、忽略机器人自身的消息等等
 
-## 各个装饰器签名
+## 装饰器
+
+| 名称                    | 作用                             | 适用的消息          |
+| ----------------------- | -------------------------------- | ------------------- |
+| equal_content           | 发送的内容与指定字符串相等时     | GroupMsg, FriendMsg |
+| in_content              | Content 字段包括指定字符串       | GroupMsg, FriendMsg |
+| from_these_groups       | 只接受这些群组的消息             | GroupMsg            |
+| from_these_users        | 仅接受来自这些用户的消息         | GroupMsg, FriendMsg |
+| ignore_botself          | 忽略机器人自身的消息             | GroupMsg, FriendMsg |
+| ignore_these_groups     | 不接受这些群组的消息             | GroupMsg            |
+| ignore_these_users      | 忽略这些人的消息                 | GroupMsg, FriendMsg |
+| from_botself            | 只处理机器人自身的消息           | GroupMsg, FriendMsg |
+| startswith              | Content 以指定前缀开头           | GroupMsg, FriendMsg |
+| these_msgtypes          | 仅接受该些类型消息               | GroupMsg, FriendMsg |
+| with_pattern (即将移除) | 正则匹配 Content 字段            | GroupMsg, FriendMsg |
+| ensure_tempMsg          | 只接收私聊信息                   | FriendMsg           |
+| ignore_tempMsg          | 忽略私聊信息                     | FriendMsg           |
+| from_phone              | 来自手机的消息(给自己发的)       | FriendMsg           |
+| from_admin              | 来自群管理员(列表包括群主)的消息 | GroupMsg            |
+| queued_up               | 队列执行函数                     |                     |
+| on_regexp               | 正则匹配 Content 字段            | GroupMsg, FriendMsg |
+
+## 装饰器签名
 
 ```python
 {!../docs_src/decorators_outline.py!}

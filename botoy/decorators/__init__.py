@@ -11,6 +11,7 @@ from ._ignore_tempMsg import ignore_tempMsg
 from ._ignore_these_groups import ignore_these_groups
 from ._ignore_these_users import ignore_these_users
 from ._in_content import in_content
+from ._on_regexp import on_regexp
 from ._queued_up import queued_up
 from ._startswith import startswith
 from ._these_msgtypes import these_msgtypes
