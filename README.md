@@ -25,7 +25,7 @@ __import__('botoy').Botoy().on_group_msg(lambda ctx: __import__('botoy').Action(
 
 # [文档](https://botoy.readthedocs.io/)
 
-# [简单例子](https://github.com/xiyaowong/botoy-example)
+# [简单例子](https://github.com/opq-osc/botoy-plugins)
 
 # 感谢
 
