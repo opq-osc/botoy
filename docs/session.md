@@ -46,7 +46,7 @@ session 开启的条件，接收若干个筛选函数，函数的参数为消息
 示例
 
 ```python
-from botoy.session import FILTER_SUCCESS
+from botoy.session import FILTER_SUCCESS, SessionHandler
 from botoy.decorators import ignore_botself, equal_content
 
 def my_filter(ctx):
