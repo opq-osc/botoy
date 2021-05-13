@@ -1,5 +1,5 @@
 # pylint: disable=C0415,C0413
-__version__ = "4.2"
+__version__ = "4.3"
 
 
 def check_version():
