@@ -47,7 +47,7 @@ class SessionBase:
                 self.do_not_wait(key)
                 self._not_empty.release()
         else:
-            return self._state.get(key, default=default)
+            return self._state.get(key, default)
 
     def pop(self, key: str, wait: bool = True, timeout: int = None, default=None):
         """获取数据,然后删除, 该函数会等待至取到数据或超时，返回默认值
