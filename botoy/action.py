@@ -648,7 +648,7 @@ class Action:
         """刷新key二次登陆"""
         return self.get("", path="/v1/RefreshKeys")
 
-    def logout(self, flag=False) -> bool:
+    def logout(self, flag=False) -> dict:
         """退出指定QQ
         :param flag: 是否删除设备信息文件
         """

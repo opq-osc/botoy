@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from prettytable import PrettyTable
 
@@ -14,7 +14,7 @@ from botoy import json
 class Plugin:
     def __init__(self, import_path: str):
         self.import_path = import_path
-        self.module: ModuleType = None
+        self.module: Optional[ModuleType] = None
 
     @property
     def loaded(self):
@@ -72,7 +72,7 @@ class PluginManager:
         self._removed_plugins: Dict[str, Plugin] = dict()  # 已停用的插件
 
         # 停用的插件名列表
-        self._removed_plugin_names = []
+        self._removed_plugin_names: List[str] = []
 
     def _load_removed_plugin_names(self):
         """读取已移除插件名文件，初始化_removed_plugin_names，后面刷新插件时不再加载"""
@@ -188,7 +188,7 @@ class PluginManager:
         enabled_plugin_table = PrettyTable(
             ["", "PLUGIN", "GROUP MESSAGE", "FRIEND MESSAGE", "EVENT", "HELP"]
         )
-        for idx, plugin in enumerate(self._plugins.values()):  # type: Plugin
+        for idx, plugin in enumerate(self._plugins.values()):  # type: (int, Plugin)
             enabled_plugin_table.add_row(
                 [
                     str(idx + 1),

@@ -1,4 +1,5 @@
 # pylint: disable=W0212
+# type: ignore
 """深度封装Action方法
 函数只能在群消息和好友消息接收函数中调用
 """

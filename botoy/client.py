@@ -57,7 +57,7 @@ class Botoy:
             else:
                 self.qq = [qq]
         else:
-            self.qq = None
+            self.qq = []
 
         self.config = Config(
             host, port, group_blacklist, friend_blacklist, blocked_users
@@ -71,16 +71,16 @@ class Botoy:
 
         # 消息接收函数列表
         # 这里只储存主体文件中通过装饰器或函数添加的接收函数
-        self._friend_msg_receivers = []
-        self._group_msg_receivers = []
-        self._event_receivers = []
+        self._friend_msg_receivers: List[Callable[[FriendMsg], Any]] = []
+        self._group_msg_receivers: List[Callable[[GroupMsg], Any]] = []
+        self._event_receivers: List[Callable[[EventMsg], Any]] = []
 
         # 消息上下文对象中间件列表
         # 中间件以对应消息上下文为唯一参数，返回值与上下文类型一致则向下传递
         # 否则直接丢弃该次消息
-        self._friend_context_middlewares = []
-        self._group_context_middlewares = []
-        self._event_context_middlewares = []
+        self._friend_context_middlewares: List[Callable[[FriendMsg], Any]] = []
+        self._group_context_middlewares: List[Callable[[GroupMsg], Any]] = []
+        self._event_context_middlewares: List[Callable[[EventMsg], Any]] = []
 
         # webhook
         if self.config.webhook:
@@ -100,8 +100,8 @@ class Botoy:
         # 当连接上或断开连接运行的函数
         # 如果通过装饰器注册了, 这两个字段设置成(func, every_time)
         # func 是需要执行的函数， every_time 表示是否每一次连接或断开都会执行
-        self._when_connected_do: Tuple[Callable, bool] = None
-        self._when_disconnected_do: Tuple[Callable, bool] = None
+        self._when_connected_do: Optional[Tuple[Callable, bool]] = None
+        self._when_disconnected_do: Optional[Tuple[Callable, bool]] = None
 
         # 线程池 TODO: 开放该参数
         thread_works = 50
