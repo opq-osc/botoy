@@ -1,7 +1,9 @@
 # pylint: disable=R0904
+import mimetypes
 import threading
 import time
 import traceback
+import uuid
 from typing import List, Union
 
 import httpx
@@ -424,6 +426,54 @@ class Action:
         else:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
+
+    def uploadGroupFile(
+        self,
+        group: int,
+        fileURL: str = "",
+        fileBase64: str = "",
+        fileName: str = "",
+        fileType: str = "",
+        notify: bool = True,
+    ) -> dict:
+        """上传群文件
+        :param group: 群号
+        :param fileURL: 文件网络地址, 和fileBase64二选一
+        :param fileBase64: 文件base64编码, 和fileURL二选一
+        :param fileName: 文件名(需包含拓展名)，如果不传则随机生成并且如果是使用URL上传则会尝试自动推测文件类型
+        :param fileType: 文件的后缀名，如果指定了，会自动加在文件名(fileName)后面, 如 .txt 或 txt
+        :param notify: 是否通知
+        """
+        if not fileName:
+            fileName = str(uuid.uuid4())
+            # guess extension by url
+            if fileURL:
+                try:
+                    with httpx.stream("GET", fileURL, timeout=5) as resp:
+                        content_type = resp.headers["content-type"]
+                        extension = mimetypes.guess_extension(content_type)
+                        if extension is not None:
+                            fileName = fileName + extension
+                except Exception:
+                    pass
+        if fileType:
+            if fileType.startswith("."):
+                fileName = fileName + fileType
+            else:
+                fileName = fileName + "." + fileType
+        payload = {
+            "ToUserUid": group,
+            "SendMsgType": "UploadGroupFile",
+            "FileName": fileName,
+            "Notify": notify,
+        }
+        if fileURL:
+            payload.update({"FileUrl": fileURL})
+        elif fileBase64:
+            payload.update({"FileBase64": fileBase64})
+        else:
+            raise Exception("fileURL 和 fileBase64 必须给定其中一个")
+        return self.post("SendMsgV2", payload)
 
     ############获取############
     def getCookies(self) -> dict:
