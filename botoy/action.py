@@ -432,6 +432,7 @@ class Action:
         group: int,
         fileURL: str = "",
         fileBase64: str = "",
+        filePath: str = "",
         fileName: str = "",
         fileType: str = "",
         notify: bool = True,
@@ -440,39 +441,44 @@ class Action:
         :param group: 群号
         :param fileURL: 文件网络地址, 和fileBase64二选一
         :param fileBase64: 文件base64编码, 和fileURL二选一
+        :param filePath: 文件路径，注意该路径要确保机器人服务端能够访问到，并且该项设置后，fileName和fileType参数将无效
         :param fileName: 文件名(需包含拓展名)，如果不传则随机生成并且如果是使用URL上传则会尝试自动推测文件类型
         :param fileType: 文件的后缀名，如果指定了，会自动加在文件名(fileName)后面, 如 .txt 或 txt
         :param notify: 是否通知
         """
-        if not fileName:
-            fileName = str(uuid.uuid4())
-            # guess extension by url
-            if fileURL:
-                try:
-                    with httpx.stream("GET", fileURL, timeout=5) as resp:
-                        content_type = resp.headers["content-type"]
-                        extension = mimetypes.guess_extension(content_type)
-                        if extension is not None:
-                            fileName = fileName + extension
-                except Exception:
-                    pass
-        if fileType:
-            if fileType.startswith("."):
-                fileName = fileName + fileType
-            else:
-                fileName = fileName + "." + fileType
+        # 将filePath作最高优先级，因为通过路径上传，fileName字段无效
+        if not filePath:
+            if not fileName:
+                fileName = str(uuid.uuid4())
+                # guess extension by url
+                if fileURL:
+                    try:
+                        with httpx.stream("GET", fileURL, timeout=5) as resp:
+                            content_type = resp.headers["content-type"]
+                            extension = mimetypes.guess_extension(content_type)
+                            if extension is not None:
+                                fileName = fileName + extension
+                    except Exception:
+                        pass
+            if fileType:
+                if fileType.startswith("."):
+                    fileName = fileName + fileType
+                else:
+                    fileName = fileName + "." + fileType
         payload = {
             "ToUserUid": group,
             "SendMsgType": "UploadGroupFile",
             "FileName": fileName,
             "Notify": notify,
         }
-        if fileURL:
+        if filePath:
+            payload.update({"FilePath": filePath})
+        elif fileURL:
             payload.update({"FileUrl": fileURL})
         elif fileBase64:
             payload.update({"FileBase64": fileBase64})
         else:
-            raise Exception("fileURL 和 fileBase64 必须给定其中一个")
+            raise Exception("fileURL, fileBase64, filePath 必须给定其中一个")
         return self.post("SendMsgV2", payload)
 
     ############获取############
