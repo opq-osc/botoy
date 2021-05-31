@@ -1,7 +1,7 @@
 # pylint: disable=R0915
 import inspect
 import traceback
-from typing import Callable, Union
+from typing import Callable, List, Union
 
 from ..log import logger
 from ..model import FriendMsg, GroupMsg
@@ -41,7 +41,7 @@ class SessionHandler:
         # self.handle
         self.handler = None
         # self.got
-        self.condition_handlers = []  # 具体操作时要和session绑定
+        self.condition_handlers: List[ConditionHandler] = []  # 具体操作时要和session绑定
         # self.receive
         self.receiver = None
         # self.parse
@@ -108,19 +108,22 @@ class SessionHandler:
         # 当且仅当新建session就开始运行handler，直到handler退出
         if ret == FILTER_SUCCESS:
             if not self.sc.session_existed(msg_ctx, self.single_user):
-                session: Session = self.sc.get_session(msg_ctx, self.single_user)
+                session: Session = self.sc.get_session(  # type:ignore
+                    msg_ctx, self.single_user
+                )
                 logger.debug(f"新建session => {session}")
                 _ctx.set(msg_ctx)
                 _session.set(session)
                 try:
-                    self.handler()
+                    if self.handler is not None:
+                        self.handler()
                 except (RejectException, FinishException):
                     session.close()
                 return
 
         # 如果session存在，则需要对该消息进行各种操作
         if self.sc.session_existed(msg_ctx, self.single_user):
-            session = self.sc.get_session(msg_ctx, self.single_user)
+            session = self.sc.get_session(msg_ctx, self.single_user)  # type: ignore
             logger.debug(f"存在session => {session}")
             _ctx.set(msg_ctx)
             _session.set(session)
@@ -133,7 +136,7 @@ class SessionHandler:
                 if self.parser is None:
                     data = msg_ctx.Content
                 else:
-                    data = self.parser(data)
+                    data = self.parser(msg_ctx)
                 logger.debug(f"有正在等待的数据，开始自动设置 {session.waitings[0]} => {data}")
                 session.set(session.waitings[0], data)
             # 3. 执行condition handler
@@ -164,7 +167,7 @@ class SessionHandler:
                     except RejectException:  # 设置为获取新数据后再次运行
                         for need_key in c_h.keys:
                             session.remove(need_key)
-                        c_h.rework()
+                        c_h.work()
                     except FinishException:
                         pass
 

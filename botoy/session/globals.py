@@ -33,5 +33,5 @@ def bind_contextvar(contextvar):
 _ctx: ContextVar[Union[FriendMsg, GroupMsg]] = ContextVar("ctx")
 _session: ContextVar[Session] = ContextVar("session")
 
-ctx: Union[FriendMsg, GroupMsg] = bind_contextvar(_ctx)
-session: Session = bind_contextvar(_session)
+ctx: Union[FriendMsg, GroupMsg] = bind_contextvar(_ctx)  # type:ignore
+session: Session = bind_contextvar(_session)  # type:ignore

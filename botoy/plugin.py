@@ -4,11 +4,12 @@ import os
 import re
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from prettytable import PrettyTable
 
 from botoy import json
+from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 
 class Plugin:
@@ -17,35 +18,40 @@ class Plugin:
         self.module: Optional[ModuleType] = None
 
     @property
-    def loaded(self):
+    def loaded(self) -> bool:
         return self.module is not None
 
-    def load(self):
+    def load(self) -> "Plugin":
         self.module = importlib.import_module(self.import_path)
         return self
 
-    def reload(self):
-        self.module = importlib.reload(self.module)
+    def reload(self) -> "Plugin":
+        if self.module is not None:
+            self.module = importlib.reload(self.module)
         return self
 
     @property
-    def help(self):
-        return self.module.__doc__
+    def help(self) -> str:
+        if self.module is not None:
+            return self.module.__doc__ or ""
+        return ""
 
     @property
-    def name(self):
-        return self.module.__name__.split(".")[-1][4:]
+    def name(self) -> str:
+        if self.module is not None:
+            return self.module.__name__.split(".")[-1][4:]
+        return ""
 
     @property
-    def receive_group_msg(self):
+    def receive_group_msg(self) -> Optional[Callable[[GroupMsg], Any]]:
         return self.module.__dict__.get("receive_group_msg")
 
     @property
-    def receive_friend_msg(self):
+    def receive_friend_msg(self) -> Optional[Callable[[FriendMsg], Any]]:
         return self.module.__dict__.get("receive_friend_msg")
 
     @property
-    def receive_events(self):
+    def receive_events(self) -> Optional[Callable[[EventMsg], Any]]:
         return self.module.__dict__.get("receive_events")
 
 

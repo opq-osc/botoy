@@ -31,8 +31,8 @@ def get_cache_dir(dir_name: str) -> Path:
             break
     else:
         cf = inspect.currentframe()
-        bf = cf.f_back
-        file = bf.f_globals["__file__"]
+        bf = cf.f_back  # type:ignore
+        file = bf.f_globals["__file__"]  # type:ignore
         dir_ = Path(file).absolute()
         while "plugins" in str(dir_):
             dir_ = dir_.parent

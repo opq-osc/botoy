@@ -1,6 +1,6 @@
 import threading
 import time
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..action import Action
 from ..log import logger
@@ -17,10 +17,10 @@ class SessionBase:
     """
 
     def __init__(self, expiration: int = None):
-        self._state = {}
+        self._state: Dict[str, Any] = {}
         self._mutex = threading.Lock()
         self._not_empty = threading.Condition(self._mutex)
-        self._waitings = []
+        self._waitings: List[str] = []
         self._last_work = time.monotonic()
         self._expiration = expiration or DEFAULT_EXPIRATION
 
@@ -144,7 +144,9 @@ class Session(SessionBase):
     def __init__(self, ctx: Union[FriendMsg, GroupMsg], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ctx = ctx
-        self.action = Action(ctx.CurrentQQ, host=ctx._host, port=ctx._port)
+        self.action = Action(
+            ctx.CurrentQQ, host=ctx._host, port=ctx._port  # type:ignore
+        )
 
     def send(self, method: str, *args, **kwargs):
         """调用与session对应的action的方法
@@ -245,10 +247,10 @@ class Session(SessionBase):
 class SessionController:
     def __init__(self, session_expiration: int = None):
         self._session_expiration = session_expiration
-        self._session_storage = {}
+        self._session_storage: Dict[str, Session] = {}
 
     @property
-    def session_storage(self) -> dict:
+    def session_storage(self) -> Dict[str, Session]:
         """返回所有未关闭的session"""
         self._session_storage = {
             sid: s for sid, s in self._session_storage.items() if not s.closed
@@ -269,7 +271,7 @@ class SessionController:
             else:
                 sid = str(ctx.FromGroupId)
         elif isinstance(ctx, FriendMsg):
-            sid = ctx.FromUin
+            sid = str(ctx.FromUin)
         else:
             raise ValueError("Type of ctx must be GroupMsg or FriendMsg.")
         return sid
@@ -278,7 +280,7 @@ class SessionController:
         """移除对应session"""
         sid = self.define_session_id(ctx, single_user)
         if sid in self.session_storage:
-            self.session_storage.remove(sid)
+            del self.session_storage[sid]
 
     def session_existed(
         self, ctx: Union[FriendMsg, GroupMsg], single_user: bool = True

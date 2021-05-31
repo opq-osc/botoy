@@ -550,6 +550,7 @@ class Action:
         members = self.getGroupMembers(group)
         if include_owner:
             # 获取群主id
+            owner = 0
             for groupInfo in self.getGroupList():
                 if groupInfo["GroupId"] == group:
                     owner = groupInfo["GroupOwner"]
@@ -738,7 +739,7 @@ class Action:
                 logger.warning(f"响应超时，但不代表处理未成功, 结果未知! => {e}")
             elif isinstance(e, httpx.HTTPStatusError):
                 logger.error(
-                    f"响应码出错 => {resp.status_code}",
+                    f"响应码出错 => {resp.status_code}",  # type:ignore
                 )
             else:
                 logger.error(f"请求出错: {traceback.format_exc()}")
