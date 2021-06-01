@@ -94,7 +94,7 @@ class RateLimit:
             if period_remaining <= 0:
                 self.reset()
 
-            if self.num_calls > self.calls:
+            if self.num_calls >= self.calls:
                 return False
 
             return True
@@ -106,8 +106,8 @@ class RateLimit:
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            self.add(1)
             if self.permitted():
+                self.add(1)
                 return func(*args, **kwargs)
             return None
 
