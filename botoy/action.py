@@ -729,26 +729,29 @@ class Action:
         # 发送请求
         try:
             self.lock.acquire()
-            threading.Timer(2.5, self.release_lock).start()
+            threading.Timer(5, self.release_lock).start()
             resp = self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
             resp.raise_for_status()
-        except httpx.HTTPError as e:
-            if isinstance(e, httpx.TimeoutException):
-                logger.warning(f"响应超时，但不代表处理未成功, 结果未知! => {e}")
-            elif isinstance(e, httpx.HTTPStatusError):
-                logger.error(
-                    f"响应码出错 => {resp.status_code}",  # type:ignore
-                )
-            else:
-                logger.error(f"请求出错: {traceback.format_exc()}")
+        except httpx.TimeoutException:
+            logger.warning(f"响应超时，但不代表处理未成功, 结果未知!")
             return {}
+        except httpx.HTTPStatusError:
+            logger.error(
+                f"响应码出错 => {resp.status_code}",  # type:ignore
+            )
+            return {}
+        except Exception:
+            logger.error(f"请求出错: {traceback.format_exc()}")
+            return {}
+        finally:
+            self.release_lock()
 
         # 处理数据
         try:
             data = resp.json()
-        except Exception as e:
+        except Exception:
             logger.error("API响应结果非json格式")
             return {}
 
@@ -798,4 +801,5 @@ class Action:
         return self.baseRequest("GET", funcname=funcname, path=path, params=params)
 
     def release_lock(self):
-        self.lock.release()
+        if self.lock.locked():
+            self.lock.release()
