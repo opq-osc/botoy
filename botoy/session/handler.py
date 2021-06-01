@@ -85,7 +85,6 @@ class SessionHandler:
         if msg_ctx.CurrentQQ == (
             msg_ctx.FromUserId if isinstance(msg_ctx, GroupMsg) else msg_ctx.FromUin
         ):
-            logger.debug("忽略自身消息")
             return
         filters = self.filters.copy()
         ret = FILTER_SUCCESS
