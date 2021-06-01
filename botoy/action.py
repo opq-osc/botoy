@@ -801,5 +801,7 @@ class Action:
         return self.baseRequest("GET", funcname=funcname, path=path, params=params)
 
     def release_lock(self):
-        if self.lock.locked():
+        try:
             self.lock.release()
+        except Exception:
+            pass
