@@ -7,11 +7,14 @@ import threading
 from functools import wraps
 from pathlib import Path
 from time import monotonic as clock
+from typing import Dict, Union
 
 __all__ = [
     "file_to_base64",
     "get_cache_dir",
     "RateLimit",
+    "Switcher",
+    "SwitcherManager",
 ]
 
 
@@ -125,3 +128,64 @@ class RateLimit:
             return None
 
         return wrapper
+
+
+class Switcher:
+    """一个简单的开关"""
+
+    __slots__ = ("_enabled",)
+
+    def __init__(self, init_enabled: bool = False):
+        """
+        :param init_enabled: 初始的开关状态
+        """
+        self._enabled = init_enabled
+
+    def enable(self):
+        """开启"""
+        self._enabled = True
+
+    def disable(self):
+        """关闭"""
+        self._enabled = False
+
+    def toggle(self):
+        """切换开关"""
+        self._enabled = not self._enabled
+
+    @property
+    def enabled(self) -> bool:
+        """是否开启"""
+        return self._enabled
+
+    def __bool__(self) -> bool:
+        """是否开启"""
+        return self._enabled
+
+
+# TODO: 缓存至文件，否则每次启动都是重置状态，没有实用性
+class SwitcherManager:
+    """开关管理器"""
+
+    __slots__ = ("name", "init_enabled")
+    storage: Dict[str, Switcher] = {}
+
+    def __init__(self, name: str, init_enabled: bool = True):
+        """
+        :param name: 开关管理器的唯一标识符, 这往往对应一个单独的功能或插件
+        :param init_enabled: 默认是开或关
+        """
+        self.name = name
+        self.init_enabled = init_enabled
+
+    def of(self, id: Union[int, str] = None) -> Switcher:
+        """获取开关
+        :param id: 开关的标识符, 未指定则返回默认的开关
+        """
+        if id is None:
+            key = self.name
+        else:
+            key = f"{self.name}-{id}"
+        if key not in self.storage:
+            self.storage[key] = Switcher(self.init_enabled)
+        return self.storage[key]
