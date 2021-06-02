@@ -8,6 +8,12 @@ from functools import wraps
 from pathlib import Path
 from time import monotonic as clock
 
+__all__ = [
+    "file_to_base64",
+    "get_cache_dir",
+    "RateLimit",
+]
+
 
 def file_to_base64(path):
     """获取文件base64编码"""
@@ -85,6 +91,13 @@ class RateLimit:
         with self.lock:
             self.num_calls = 0
             self.last_reset = clock()
+
+    @property
+    def left_calls(self) -> int:
+        """剩余可调用次数"""
+        if self.num_calls >= self.calls:
+            return 0
+        return self.calls - self.num_calls
 
     def permitted(self) -> bool:
         """是否允许调用，即未达到限制次数"""
