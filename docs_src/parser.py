@@ -11,7 +11,7 @@ def group(ctx: GroupMsg):
     if pic_data is not None:
         for pic in pic_data.GroupPic:
             print(pic.Url)
-    # 如果机器人本艾特了，在控制台打印提示
+    # 如果机器人被艾特了，在控制台打印提示
     at_data = gp.at(ctx)
     if at_data is not None:
         if ctx.CurrentQQ in at_data.UserID:

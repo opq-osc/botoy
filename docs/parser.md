@@ -6,8 +6,8 @@
 
 ```python
 from botoy.parser import group as gp # 群消息(GroupMsg)相关解析
-from botoy.parser import friend as fp # 群消息(FriendMsg)相关解析
-from botoy.parser import event as ep # 群消息(EevntMsg)相关解析
+from botoy.parser import friend as fp # 好友消息(FriendMsg)相关解析
+from botoy.parser import event as ep # 事件(EevntMsg)相关解析
 ```
 
 该模块很简单，看示例即可, 根据补全提示操作即可
