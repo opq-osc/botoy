@@ -1,10 +1,5 @@
 """See https://github.com/xiyaowong/botoy
 """
-try:
-    import ujson as json
-except ImportError:
-    import json
-
 from .__version__ import check_version
 from .action import Action
 from .async_action import AsyncAction
@@ -18,3 +13,21 @@ from .sugar import Picture, Text, Voice
 
 check_version()
 del check_version
+
+__all__ = [
+    "Action",
+    "AsyncAction",
+    "AsyncBotoy",
+    "Botoy",
+    "Emoticons",
+    "EventNames",
+    "MsgTypes",
+    "jconfig",
+    "logger",
+    "EventMsg",
+    "FriendMsg",
+    "GroupMsg",
+    "Picture",
+    "Text",
+    "Voice",
+]

@@ -29,6 +29,7 @@ nav:
   - middleware.md
   - decorators.md
   - refine.md
+  - parser.md
   - action.md
   - plugin.md
   - session.md

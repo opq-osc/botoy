@@ -1,6 +1,6 @@
+import json
 from typing import List
 
-from botoy import json
 from botoy.contrib import check_schema
 from botoy.exceptions import InvalidConfigError
 

@@ -1,5 +1,6 @@
 import copy
 import importlib
+import json
 import os
 import re
 from pathlib import Path
@@ -8,7 +9,6 @@ from typing import Any, Callable, Dict, List, Optional
 
 from prettytable import PrettyTable
 
-from botoy import json
 from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 
