@@ -168,16 +168,16 @@ class Botoy:
 
     def remove_plugin(self, plugin_name: str):
         """停用指定插件"""
-        return self.plugMgr.remove_plugin(plugin_name)
+        return self.plugMgr.disable_plugin(plugin_name)
 
     def recover_plugin(self, plugin_name: str):
         """启用指定插件"""
-        return self.plugMgr.recover_plugin(plugin_name)
+        return self.plugMgr.enable_plugin(plugin_name)
 
     @property
     def plugin_status(self):
         """插件启用状态"""
-        return self.plugMgr.info_table
+        return self.plugMgr.info
 
     @property
     def plugins(self):
@@ -187,7 +187,7 @@ class Botoy:
     @property
     def removed_plugins(self):
         """已停用的插件名列表"""
-        return self.plugMgr.removed_plugins
+        return self.plugMgr.disabled_plugins
 
     @property
     def plugin_help(self):

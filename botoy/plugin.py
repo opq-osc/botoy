@@ -1,6 +1,17 @@
-import copy
+"""
+插件仅作为模块导入，提供receive_group_msg, receive_friend_msg, receive_events 函数
+
+插件位于plugins目录:
+    单文件: bot_pluginA.py  (插件标记为 pluginA)
+    包：bot_pluginB (插件标记为pluginB)
+        包支持子目录提供插件同样支持包和文件夹形式, 最多二级子目录
+        bot_pluginB_sub1.py (插件标记为pluginB.sub1)
+        bot_pluginB_sub2 (插件标记为pluginB.sub2)
+    如果包形式的插件未提供接收函数，那么将不会当作插件
+
+只能对已启用的插件进行重载操作
+"""
 import importlib
-import json
 import os
 import re
 from pathlib import Path
@@ -12,10 +23,31 @@ from prettytable import PrettyTable
 from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 
+def resolve_plugin_name(name: str) -> str:
+    # plugins.bot_a
+    # plugins.bot_a.bot_b
+    names = re.findall(r"bot_(\w+)", name)
+    if names:
+        return ".".join(names)
+    return name
+
+
 class Plugin:
     def __init__(self, import_path: str):
         self.import_path = import_path
         self.module: Optional[ModuleType] = None
+        self._enabled = True
+        self._name = None
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    def enable(self):
+        self._enabled = True
+
+    def disable(self):
+        self._enabled = False
 
     @property
     def loaded(self) -> bool:
@@ -39,7 +71,7 @@ class Plugin:
     @property
     def name(self) -> str:
         if self.module is not None:
-            return self.module.__name__.split(".")[-1][4:]
+            return resolve_plugin_name(self.module.__name__)
         return ""
 
     @property
@@ -55,171 +87,196 @@ class Plugin:
         return self.module.__dict__.get("receive_events")
 
 
-def read_json_file(path) -> dict:
-    with open(path, encoding="utf8") as f:
-        return json.load(f)
+CACHE_PATH = Path("REMOVED_PLUGINS")
+CACHE_PATH.touch()
 
 
-def write_json_file(path, data) -> None:
-    with open(path, "w", encoding="utf8") as f:
-        json.dump(data, f, ensure_ascii=False)
+def read_removed_plugins() -> List[str]:
+    with open(CACHE_PATH) as f:
+        return [line.strip("\n").strip() for line in f.readlines() if line.strip()]
 
 
-REMOVED_PLUGINS_FILE = Path("REMOVED_PLUGINS")
-REMOVED_PLUGINS_TEMPLATE = {"tips": "用于存储已停用插件信息,请不要修改这个文件", "plugins": []}
+def write_removed_plugins(plugins: List[str]):
+    with open(CACHE_PATH, "w") as f:
+        print(*plugins, file=f, sep="\n")
 
 
 class PluginManager:
-    """通用插件管理类"""
+    def __init__(self) -> None:
+        self.plugins_dir: Path = Path("plugins")
+        # 插件的导入路径作为键, 也是所说的插件id
+        self.plugins: Dict[str, Plugin] = dict()
 
-    def __init__(self, plugin_dir: str = "plugins"):
-        self.plugin_dir: Path = Path(plugin_dir)  # 插件文件夹
-        self._plugins: Dict[str, Plugin] = dict()  # 已启用的插件
-        self._removed_plugins: Dict[str, Plugin] = dict()  # 已停用的插件
-
-        # 停用的插件名列表
-        self._removed_plugin_names: List[str] = []
-
-    def _load_removed_plugin_names(self):
-        """读取已移除插件名文件，初始化_removed_plugin_names，后面刷新插件时不再加载"""
-        if REMOVED_PLUGINS_FILE.exists():
-            self._removed_plugin_names = read_json_file(REMOVED_PLUGINS_FILE)["plugins"]
-        else:
-            write_json_file(REMOVED_PLUGINS_FILE, REMOVED_PLUGINS_TEMPLATE)
-            self._removed_plugin_names = []
-
-    def _update_removed_plugin_names(self):
-        """更新已移除插件名文件"""
-        removed_plugins_data = copy.deepcopy(REMOVED_PLUGINS_TEMPLATE)
-        removed_plugins_data["plugins"] = list(set(self._removed_plugin_names))
-        write_json_file(REMOVED_PLUGINS_FILE, removed_plugins_data)
+    def cache(self):
+        plugins = []
+        for id, plugin in self.plugins.items():
+            if not plugin.enabled:
+                plugins.append(id)
+        write_removed_plugins(plugins)
 
     def load_plugins(self) -> None:
-        """加载插件，只会加载新插件, 在调用其他方法前必须调用该方法一次"""
-        self._load_removed_plugin_names()
+        # 整理所有插件的导入路径
+        # 如果是包形式，则还需要多读取一级目录
+        def clean_path(name) -> Optional[str]:
+            matched = re.match(r"(bot_\w+)", name)
+            if matched:
+                return matched.group(1)
+            return None
 
-        suspected_plugin_list = (
-            i for i in os.listdir(self.plugin_dir) if re.search(r"bot_\w+", i)
-        )
-        for suspected_plugin in suspected_plugin_list:
-            if os.path.isdir(self.plugin_dir / suspected_plugin):
-                import_path = "{}.{}".format(self.plugin_dir, suspected_plugin)
-            elif re.search(r"bot_\w+\.py", suspected_plugin):
-                import_path = "{}.{}".format(
-                    self.plugin_dir, suspected_plugin.split(".")[0]
-                )
-            else:
+        paths = []
+
+        for name in os.listdir(self.plugins_dir):
+            path = clean_path(name)
+            if not path:
                 continue
-            plugin_name = re.findall(r"bot_(\w+)", suspected_plugin)[0]
-            plugin = Plugin(import_path)
-            if plugin_name in self._removed_plugin_names:
-                self._removed_plugins[plugin_name] = plugin
-            else:
-                self._plugins[plugin_name] = plugin.load()
+            paths.append(f"plugins.{path}")
 
-    def reload_plugins(self) -> None:
-        """加载新插件并刷新旧插件"""
-        # reload old
-        old_plugins = self._plugins.copy()
-        for old_plugin in old_plugins.values():
-            old_plugins[old_plugin.name].reload()
-        # load new
-        self.load_plugins()
-        # tidy
-        self._plugins.update(old_plugins)
+            name_obj = self.plugins_dir / name
+            if name_obj.is_dir():
+                for subname in os.listdir(name_obj):
+                    path = clean_path(subname)
+                    if path:
+                        paths.append(f"plugins.{name}.{path}")
 
-    def reload_plugin(self, plugin_name: str) -> None:
-        """根据指定插件名刷新插件，不管是否存在，都不会报错"""
-        if plugin_name in self._plugins:
-            self._plugins[plugin_name].reload()
-
-    def remove_plugin(self, plugin_name: str) -> None:
-        """移除指定插件, 不会报错"""
-        if plugin_name in self._plugins:
-            self._removed_plugins[plugin_name] = self._plugins.pop(plugin_name)
-            # 缓存到本地
-            self._removed_plugin_names.append(plugin_name)
-            self._update_removed_plugin_names()
-
-    def recover_plugin(self, plugin_name: str) -> None:
-        """重新开启指定插件, 不会报错"""
-        if plugin_name in self._removed_plugins:
-            plugin = self._removed_plugins.pop(plugin_name)
-            if not plugin.loaded:
+        # 初始化插件实例
+        removed_plugins = read_removed_plugins()
+        for path in paths:
+            id_ = resolve_plugin_name(path)
+            plugin = Plugin(path)
+            if id_ in removed_plugins:
+                plugin.disable()
+            self.plugins[id_] = plugin
+        # 加载插件
+        for plugin in self.plugins.values():
+            if plugin.enabled:
                 plugin.load()
-            self._plugins[plugin_name] = plugin
-            if plugin_name in self._removed_plugin_names:
-                self._removed_plugin_names.remove(plugin_name)
-                self._update_removed_plugin_names()
+
+    def reload_plugin(self, id_or_name: str) -> bool:
+        for id, plugin in self.plugins.items():
+            if plugin.enabled and id_or_name in (id, plugin.name):
+                plugin.reload()
+                return True
+        return False
+
+    def disable_plugin(self, id_or_name: str) -> bool:
+        for id, plugin in self.plugins.items():
+            if plugin.enabled and id_or_name in (id, plugin.name):
+                plugin.disable()
+                self.cache()
+                return True
+        return False
+
+    def enable_plugin(self, id_or_name: str) -> bool:
+        for id, plugin in self.plugins.items():
+            if not plugin.enabled and id_or_name in (id, plugin.name):
+                plugin.enable()
+                self.cache()
+                # 位于缓存移除插件列表的插件启动时并不会加载
+                # 所以这里中途启用的话需要判断并加载一次
+                if not plugin.loaded:
+                    plugin.load()
+                return True
+        return False
+
+    def reload_plugins(self, include_new: bool = True):
+        for plugin in self.plugins.values():
+            if plugin.enabled:
+                plugin.reload()
+        if include_new:
+            self.load_plugins()
 
     @property
-    def plugins(self) -> List[str]:
-        """return a list of plugin name"""
-        return list(self._plugins)
+    def all_plugins(self) -> List[str]:
+        plugins = []
+        for id, plugin in self.plugins.items():
+            if plugin.name != id:
+                plugins.append(f"{id}({plugin.name})")
+            else:
+                plugins.append(f"{id}")
+        return plugins
 
     @property
-    def removed_plugins(self) -> List[str]:
-        """return a list of removed plugin name"""
-        return list(self._removed_plugins)
+    def enabled_plugins(self) -> List[str]:
+        plugins = []
+        for id, plugin in self.plugins.items():
+            if plugin.enabled:
+                if plugin.name != id:
+                    plugins.append(f"{id}({plugin.name})")
+                else:
+                    plugins.append(f"{id}")
+        return plugins
+
+    @property
+    def disabled_plugins(self) -> List[str]:
+        plugins = []
+        for id, plugin in self.plugins.items():
+            if not plugin.enabled:
+                if plugin.name != id:
+                    plugins.append(f"{id}({plugin.name})")
+                else:
+                    plugins.append(f"{id}")
+        return plugins
 
     @property
     def friend_msg_receivers(self):
-        """funcs to handle (friend msg)context"""
-        return [
-            plugin.receive_friend_msg
-            for plugin in self._plugins.values()
-            if plugin.receive_friend_msg
-        ]
+        receivers = []
+        for plugin in self.plugins.values():
+            if plugin.enabled and plugin.receive_friend_msg is not None:
+                receivers.append(plugin.receive_friend_msg)
+        return receivers
 
     @property
     def group_msg_receivers(self):
-        """funcs to handle (group msg)context"""
-        return [
-            plugin.receive_group_msg
-            for plugin in self._plugins.values()
-            if plugin.receive_group_msg
-        ]
+        receivers = []
+        for plugin in self.plugins.values():
+            if plugin.enabled and plugin.receive_group_msg is not None:
+                receivers.append(plugin.receive_group_msg)
+        return receivers
 
     @property
     def event_receivers(self):
-        """funcs to handle (event msg)context"""
-        return [
-            plugin.receive_events
-            for plugin in self._plugins.values()
-            if plugin.receive_events
-        ]
+        receivers = []
+        for plugin in self.plugins.values():
+            if plugin.enabled and plugin.receive_events is not None:
+                receivers.append(plugin.receive_events)
+        return receivers
 
     @property
-    def info_table(self) -> str:
+    def info(self) -> str:
         enabled_plugin_table = PrettyTable(
-            ["", "PLUGIN", "GROUP MESSAGE", "FRIEND MESSAGE", "EVENT", "HELP"]
+            ["PLUGIN NAME", "GROUP MESSAGE", "FRIEND MESSAGE", "EVENT", "HELP"]
         )
-        for idx, plugin in enumerate(self._plugins.values()):  # type: (int, Plugin)
-            enabled_plugin_table.add_row(
-                [
-                    str(idx + 1),
-                    plugin.name,
-                    "√" if plugin.receive_group_msg else "",
-                    "√" if plugin.receive_friend_msg else "",
-                    "√" if plugin.receive_events else "",
-                    plugin.help or "",
-                ]
-            )
-        removed_plugin_table = PrettyTable(["", "REMOVED PLUGINS"])
-        for idx, plugin_name in enumerate(self.removed_plugins):
-            removed_plugin_table.add_row([str(idx + 1), plugin_name])
-        return str(enabled_plugin_table) + "\n" + str(removed_plugin_table)
+        disabled_plugin_table = PrettyTable(["REMOVED PLUGINS"])
+
+        for id, plugin in self.plugins.items():
+            if id == plugin.name:
+                name = id
+            else:
+                name = f"{id}({plugin.name})"
+
+            if plugin.enabled:
+                enabled_plugin_table.add_row(
+                    [
+                        name,
+                        "√" if plugin.receive_group_msg else "",
+                        "√" if plugin.receive_friend_msg else "",
+                        "√" if plugin.receive_events else "",
+                        plugin.help or "",
+                    ]
+                )
+            else:
+                disabled_plugin_table.add_row(name)
+
+        return str(enabled_plugin_table) + "\n" + str(disabled_plugin_table)
 
     @property
     def help(self) -> str:
-        """返回已启用插件的帮助信息"""
         return "\n".join(
-            ["※ " + plugin.help for plugin in self._plugins.values() if plugin.help]
+            ["※ " + plugin.help for plugin in self.plugins.values() if plugin.help]
         )
 
-    def get_plugin_help(self, plugin_name: str) -> str:
-        """返回指定插件的帮助信息，如果插件不存在，则返回空"""
-        plugin = {**self._plugins, **self._removed_plugins}.get(plugin_name)
-        if plugin is not None:
-            return plugin.help
+    def get_plugin_help(self, id_or_name: str) -> str:
+        for id, plugin in self.plugins.items():
+            if id_or_name in (id, plugin.name):
+                return plugin.help
         return ""
