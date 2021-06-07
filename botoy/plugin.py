@@ -7,9 +7,6 @@
         包支持子目录提供插件同样支持包和文件夹形式, 最多二级子目录
         bot_pluginB_sub1.py (插件标记为pluginB.sub1)
         bot_pluginB_sub2 (插件标记为pluginB.sub2)
-    如果包形式的插件未提供接收函数，那么将不会当作插件
-
-只能对已启用的插件进行重载操作
 """
 import importlib
 import os
