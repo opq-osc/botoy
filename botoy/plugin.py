@@ -16,7 +16,7 @@ import os
 import re
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from prettytable import PrettyTable
 
@@ -115,6 +115,7 @@ class PluginManager:
         write_removed_plugins(plugins)
 
     def load_plugins(self) -> None:
+        """加载插件"""
         # 整理所有插件的导入路径
         # 如果是包形式，则还需要多读取一级目录
         def clean_path(name) -> Optional[str]:
@@ -123,6 +124,7 @@ class PluginManager:
                 return matched.group(1)
             return None
 
+        # 能直接被import的路徑
         paths = []
 
         for name in os.listdir(self.plugins_dir):
@@ -152,6 +154,9 @@ class PluginManager:
                 plugin.load()
 
     def reload_plugin(self, id_or_name: str) -> bool:
+        """重载指定插件, 插件不存在或未启用则返回``False``
+        :param id_or_name: 插件id或插件名
+        """
         for id, plugin in self.plugins.items():
             if plugin.enabled and id_or_name in (id, plugin.name):
                 plugin.reload()
@@ -159,6 +164,9 @@ class PluginManager:
         return False
 
     def disable_plugin(self, id_or_name: str) -> bool:
+        """停用指定插件, 插件不存在或未启用则返回``False``
+        :param id_or_name: 插件id或插件名
+        """
         for id, plugin in self.plugins.items():
             if plugin.enabled and id_or_name in (id, plugin.name):
                 plugin.disable()
@@ -167,6 +175,9 @@ class PluginManager:
         return False
 
     def enable_plugin(self, id_or_name: str) -> bool:
+        """启用指定插件, 插件不存在或未停用则返回``False``
+        :param id_or_name: 插件id或插件名
+        """
         for id, plugin in self.plugins.items():
             if not plugin.enabled and id_or_name in (id, plugin.name):
                 plugin.enable()
@@ -179,6 +190,9 @@ class PluginManager:
         return False
 
     def reload_plugins(self, include_new: bool = True):
+        """重新加载插件
+        :param include_new: 为``True``的话将会同时加载新创建的插件
+        """
         for plugin in self.plugins.values():
             if plugin.enabled:
                 plugin.reload()
@@ -186,39 +200,40 @@ class PluginManager:
             self.load_plugins()
 
     @property
-    def all_plugins(self) -> List[str]:
+    def all_plugins(self) -> List[Tuple[str, str]]:
+        """返回当前所有插件信息
+        返回值是一个元组列表，元组有两项，第一项为插件id，第二项为插件名
+        """
         plugins = []
         for id, plugin in self.plugins.items():
-            if plugin.name != id:
-                plugins.append(f"{id}({plugin.name})")
-            else:
-                plugins.append(f"{id}")
+            plugins.append((id, plugin.name))
         return plugins
 
     @property
-    def enabled_plugins(self) -> List[str]:
+    def enabled_plugins(self) -> List[Tuple[str, str]]:
+        """返回当前已启用插件信息
+        返回值是一个元组列表，元组有两项，第一项为插件id，第二项为插件名
+        """
         plugins = []
         for id, plugin in self.plugins.items():
             if plugin.enabled:
-                if plugin.name != id:
-                    plugins.append(f"{id}({plugin.name})")
-                else:
-                    plugins.append(f"{id}")
+                plugins.append((id, plugin.name))
         return plugins
 
     @property
-    def disabled_plugins(self) -> List[str]:
+    def disabled_plugins(self) -> List[Tuple[str, str]]:
+        """返回当前已停用插件信息
+        返回值是一个元组列表，元组有两项，第一项为插件id，第二项为插件名
+        """
         plugins = []
         for id, plugin in self.plugins.items():
             if not plugin.enabled:
-                if plugin.name != id:
-                    plugins.append(f"{id}({plugin.name})")
-                else:
-                    plugins.append(f"{id}")
+                plugins.append((id, plugin.name))
         return plugins
 
     @property
     def friend_msg_receivers(self):
+        """插件所提供的所有好友消息接收函数"""
         receivers = []
         for plugin in self.plugins.values():
             if plugin.enabled and plugin.receive_friend_msg is not None:
@@ -227,6 +242,7 @@ class PluginManager:
 
     @property
     def group_msg_receivers(self):
+        """插件所提供的所有群消息接收函数"""
         receivers = []
         for plugin in self.plugins.values():
             if plugin.enabled and plugin.receive_group_msg is not None:
@@ -235,6 +251,7 @@ class PluginManager:
 
     @property
     def event_receivers(self):
+        """插件所提供的所有事件接收函数"""
         receivers = []
         for plugin in self.plugins.values():
             if plugin.enabled and plugin.receive_events is not None:
@@ -243,6 +260,7 @@ class PluginManager:
 
     @property
     def info(self) -> str:
+        """插件信息"""
         enabled_plugin_table = PrettyTable(
             ["PLUGIN NAME", "GROUP MESSAGE", "FRIEND MESSAGE", "EVENT", "HELP"]
         )
@@ -271,11 +289,13 @@ class PluginManager:
 
     @property
     def help(self) -> str:
+        """所有的插件帮助信息"""
         return "\n".join(
             ["※ " + plugin.help for plugin in self.plugins.values() if plugin.help]
         )
 
     def get_plugin_help(self, id_or_name: str) -> str:
+        """获取单个插件的帮助信息"""
         for id, plugin in self.plugins.items():
             if id_or_name in (id, plugin.name):
                 return plugin.help

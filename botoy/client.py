@@ -95,7 +95,7 @@ class Botoy:
         self.plugMgr = PluginManager()
         if use_plugins:
             self.plugMgr.load_plugins()
-            print(self.plugin_status)
+            print(self.plugMgr.info)
 
         # 当连接上或断开连接运行的函数
         # 如果通过装饰器注册了, 这两个字段设置成(func, every_time)
@@ -148,55 +148,6 @@ class Botoy:
         """注册事件消息中间件"""
         self._event_context_middlewares.append(middleware)
         return self
-
-    ########################################################################
-    # shortcuts to call plugin manager methods
-    ########################################################################
-    # 只推荐使用这几个方法，其他的更细致的方法需要通过 plugMgr 对象访问
-    # 原始plugMgr提供了自由度更高的方法
-    def load_plugins(self):
-        """加载新插件"""
-        return self.plugMgr.load_plugins()
-
-    def reload_plugins(self):
-        """重载旧插件，加载新插件"""
-        return self.plugMgr.reload_plugins()
-
-    def reload_plugin(self, plugin_name: str):
-        """重载指定插件"""
-        return self.plugMgr.reload_plugin(plugin_name)
-
-    def remove_plugin(self, plugin_name: str):
-        """停用指定插件"""
-        return self.plugMgr.disable_plugin(plugin_name)
-
-    def recover_plugin(self, plugin_name: str):
-        """启用指定插件"""
-        return self.plugMgr.enable_plugin(plugin_name)
-
-    @property
-    def plugin_status(self):
-        """插件启用状态"""
-        return self.plugMgr.info
-
-    @property
-    def plugins(self):
-        """插件名列表"""
-        return self.plugMgr.plugins
-
-    @property
-    def removed_plugins(self):
-        """已停用的插件名列表"""
-        return self.plugMgr.disabled_plugins
-
-    @property
-    def plugin_help(self):
-        """返回所有已启用插件的帮助信息"""
-        return self.plugMgr.help
-
-    def get_plugin_help(self, plugin_name: str):
-        """返回指定插件的帮助信息，如果插件不存在，则返回空"""
-        return self.plugMgr.get_plugin_help(plugin_name)
 
     ##########################################################################
     # decorators for registering hook function when connected or disconnected
