@@ -18,6 +18,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+import colorama
 from prettytable import PrettyTable
 
 from botoy.model import EventMsg, FriendMsg, GroupMsg
@@ -266,7 +267,17 @@ class PluginManager:
         )
         disabled_plugin_table = PrettyTable(["REMOVED PLUGINS"])
 
+        color = colorama.Fore.BLUE
         for id, plugin in self.plugins.items():
+            color = (
+                colorama.Fore.GREEN
+                if color == colorama.Fore.BLUE
+                else colorama.Fore.BLUE
+            )
+
+            def c(msg) -> str:
+                return f"{color}{msg}{colorama.Style.RESET_ALL}"
+
             if id == plugin.name:
                 name = id
             else:
@@ -275,15 +286,15 @@ class PluginManager:
             if plugin.enabled:
                 enabled_plugin_table.add_row(
                     [
-                        name,
-                        "√" if plugin.receive_group_msg else "",
-                        "√" if plugin.receive_friend_msg else "",
-                        "√" if plugin.receive_events else "",
-                        plugin.help or "",
+                        c(name),
+                        c("√" if plugin.receive_group_msg else ""),
+                        c("√" if plugin.receive_friend_msg else ""),
+                        c("√" if plugin.receive_events else ""),
+                        c(plugin.help or ""),
                     ]
                 )
             else:
-                disabled_plugin_table.add_row(name)
+                disabled_plugin_table.add_row(c(name))
 
         return str(enabled_plugin_table) + "\n" + str(disabled_plugin_table)
 
