@@ -291,7 +291,7 @@ class PluginManager:
                     ]
                 )
             else:
-                disabled_plugin_table.add_row(c(name))
+                disabled_plugin_table.add_row([c(name)])
 
         return str(enabled_plugin_table) + "\n" + str(disabled_plugin_table)
 
