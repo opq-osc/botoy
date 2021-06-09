@@ -1,3 +1,8 @@
+"""
+该模块提供一系列内置辅助功能
+"""
+
+# NOTE: 这是独立的模块，不应该在框架其他位置被导入，以免循环依赖
 import base64
 import inspect
 import os
@@ -23,13 +28,6 @@ def file_to_base64(path):
     with open(path, "rb") as f:
         content = f.read()
     return base64.b64encode(content).decode()
-
-
-def check_schema(url: str) -> str:
-    url = url.strip("/")
-    if not re.findall(r"(http://|https://)", url):
-        return "http://" + url
-    return url
 
 
 def get_cache_dir(dir_name: str) -> Path:

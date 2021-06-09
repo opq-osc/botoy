@@ -7,9 +7,9 @@ import sys
 
 from .action import Action
 from .collection import MsgTypes
-from .contrib import file_to_base64
 from .exceptions import InvalidContextError
 from .model import FriendMsg, GroupMsg
+from .utils import file_to_base64
 
 
 def Text(text: str, at=False):
