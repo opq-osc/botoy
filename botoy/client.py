@@ -71,9 +71,6 @@ class Botoy:
             host, port, group_blacklist, friend_blacklist, blocked_users
         )
 
-        # 作为程序是否应该退出的标志，以便后续用到
-        self._exit = False
-
         # 日志
         logger_init(log, log_file)
 
@@ -114,10 +111,6 @@ class Botoy:
         # 线程池 TODO: 开放该参数
         thread_works = 50
         self.pool = WorkerPool(thread_works)
-
-        # 依次各种初始化
-        self._initialize_socketio()
-        self._initialize_handlers()
 
     ########################################################################
     # Add context receivers
@@ -190,28 +183,6 @@ class Botoy:
             self._when_disconnected_do[0]()
             if not self._when_disconnected_do[1]:
                 self._when_disconnected_do = None
-
-    def close(self):
-        # 如果先关线程池，当新消息进入时依然会调用submit方法,此时会报错
-        self.socketio.disconnect()
-        self.pool.shutdown(wait=False)
-        self._exit = True
-
-    def run(self):
-        logger.info("Connecting to the server...")
-        try:
-            self.socketio.connect(self.config.address, transports=["websocket"])
-        except Exception:
-            logger.error(traceback.format_exc())
-            self.close()
-        else:
-            try:
-                self.socketio.wait()
-            except KeyboardInterrupt:
-                pass
-            finally:
-                print("bye~")
-                self.close()
 
     ########################################################################
     # context distributor
@@ -307,15 +278,28 @@ class Botoy:
         setattr(context, "_port", self.config.port)
         self.pool.submit(self._event_context_distributor, context)
 
-    ########################################################################
-    # initialize
-    ########################################################################
-    def _initialize_socketio(self):
-        self.socketio = socketio.Client()
-        self.socketio.event()(self.connect)
-        self.socketio.event()(self.disconnect)
+    def run(self):
+        sio = socketio.Client()
 
-    def _initialize_handlers(self):
-        self.socketio.on("OnGroupMsgs")(self._group_msg_handler)
-        self.socketio.on("OnFriendMsgs")(self._friend_msg_handler)
-        self.socketio.on("OnEvents")(self._event_handler)
+        sio.event(self.connect)
+        sio.event(self.disconnect)
+        sio.on("OnGroupMsgs")(self._group_msg_handler)
+        sio.on("OnFriendMsgs")(self._friend_msg_handler)
+        sio.on("OnEvents")(self._event_handler)
+
+        logger.info("Connecting to the server...")
+        try:
+            sio.connect(self.config.address, transports=["websocket"])
+        except Exception:
+            logger.error(traceback.format_exc())
+            sio.disconnect()
+            self.pool.shutdown(wait=False)
+        else:
+            try:
+                sio.wait()
+            except KeyboardInterrupt:
+                pass
+            finally:
+                print("bye~")
+                sio.disconnect()
+                self.pool.shutdown(wait=False)
