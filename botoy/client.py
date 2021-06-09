@@ -3,15 +3,23 @@ import copy
 import functools
 import traceback
 from collections.abc import Sequence
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import socketio
 
-from botoy.config import Config
-from botoy.log import logger, logger_init
-from botoy.model import EventMsg, FriendMsg, GroupMsg
-from botoy.plugin import PluginManager
-from botoy.pool import WorkerPool
+from .config import Config
+from .log import logger, logger_init
+from .model import EventMsg, FriendMsg, GroupMsg
+from .plugin import PluginManager
+from .pool import WorkerPool
+from .typing import (
+    T_EventMiddleware,
+    T_EventReceiver,
+    T_FriendMsgMiddleware,
+    T_FriendMsgReceiver,
+    T_GroupMsgMiddleware,
+    T_GroupMsgReceiver,
+)
 
 #######################
 #     socketio
@@ -71,16 +79,16 @@ class Botoy:
 
         # 消息接收函数列表
         # 这里只储存主体文件中通过装饰器或函数添加的接收函数
-        self._friend_msg_receivers: List[Callable[[FriendMsg], Any]] = []
-        self._group_msg_receivers: List[Callable[[GroupMsg], Any]] = []
-        self._event_receivers: List[Callable[[EventMsg], Any]] = []
+        self._friend_msg_receivers: List[T_FriendMsgReceiver] = []
+        self._group_msg_receivers: List[T_GroupMsgReceiver] = []
+        self._event_receivers: List[T_EventReceiver] = []
 
         # 消息上下文对象中间件列表
         # 中间件以对应消息上下文为唯一参数，返回值与上下文类型一致则向下传递
         # 否则直接丢弃该次消息
-        self._friend_context_middlewares: List[Callable[[FriendMsg], Any]] = []
-        self._group_context_middlewares: List[Callable[[GroupMsg], Any]] = []
-        self._event_context_middlewares: List[Callable[[EventMsg], Any]] = []
+        self._friend_context_middlewares: List[T_FriendMsgMiddleware] = []
+        self._group_context_middlewares: List[T_GroupMsgMiddleware] = []
+        self._event_context_middlewares: List[T_EventMiddleware] = []
 
         # webhook
         if self.config.webhook:
@@ -114,17 +122,17 @@ class Botoy:
     ########################################################################
     # Add context receivers
     ########################################################################
-    def on_friend_msg(self, receiver: Callable[[FriendMsg], Any]):
+    def on_friend_msg(self, receiver: T_FriendMsgReceiver):
         """添加好友消息接收函数"""
         self._friend_msg_receivers.append(receiver)
         return self  # 包括下面的六个方法是都不需要返回值的, 但返回本身也无妨,可以支持链式初始化
 
-    def on_group_msg(self, receiver: Callable[[GroupMsg], Any]):
+    def on_group_msg(self, receiver: T_GroupMsgReceiver):
         """添加群消息接收函数"""
         self._group_msg_receivers.append(receiver)
         return self
 
-    def on_event(self, receiver: Callable[[EventMsg], Any]):
+    def on_event(self, receiver: T_EventReceiver):
         """添加事件消息接收函数"""
         self._event_receivers.append(receiver)
         return self
@@ -132,19 +140,17 @@ class Botoy:
     ########################################################################
     # Add context middlewares
     ########################################################################
-    def friend_context_use(
-        self, middleware: Callable[[FriendMsg], Optional[FriendMsg]]
-    ):
+    def friend_context_use(self, middleware: T_FriendMsgMiddleware):
         """注册好友消息中间件"""
         self._friend_context_middlewares.append(middleware)
         return self
 
-    def group_context_use(self, middleware: Callable[[GroupMsg], Optional[GroupMsg]]):
+    def group_context_use(self, middleware: T_GroupMsgMiddleware):
         """注册群消息中间件"""
         self._group_context_middlewares.append(middleware)
         return self
 
-    def event_context_use(self, middleware: Callable[[EventMsg], Optional[EventMsg]]):
+    def event_context_use(self, middleware: T_EventMiddleware):
         """注册事件消息中间件"""
         self._event_context_middlewares.append(middleware)
         return self
@@ -313,12 +319,3 @@ class Botoy:
         self.socketio.on("OnGroupMsgs")(self._group_msg_handler)
         self.socketio.on("OnFriendMsgs")(self._friend_msg_handler)
         self.socketio.on("OnEvents")(self._event_handler)
-
-    ########################################################################
-    def __repr__(self):
-        return "Botoy <{}> <host-{}> <port-{}> <address-{}>".format(
-            " ".join([str(i) for i in self.qq]),
-            self.config.host,
-            self.config.port,
-            self.config.address,
-        )

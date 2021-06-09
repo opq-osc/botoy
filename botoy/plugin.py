@@ -13,12 +13,12 @@ import os
 import re
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import colorama
 from prettytable import PrettyTable
 
-from botoy.model import EventMsg, FriendMsg, GroupMsg
+from .typing import T_EventReceiver, T_FriendMsgReceiver, T_GroupMsgReceiver
 
 
 def resolve_plugin_name(name: str) -> str:
@@ -73,15 +73,15 @@ class Plugin:
         return ""
 
     @property
-    def receive_group_msg(self) -> Optional[Callable[[GroupMsg], Any]]:
+    def receive_group_msg(self) -> Optional[T_GroupMsgReceiver]:
         return self.module.__dict__.get("receive_group_msg")
 
     @property
-    def receive_friend_msg(self) -> Optional[Callable[[FriendMsg], Any]]:
+    def receive_friend_msg(self) -> Optional[T_FriendMsgReceiver]:
         return self.module.__dict__.get("receive_friend_msg")
 
     @property
-    def receive_events(self) -> Optional[Callable[[EventMsg], Any]]:
+    def receive_events(self) -> Optional[T_EventReceiver]:
         return self.module.__dict__.get("receive_events")
 
 
@@ -230,7 +230,7 @@ class PluginManager:
         return plugins
 
     @property
-    def friend_msg_receivers(self):
+    def friend_msg_receivers(self) -> List[T_FriendMsgReceiver]:
         """插件所提供的所有好友消息接收函数"""
         receivers = []
         for plugin in self.plugins.values():
@@ -239,7 +239,7 @@ class PluginManager:
         return receivers
 
     @property
-    def group_msg_receivers(self):
+    def group_msg_receivers(self) -> List[T_GroupMsgReceiver]:
         """插件所提供的所有群消息接收函数"""
         receivers = []
         for plugin in self.plugins.values():
@@ -248,7 +248,7 @@ class PluginManager:
         return receivers
 
     @property
-    def event_receivers(self):
+    def event_receivers(self) -> List[T_EventReceiver]:
         """插件所提供的所有事件接收函数"""
         receivers = []
         for plugin in self.plugins.values():

@@ -23,9 +23,8 @@ def from_admin(func=None):
         # start = time.time()
         admins = __get_group_admins(
             qq=ctx.CurrentQQ,
-            # pylint: disable=W0212
-            host=ctx._host,
-            port=ctx._port,
+            host=getattr(ctx, "_host", "http://127.0.0.1"),
+            port=getattr(ctx, "_port", 8888),
             group=ctx.FromGroupId,
         )
         # print('===================')
