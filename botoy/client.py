@@ -278,6 +278,24 @@ class Botoy:
         setattr(context, "_port", self.config.port)
         self.pool.submit(self._event_context_distributor, context)
 
+    def group_msg_handler(self, msg: dict):
+        """群消息入口函数
+        :param msg: 完整的消息数据
+        """
+        return self._group_msg_handler(msg)
+
+    def friend_msg_handler(self, msg: dict):
+        """好友消息入口函数
+        :param msg: 完整的消息数据
+        """
+        return self._friend_msg_handler(msg)
+
+    def event_handler(self, msg: dict):
+        """事件入口函数
+        :param msg: 完整的消息数据
+        """
+        return self._event_handler(msg)
+
     def run(self):
         sio = socketio.Client()
 

@@ -36,6 +36,7 @@ nav:
   - webhook.md
   - schedule.md
   - contrib.md
+  - connection.md
   - async.md
   - cli.md
   - other.md
