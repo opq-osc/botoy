@@ -1,7 +1,7 @@
 # pylint: disable=R0915
 import inspect
 import traceback
-from typing import Callable, List, Union
+from typing import Callable, List, NoReturn, Union
 
 from ..log import logger
 from ..model import FriendMsg, GroupMsg
@@ -170,7 +170,7 @@ class SessionHandler:
                     except FinishException:
                         pass
 
-    def reject(self, prompt: Union[str, Prompt, Callable] = None, **kwargs):
+    def reject(self, prompt: Union[str, Prompt, Callable] = None, **kwargs) -> NoReturn:
         """该方法调用对应session的resolve_prompt方法
         :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
                         如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
@@ -183,7 +183,7 @@ class SessionHandler:
         finally:
             raise RejectException
 
-    def finish(self, prompt: Union[str, Prompt, Callable] = None, **kwargs):
+    def finish(self, prompt: Union[str, Prompt, Callable] = None, **kwargs) -> NoReturn:
         """该方法调用对应session的resolve_prompt方法
         :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
                         如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
@@ -196,16 +196,16 @@ class SessionHandler:
         finally:
             raise FinishException
 
-    def receive_group_msg(self):
+    def receive_group_msg(self) -> "SessionHandler":
         """接收该插件的群消息"""
-        inspect.currentframe().f_back.f_globals.update(
+        inspect.currentframe().f_back.f_globals.update(  # type: ignore
             receive_group_msg=self.message_receiver
         )
         return self
 
-    def receive_friend_msg(self):
+    def receive_friend_msg(self) -> "SessionHandler":
         """接收该插件的好友消息"""
-        inspect.currentframe().f_back.f_globals.update(
+        inspect.currentframe().f_back.f_globals.update(  # type: ignore
             receive_friend_msg=self.message_receiver
         )
         return self

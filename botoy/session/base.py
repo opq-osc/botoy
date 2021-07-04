@@ -24,7 +24,9 @@ class SessionBase:
         self._last_work = time.monotonic()
         self._expiration = expiration or DEFAULT_EXPIRATION
 
-    def get(self, key: str, wait: bool = True, timeout: int = None, default=None):
+    def get(
+        self, key: str, wait: bool = True, timeout: int = None, default=None
+    ) -> Any:
         """获取数据, 该函数会等待至取到数据或超时，返回默认值
         :param key: 数据键名
         :param wait: 是否阻塞等待
@@ -49,7 +51,9 @@ class SessionBase:
         else:
             return self._state.get(key, default)
 
-    def pop(self, key: str, wait: bool = True, timeout: int = None, default=None):
+    def pop(
+        self, key: str, wait: bool = True, timeout: int = None, default=None
+    ) -> Any:
         """获取数据,然后删除, 该函数会等待至取到数据或超时，返回默认值
         :param key: 数据键名
         :param wait: 是否阻塞等待
@@ -121,7 +125,7 @@ class SessionBase:
             self._waitings.remove(key)
 
     @property
-    def empty(self):
+    def empty(self) -> bool:
         """是否为空"""
         return bool(self._state)
 
@@ -228,7 +232,7 @@ class Session(SessionBase):
         timeout: int = None,
         default: Any = None,
         **kwargs,
-    ):
+    ) -> Any:
         """包装get和pop方法，增加prompt参数, 该方法一定会阻塞等待数据
         :param key: 需要的数据键名
         :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
