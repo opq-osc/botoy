@@ -301,9 +301,9 @@ class Botoy:
 
         sio.event(self.connect)
         sio.event(self.disconnect)
-        sio.on("OnGroupMsgs")(self._group_msg_handler)
-        sio.on("OnFriendMsgs")(self._friend_msg_handler)
-        sio.on("OnEvents")(self._event_handler)
+        sio.on("OnGroupMsgs")(self._group_msg_handler)  # type: ignore
+        sio.on("OnFriendMsgs")(self._friend_msg_handler)  # type: ignore
+        sio.on("OnEvents")(self._event_handler)  # type: ignore
 
         logger.info("Connecting to the server...")
         try:

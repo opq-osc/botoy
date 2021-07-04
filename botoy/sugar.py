@@ -4,6 +4,7 @@
 函数只能在群消息和好友消息接收函数中调用
 """
 import sys
+from typing import Union
 
 from .action import Action
 from .collection import MsgTypes
