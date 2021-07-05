@@ -9,7 +9,7 @@ from .collection import Emoticons, EventNames, MsgTypes
 from .config import jconfig
 from .log import logger
 from .model import EventMsg, FriendMsg, GroupMsg
-from .sugar import Picture, Text, Voice
+from .sugar import Picture, S, Text, Voice
 
 check_version()
 del check_version
@@ -30,4 +30,5 @@ __all__ = [
     "Picture",
     "Text",
     "Voice",
+    "S",
 ]
