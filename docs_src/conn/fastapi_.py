@@ -26,11 +26,11 @@ def event(ctx: EventMsg):
 @app.post("conn/{path}")
 async def conn(path: str, request: Request):
     if path == "group":
-        bot.group_msg_handler(request.json())
+        bot.group_msg_handler(await request.json())
     elif path == "friend":
-        bot.friend_msg_handler(request.json())
+        bot.friend_msg_handler(await request.json())
     elif path == "event":
-        bot.event_handler(request.json())
+        bot.event_handler(await request.json())
     return "ok"
 
 
