@@ -32,3 +32,9 @@
 ```python
 {!../docs_src/conn/flask_socketio_.py!}
 ```
+
+### fastapi socketio
+
+```python
+{!../docs_src/conn/fastapi_socketio_.py!}
+```
