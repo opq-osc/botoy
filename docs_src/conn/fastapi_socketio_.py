@@ -34,4 +34,4 @@ sio.on("OnEvents", handler=bot.event_handler)
 # ----------------------------
 
 app = FastAPI()
-app.mount('/sio', ASGIApp(socketio_server=sio, socketio_path="socket.io"))
+app.mount("/sio", ASGIApp(socketio_server=sio, socketio_path="socket.io"))
