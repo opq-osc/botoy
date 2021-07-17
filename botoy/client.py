@@ -60,12 +60,13 @@ class Botoy:
         log_file: bool = False,
     ):
         if qq is not None:
-            if isinstance(qq, Sequence):
+            if not isinstance(qq, str) and isinstance(qq, Sequence):
                 self.qq = list(qq)
             else:
                 self.qq = [qq]
         else:
             self.qq = []
+        self.qq = [int(qq) for qq in self.qq]
 
         self.config = Config(
             host, port, group_blacklist, friend_blacklist, blocked_users
