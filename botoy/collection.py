@@ -4,6 +4,8 @@ class MsgTypes:
     AtMsg = "AtMsg"
     PicMsg = "PicMsg"
     TextMsg = "TextMsg"
+    XmlMsg = "XmlMsg"
+    JsonMsg = "JsonMsg"
     ReplyMsg = "ReplyMsg"
     ReplyMsgA = "ReplayMsg"
     VoiceMsg = "VoiceMsg"
