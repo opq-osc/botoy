@@ -91,3 +91,28 @@ def on_regexp(pattern: Union[str, re.Pattern]):
 
     :param pattern: 正则表达式
     """
+
+
+def common_text(
+    func=None,
+    equal: str = None,
+    in_: str = None,
+    starts: str = None,
+    ends: str = None,
+    user: Union[int, List[int]] = None,
+    group: Union[int, List[int]] = None,
+    ignore_user: Union[int, List[int]] = None,
+    ignore_group: Union[int, List[int]] = None,
+    ignore_bot=True,
+):
+    """常见对文字消息的处理(不考虑私聊消息) GroupMsg,FriendMsg
+    :param equal: 内容需要相等(==)
+    :param in_: 内容需要包含，该项支持正则表达式(re.findall)
+    :param starts: 内容以该项开头(startswith)
+    :param ends: 内容以该项结尾(endswith)
+    :param user: 来自该用户(们)(in)
+    :param group: 来自该群组(们)(in)
+    :param ignore_user: 忽略该用户(们)(not in)
+    :param ignore_group: 忽略该群组(们)(not in)
+    :param ignore_bot: 忽略机器人自身
+    """

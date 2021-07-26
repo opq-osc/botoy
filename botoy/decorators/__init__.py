@@ -1,4 +1,5 @@
 """一些用于接收函数的装饰器"""
+from ._common_text import common_text
 from ._ensure_tempMsg import ensure_tempMsg
 from ._equal_content import equal_content
 from ._from_admin import from_admin
@@ -17,3 +18,25 @@ from ._queued_up import queued_up
 from ._startswith import startswith
 from ._these_msgtypes import these_msgtypes
 from ._with_pattern import with_pattern
+
+__all__ = [
+    "ensure_tempMsg",
+    "equal_content",
+    "from_admin",
+    "from_phone",
+    "from_these_groups",
+    "from_these_users",
+    "from_botself",
+    "ignore_admin",
+    "ignore_botself",
+    "ignore_tempMsg",
+    "ignore_these_users",
+    "ignore_these_groups",
+    "in_content",
+    "on_regexp",
+    "queued_up",
+    "startswith",
+    "these_msgtypes",
+    "with_pattern",
+    "common_text",
+]
