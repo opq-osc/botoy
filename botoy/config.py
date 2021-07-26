@@ -22,18 +22,18 @@ DEFAULT_WEBHOOK = False
 DEFAULT_WEBHOOK_POST_URL = "http://127.0.0.1:5000"
 DEFAULT_WEBHOOK_TIMEOUT = 20
 
+CONFIG_FILE_NAME = "botoy.json"
+
+try:
+    with open(CONFIG_FILE_NAME, encoding="utf-8") as f:
+        botoy_json = json.load(f)
+except FileNotFoundError:
+    botoy_json = {}
+except Exception as e:
+    raise InvalidConfigError("配置文件不规范") from e
+
 # parametor > config file > default
 class Config:
-    # read botoy.json configuration
-    jconfig = {}
-    try:
-        with open("botoy.json", encoding="utf-8") as f:
-            jconfig = json.load(f)
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        raise InvalidConfigError("配置文件不规范") from e
-
     def __init__(
         self,
         host: str = None,
@@ -44,31 +44,37 @@ class Config:
         webhook: bool = None,
         webhook_post_url: str = None,
         webhook_timeout: int = None,
+        config: dict = None,
     ):
-        jconfig = self.jconfig
+        self.config = config or botoy_json
+
         self.host: str = check_schema(
-            host or jconfig.get("host") or DEFAULT_HOST
+            host or self.config.get("host") or DEFAULT_HOST
         ).strip("/")
-        self.port: int = int(port or jconfig.get("port") or DEFAULT_PORT)
+        self.port: int = int(port or self.config.get("port") or DEFAULT_PORT)
         self.group_blacklist: List[int] = list(
-            group_blacklist or jconfig.get("group_blacklist") or DEFAULT_GROUP_BLACKLIST
+            group_blacklist
+            or self.config.get("group_blacklist")
+            or DEFAULT_GROUP_BLACKLIST
         )
         self.friend_blacklist: List[int] = list(
             friend_blacklist
-            or jconfig.get("friend_blacklist")
+            or self.config.get("friend_blacklist")
             or DEFAULT_FRIEND_BLACKLIST
         )
         self.blocked_users: List[int] = list(
-            blocked_users or jconfig.get("blocked_users") or DEFAULT_BLOCK_UESRS
+            blocked_users or self.config.get("blocked_users") or DEFAULT_BLOCK_UESRS
         )
-        self.webhook: bool = webhook or jconfig.get("webhook") or DEFAULT_WEBHOOK
+        self.webhook: bool = webhook or self.config.get("webhook") or DEFAULT_WEBHOOK
         self.webhook_post_url: str = (
             webhook_post_url
-            or jconfig.get("webhook_post_url")
+            or self.config.get("webhook_post_url")
             or DEFAULT_WEBHOOK_POST_URL
         )
         self.webhook_timeout: int = int(
-            webhook_timeout or jconfig.get("webhook_timeout") or DEFAULT_WEBHOOK_TIMEOUT
+            webhook_timeout
+            or self.config.get("webhook_timeout")
+            or DEFAULT_WEBHOOK_TIMEOUT
         )
 
     @property
@@ -81,10 +87,50 @@ class Config:
         """获取botoy.json内的配置, 如果不存在就返回None
         :config_name: 配置的名称
         """
-        return self.jconfig.get(config_name)
+        return self.config.get(config_name)
 
     def __getattr__(self, attr):
-        return self.jconfig.get(attr)
+        return self.config.get(attr)
+
+    def get_section(self, section_name: str):
+        """获取该字段所对应的数据
+        - 如果数据是字典类型，则返回一个新的Config对象，新的Config的方法对该数据进行处理
+        - 如果是其他类型数据，将直接返回
+        - 不存在则返回None
+
+        例如botoy.json为
+
+        ```json
+            {
+                "A": {
+                    "B": "value of B"
+                    "C": ["item1", "item2"]
+                }
+            }
+        ```
+        那么
+        ```python
+
+            config = Config()
+
+            assert config.A == {"B":"value of B", "C": ["item1", "item2"]}
+            assert config.A["B"] == "value of B"
+
+            section_a = config.get_section("A")
+            assert section_a.B == "value of B"
+
+            section_a_b = section_a.get_("B")
+            assert section_a_b == "value of B"
+
+            section_a_c = section_a.get_("C")
+            assert section_a_c == ["item1", "item2"]
+        ```
+
+        """
+        section = self.config.get(section_name)
+        if isinstance(section, dict):
+            return Config(config=section)
+        return section
 
 
 jconfig = Config()
