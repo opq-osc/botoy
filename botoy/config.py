@@ -101,29 +101,28 @@ class Config:
         例如botoy.json为
 
         ```json
-            {
-                "A": {
-                    "B": "value of B"
-                    "C": ["item1", "item2"]
-                }
+        {
+            "A": {
+                "B": "value of B"
+                "C": ["item1", "item2"]
             }
+        }
         ```
         那么
         ```python
+        config = Config()
 
-            config = Config()
+        assert config.A == {"B":"value of B", "C": ["item1", "item2"]}
+        assert config.A["B"] == "value of B"
 
-            assert config.A == {"B":"value of B", "C": ["item1", "item2"]}
-            assert config.A["B"] == "value of B"
+        section_a = config.get_section("A")
+        assert section_a.B == "value of B"
 
-            section_a = config.get_section("A")
-            assert section_a.B == "value of B"
+        section_a_b = section_a.get_("B")
+        assert section_a_b == "value of B"
 
-            section_a_b = section_a.get_("B")
-            assert section_a_b == "value of B"
-
-            section_a_c = section_a.get_("C")
-            assert section_a_c == ["item1", "item2"]
+        section_a_c = section_a.get_("C")
+        assert section_a_c == ["item1", "item2"]
         ```
 
         """

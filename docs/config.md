@@ -24,7 +24,9 @@ API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原�
 
 **强烈建议使用配置文件**, 并且建议将`botoy.json`作为统一的配置文件用于其他功能的配置
 
-# jconfig
+# jconfig(Config())
+
+`jconfig`是预先实例化的`Config`对象,
 
 该对象可以便捷地访问**配置文件**`botoy.json`内设置的各项数据
 
@@ -36,5 +38,48 @@ from botoy import jconfig
 - 方法`get_jconfig`, 获取配置项，未设置则为 `None`
 - 通过`.`获取配置项，如`jconfig.host`, `jconfig.port`, 未设置则为 `None`
 
-其实`jconfig`只是预先实例化的`Config`类型的对象,
+可以把 config 当作一个字典，这两种获取数据的方式就是字典的 get 方法
+
+## get_section
+
+前面的两种方式获取的数据都是基本类型，后续的操作都与 Config 无关，当配置多起来时，每个插件还可能有
+相同的数据，此时配置会很乱，获取也会麻烦很多。`get_section`用来减轻这一问题
+
+获取该字段所对应的数据
+
+- 如果数据是字典类型，则返回一个新的 Config 对象，新的 Config 的方法对该数据进行处理
+- 如果是其他类型数据，将直接返回
+- 不存在则返回 None
+
+例如 botoy.json 为
+
+```json
+{
+    "A": {
+        "B": "value of B"
+        "C": ["item1", "item2"]
+    }
+}
+```
+
+那么
+
+```python
+config = Config()
+
+assert config.A == {"B":"value of B", "C": ["item1", "item2"]}
+assert config.A["B"] == "value of B"
+
+section_a = config.get_section("A")
+assert section_a.B == "value of B"
+
+section_a_b = section_a.get_("B")
+assert section_a_b == "value of B"
+
+section_a_c = section_a.get_("C")
+assert section_a_c == ["item1", "item2"]
+```
+
+---
+
 关于`Config`的细节可以查看源码了解。需要注意的是，**程序运行期间，只会读取一次**`botoy.json`
