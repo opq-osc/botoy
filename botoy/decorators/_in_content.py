@@ -27,7 +27,7 @@ def in_content(string: str, raw: bool = True):
                     content = pic_ctx.Content
                 else:
                     content = ctx.Content
-                if re.match(string, content):
+                if re.findall(string, content):
                     return func(ctx)
             return None
 
