@@ -1,5 +1,6 @@
 # pylint: disable=W0212
 """深度封装发送操作"""
+import base64
 import inspect
 import re
 from pathlib import Path
@@ -12,7 +13,11 @@ from .log import logger
 from .model import FriendMsg, GroupMsg
 from .utils import file_to_base64
 
-_T_Data = Union[str, Path, List[str]]
+# str => base64, md5, file path
+# bytes => base64
+# Path => file path
+# List[str] => md5 list
+_T_Data = Union[str, bytes, Path, List[str]]
 
 _BASE64_REGEX = re.compile(
     r"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$"
@@ -224,7 +229,8 @@ class S:
         return type("S", (S,), dict(_locals=(ctx, action)))
 
     @classmethod
-    def __guess_data_type(cls, data: _T_Data) -> int:
+    def __resolve_data_type(cls, data: _T_Data) -> Tuple[int, _T_Data]:
+        """用来处理数据类型，必要时需要对数据进行进一步加工再返回"""
         # FIXME: if hell. 逻辑并不严谨
         # url, path, md5, base64
         # url
@@ -239,25 +245,38 @@ class S:
         #   2. str 目前来看，opq收到的图片MD5均是长度为24，==结尾，
         #   语音并不支持md5发送, 基本可以确定, 并且一张图片的base64不可能这么短
 
+        # base64
+        #   1. 前面都不符合剩余的情况就是base64
+        #   2. bytes 一定是base64
+
         # Path, List[str]
+
+        type = None
+
         if isinstance(data, Path):  # Path 特殊对象优先判断
-            return cls.TYPE_PATH
+            type = cls.TYPE_PATH
+        elif isinstance(data, bytes):  # bytes 必定是base64
+            type = cls.TYPE_BASE64
+            data = base64.b64encode(data).decode()
         elif isinstance(data, list):  # 必定为MD5
-            return cls.TYPE_MD5
+            type = cls.TYPE_MD5
         # 处理 str
         elif data.startswith("http://") or data.startswith("https://"):
-            return cls.TYPE_URL
+            type = cls.TYPE_URL
         elif len(data) == 24 and data.endswith("=="):
-            return cls.TYPE_MD5
+            type = cls.TYPE_MD5
         elif len(data) < 1000:
             if Path(data).exists():
-                return cls.TYPE_PATH
+                type = cls.TYPE_PATH
             elif re.match(_BASE64_REGEX, data):
-                return cls.TYPE_BASE64
+                type = cls.TYPE_BASE64
             # else:
             #     return cls.TYPE_MD5
         elif re.match(_BASE64_REGEX, data):
-            return cls.TYPE_BASE64
+            type = cls.TYPE_BASE64
+
+        if type is not None:
+            return type, data
 
         assert False, "正常情况下这里应该是执行不到的"
 
@@ -295,7 +314,7 @@ class S:
     def image(cls, data: _T_Data, text: str = "", at: bool = False, type: int = 0):
         """发送图片
         :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
-        或者 base64 字符串，或者为MD5或MD5列表，当为MD5列表(发送多图)时，参数text将无效
+        或者 base64 字符串, 或者为bytes(此时为base64)，或者为MD5或MD5列表，当为MD5列表(发送多图)时，参数text将无效
 
         :param text: 图片附带的文字信息
         :param at: 是否要艾特该用户
@@ -312,7 +331,7 @@ class S:
             cls.TYPE_BASE64,
             cls.TYPE_PATH,
         ):
-            type = cls.__guess_data_type(data)
+            type, data = cls.__resolve_data_type(data)
 
         if isinstance(ctx, GroupMsg):
             if at:
@@ -379,7 +398,7 @@ class S:
     def voice(cls, data: _T_Data, type: int = 0):
         """发送语音
         :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
-        或者 base64 字符串， 不支持MD5
+        或者 base64 字符串, 或者为bytes(此时当作base64), 不支持MD5
 
         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
         """
@@ -394,7 +413,7 @@ class S:
             cls.TYPE_BASE64,
             cls.TYPE_PATH,
         ):
-            type = cls.__guess_data_type(data)
+            type, data = cls.__resolve_data_type(data)
 
         assert type != cls.TYPE_MD5, "语音不支持MD5发送"
 
