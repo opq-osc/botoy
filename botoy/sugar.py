@@ -3,8 +3,9 @@
 import base64
 import inspect
 import re
+from io import BytesIO
 from pathlib import Path
-from typing import List, Optional, Tuple, Type, Union
+from typing import BinaryIO, List, Optional, Tuple, Type, Union
 
 from . import macro
 from .action import Action
@@ -15,9 +16,11 @@ from .utils import file_to_base64
 
 # str => base64, md5, file path
 # bytes => base64
+# BytesIO =>base64
+# BinaryIO => base64
 # Path => file path
 # List[str] => md5 list
-_T_Data = Union[str, bytes, Path, List[str]]
+_T_Data = Union[str, bytes, BytesIO, BinaryIO, Path, List[str]]
 
 _BASE64_REGEX = re.compile(
     r"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$"
@@ -258,6 +261,12 @@ class S:
         elif isinstance(data, bytes):  # bytes 必定是base64
             type = cls.TYPE_BASE64
             data = base64.b64encode(data).decode()
+        elif isinstance(data, BytesIO):
+            type = cls.TYPE_BASE64
+            data = base64.b64encode(data.getvalue()).decode()
+        elif isinstance(data, BinaryIO):
+            type = cls.TYPE_BASE64
+            data = base64.b64encode(data.read()).decode()
         elif isinstance(data, list):  # 必定为MD5
             type = cls.TYPE_MD5
         # 处理 str
