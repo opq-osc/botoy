@@ -80,6 +80,10 @@ section_a_c = section_a.get_("C")
 assert section_a_c == ["item1", "item2"]
 ```
 
+!!!tip
+
+    `Config`的`config`属性是该对象的数据源，是一个字典
+
 ---
 
 关于`Config`的细节可以查看源码了解。需要注意的是，**程序运行期间，只会读取一次**`botoy.json`
