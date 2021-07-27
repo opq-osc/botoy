@@ -150,6 +150,9 @@ image 和 voice 都有一个参数 data, 该参数可以为
     1. 字符串， 表示 url，base64，MD5, file path
     2. 字符串列表， 表示发送 MD5
     3. Path 对象，表示 file path
+    4. bytes => base64
+    5. BytesIO => base64
+    6. BinaryIO => base64
 
 默认会自动判断内容的发送类型，你也可以显示指定参数 type, 允许值为 S.TYPE\_?
 
