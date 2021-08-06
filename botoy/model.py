@@ -1,7 +1,6 @@
 # pylint: disable=too-many-instance-attributes
+import warnings
 from typing import Optional
-
-from .log import logger
 
 
 class GroupMsg:
@@ -62,7 +61,8 @@ class GroupMsg:
             "MsgRandom",
             "RedBaginfo",
         ):
-            logger.warning(f"{name} 为保留属性，不建议修改")
+            warnings.warn(f"{name} 为保留属性，不建议修改", SyntaxWarning, 2)
+
         self.__dict__[name] = value
 
     def __repr__(self):
@@ -118,7 +118,7 @@ class FriendMsg:
             "TempUin",
             "RedBaginfo",
         ):
-            logger.warning(f"{name} 为保留属性，不建议修改")
+            warnings.warn(f"{name} 为保留属性，不建议修改", SyntaxWarning, 2)
         self.__dict__[name] = value
 
     def __repr__(self):
@@ -175,7 +175,7 @@ class EventMsg:
             "ToUin"
             "RedBaginfo",
         ):
-            logger.warning(f"{name} 为保留属性，不建议修改")
+            warnings.warn(f"{name} 为保留属性，不建议修改", SyntaxWarning, 2)
         self.__dict__[name] = value
 
     def __repr__(self):
