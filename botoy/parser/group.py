@@ -81,7 +81,7 @@ class Pic(BaseModel):
     GroupPic: List[PicItem]
     Content: str = ""
     Tips: str  # FIXME: 处理这类情况，但无法复现该消息 [好友图片]
-    UserExt: Optional[List[UserExtItem]] # 即使at，有图就是图片消息。。。
+    UserExt: Optional[List[UserExtItem]]  # 即使at，有图就是图片消息。。。
     UserID: Optional[List[int]]
 
 

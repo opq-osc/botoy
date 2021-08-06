@@ -1,6 +1,8 @@
 # pylint: disable=too-many-instance-attributes
 from typing import Optional
 
+from .log import logger
+
 
 class GroupMsg:
     message: dict  # raw message
@@ -27,7 +29,7 @@ class GroupMsg:
             CurrentQQ=message["CurrentQQ"],
             data=data,
         ).items():
-            self.__setattr__(name, value)
+            self.__dict__[name] = value
 
         # set Data items
         for name in [
@@ -42,7 +44,26 @@ class GroupMsg:
             "MsgRandom",
             "RedBaginfo",
         ]:
-            self.__setattr__(name, data.get(name))
+            self.__dict__[name] = data.get(name)
+
+    def __setattr__(self, name, value):
+        if name in (
+            "message",
+            "CurrentQQ",
+            "data",
+            "FromGroupId",
+            "FromGroupName",
+            "FromUserId",
+            "FromNickName",
+            "Content",
+            "MsgType",
+            "MsgTime",
+            "MsgSeq",
+            "MsgRandom",
+            "RedBaginfo",
+        ):
+            logger.warning(f"{name} 为保留属性，不建议修改")
+        self.__dict__[name] = value
 
     def __repr__(self):
         return f"GroupMsg => {self.data}"
@@ -70,7 +91,7 @@ class FriendMsg:
             CurrentQQ=message["CurrentQQ"],
             data=data,
         ).items():
-            self.__setattr__(name, value)
+            self.__dict__[name] = value
 
         # set Data items
         for name in [
@@ -82,7 +103,23 @@ class FriendMsg:
             "RedBaginfo",
             "TempUin",
         ]:
-            self.__setattr__(name, data.get(name))
+            self.__dict__[name] = data.get(name)
+
+    def __setattr__(self, name, value):
+        if name in (
+            "message",
+            "CurrentQQ",
+            "data",
+            "FromUin",
+            "ToUin",
+            "Content",
+            "MsgType",
+            "MsgSeq",
+            "TempUin",
+            "RedBaginfo",
+        ):
+            logger.warning(f"{name} 为保留属性，不建议修改")
+        self.__dict__[name] = value
 
     def __repr__(self):
         return f"FriendMsg => {self.data}"
@@ -113,15 +150,33 @@ class EventMsg:
             CurrentQQ=message["CurrentQQ"],
             data=data,
         ).items():
-            self.__setattr__(name, value)
+            self.__dict__[name] = value
 
         # set Data items
         for name in ["EventName", "EventData", "EventMsg"]:
-            self.__setattr__(name, data.get(name))
+            self.__dict__[name] = data.get(name)
         # set EventMsg items
         eventMsg = data["EventMsg"]
         for name in ["Content", "FromUin", "MsgSeq", "MsgType", "ToUin", "RedBaginfo"]:
-            self.__setattr__(name, eventMsg.get(name))
+            self.__dict__[name] = eventMsg.get(name)
+
+    def __setattr__(self, name, value):
+        if name in (
+            "message",
+            "CurrentQQ",
+            "data",
+            "EventName"
+            "EventData"
+            "EventMsg"
+            "Content"
+            "FromUin"
+            "MsgSeq"
+            "MsgType"
+            "ToUin"
+            "RedBaginfo",
+        ):
+            logger.warning(f"{name} 为保留属性，不建议修改")
+        self.__dict__[name] = value
 
     def __repr__(self):
         return f"EventMsg => {self.data}"
