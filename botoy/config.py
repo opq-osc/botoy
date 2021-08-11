@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import Any, List
 
 from .exceptions import InvalidConfigError
 from .utils import check_schema
@@ -89,7 +89,7 @@ class Config:
         """
         return self.config.get(config_name)
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> Any:
         return self.config.get(attr)
 
     def get_section(self, section_name: str):
