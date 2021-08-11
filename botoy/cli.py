@@ -66,6 +66,7 @@ def init(name, qq, host, port):
     template = textwrap.dedent(
         """
         from botoy import Action, Botoy, EventMsg, FriendMsg, GroupMsg
+        from botoy import decorators as deco
 
         qq = {qq}
         bot = Botoy(qq=qq, use_plugins={use_plugins})
@@ -73,12 +74,14 @@ def init(name, qq, host, port):
 
 
         @bot.on_friend_msg
+        @deco.ignore_botself
         def friend(ctx: FriendMsg):
             if ctx.Content == 'test':
                 action.sendFriendText(ctx.FromUin, 'ok')
 
 
         @bot.on_group_msg
+        @deco.ignore_botself
         def group(ctx: GroupMsg):
             if ctx.Content == 'test':
                 action.sendGroupText(ctx.FromGroupId, 'ok')
@@ -170,6 +173,7 @@ def add(name, friend, group, event):
         receivers.append(
             textwrap.dedent(
                 """
+                @deco.ignore_botself
                 def receive_friend_msg(ctx: FriendMsg):
                     Action(ctx.CurrentQQ)
                 """
@@ -180,6 +184,7 @@ def add(name, friend, group, event):
         receivers.append(
             textwrap.dedent(
                 """
+                @deco.ignore_botself
                 def receive_group_msg(ctx: GroupMsg):
                     Action(ctx.CurrentQQ)
                 """
@@ -207,6 +212,7 @@ def add(name, friend, group, event):
 
     with open(write_file, "w", encoding="utf8") as f:
         f.write("from botoy import {}".format(", ".join(imports)))
+        f.write("from botoy import decorators as deco")
         f.write("\n\n")
         f.write("\n".join(receivers))
     echo("ok")
