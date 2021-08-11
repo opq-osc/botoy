@@ -116,3 +116,9 @@ def common_text(
     :param ignore_group: 忽略该群组(们)(not in)
     :param ignore_bot: 忽略机器人自身
     """
+
+
+def need_action(func=None):
+    """自动创建action并作为接收函数第2个参数传入
+    你需要修改接收函数, 并且该装饰器只能放在最后（下）面!
+    """
