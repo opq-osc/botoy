@@ -108,6 +108,7 @@ port 和 host 的含义和 Botoy 实例中的一致
 | getSummaryCard      | 获取企鹅卡片资料                 |
 | poke                | 戳一戳                           |
 | uploadGroupFile     | 上传群文件                       |
+| groupJoinAuth       | 入群审核                         |
 
 - 除特殊说明，API 返回的都是字典类型，如果出错则返回空字典
 - 没有方法名的表示还未封装，说明前面带\*号的表示还不完善

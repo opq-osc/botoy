@@ -426,7 +426,7 @@ class Action:
         else:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
-    
+
     def groupJoinAuth(self, seq: int, group: int, userid: int, cmd=None):
         """
         :param Seq:  GroupAdminsysnotify消息中的Seq
@@ -443,12 +443,12 @@ class Action:
                 "Flag_7": 3,  # 这2个flag不知道会不会变
                 "Flag_8": 21,
                 "GroupId": group,
-                "Action": {True: 11,
-                           False: 12,
-                           None: 14}[cmd]  # 11 agree , 14 忽略 , 12/21 disagree
-            }
+                "Action": {True: 11, False: 12, None: 14}[
+                    cmd
+                ],  # 11 agree , 14 忽略 , 12/21 disagree
+            },
         )
-    
+
     def uploadGroupFile(
         self,
         group: int,

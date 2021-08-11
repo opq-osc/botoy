@@ -103,7 +103,6 @@ class GroupAdminsysnotify(BaseModel):
     Content: str
 
 
-
 def group_adminsysnotify(ctx: EventMsg) -> Optional[GroupAdminsysnotify]:
     """加群申请"""
     try:
