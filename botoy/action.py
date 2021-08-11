@@ -427,7 +427,7 @@ class Action:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
     
-    def groupJoinAuth(self, Seq: int, group: int, userid: int, cmd=None):
+    def groupJoinAuth(self, seq: int, group: int, userid: int, cmd=None):
         """
         :param Seq:  GroupAdminsysnotify消息中的Seq
         :param group: QQ群号
@@ -438,7 +438,7 @@ class Action:
         return self.post(
             "AnswerInviteGroup",
             {
-                "Seq": Seq,
+                "Seq": seq,
                 "Who": userid,
                 "Flag_7": 3,  # 这2个flag不知道会不会变
                 "Flag_8": 21,
