@@ -13,6 +13,8 @@ from pathlib import Path
 from time import monotonic as clock
 from typing import Dict, Union
 
+import httpx
+
 __all__ = [
     "file_to_base64",
     "get_cache_dir",
@@ -186,3 +188,38 @@ class SwitcherManager:
         if key not in self.storage:
             self.storage[key] = Switcher(self.init_enabled)
         return self.storage[key]
+
+
+def download(url: str, dist: Union[str, Path], timeout=20, status=True, **kwargs):
+    """下载文件
+    :param url: 文件URL
+    :param dist: 下载保存路径
+    :param timeout: 请求连接超时时间
+    :param status: 是否显示当前进度
+    :param kwargs: 额外传入httpx.stream中的参数，如headers
+    :return: 无返回，下载失败则报相关错误
+    """
+    if isinstance(dist, str):
+        dist = Path(dist)
+    try:
+        with httpx.stream("GET", url, timeout=timeout, **kwargs) as resp:
+            try:
+                total = int(resp.headers["content-length"])
+            except:
+                total = None
+
+            print(f"正在下载: {dist}")
+
+            downloaded = -512
+            with open(dist, "wb") as f:
+                for chunk in resp.iter_bytes(512):
+                    f.write(chunk)
+                    downloaded += 512
+
+                    if status and total:
+                        percent = int(100 * downloaded / total)
+                        print("\r|{:100}|{}%".format("#" * percent, percent), end="")
+    except Exception as e:
+        if dist.exists():
+            os.remove(dist)
+        raise e
