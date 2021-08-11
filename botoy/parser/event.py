@@ -89,17 +89,19 @@ def group_admin(ctx: EventMsg) -> Optional[GroupAdmin]:
 
 class GroupAdminsysnotify(BaseModel):
     Type: int  # 事件类型
+    Seq: int  # seq 处理进群的时候需要用
     MsgTypeStr: str  # 消息类型
     MsgStatusStr: str  # 消息类型状态
     Who: int  # 触发消息的对象
-    WhoName: int  # 触发消息的对象昵称
-    GroupID: int  # 来自群
+    WhoName: str  # 触发消息的对象昵称
+    GroupId: int  # 来自群
     GroupName: str  # 群名
     ActionUin: int  # 邀请人(处理人)
     ActionName: str  # 邀请人(处理人)昵称
     ActionGroupCard: str  # 邀请人(处理人)群名片
     Action: str  # 加群理由 11 agree 14 忽略 12/21 disagree
-    Content: int
+    Content: str
+
 
 
 def group_adminsysnotify(ctx: EventMsg) -> Optional[GroupAdminsysnotify]:
