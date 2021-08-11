@@ -219,6 +219,8 @@ def download(url: str, dist: Union[str, Path], timeout=20, status=True, **kwargs
                     if status and total:
                         percent = int(100 * downloaded / total)
                         print("\r|{:100}|{}%".format("#" * percent, percent), end="")
+                if status and total:
+                    print("\r|{:100}|{}%".format("#" * 100, 100))
     except Exception as e:
         if dist.exists():
             os.remove(dist)
