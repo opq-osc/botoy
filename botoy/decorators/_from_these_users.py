@@ -10,7 +10,7 @@ def from_these_users(*users):
             assert isinstance(ctx, (GroupMsg, FriendMsg))
             if isinstance(ctx, GroupMsg):
                 from_user = ctx.FromUserId
-            elif isinstance(ctx, FriendMsg):
+            else:
                 from_user = ctx.FromUin
             if from_user in users:
                 return func(ctx)

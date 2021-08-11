@@ -6,7 +6,6 @@
 import base64
 import inspect
 import os
-import re
 import sys
 import threading
 from functools import wraps

@@ -1,5 +1,6 @@
 from ..model import FriendMsg, GroupMsg
-from ..refine import refine_pic_friend_msg, refine_pic_group_msg
+from ..parser import friend as fp
+from ..parser import group as gp
 
 
 def startswith(string: str):
@@ -11,11 +12,11 @@ def startswith(string: str):
         def inner(ctx):
             assert isinstance(ctx, (GroupMsg, FriendMsg))
             if isinstance(ctx, GroupMsg):
-                refine_ctx = refine_pic_group_msg(ctx)  # type: _PicGroupMsg
+                pic_data = gp.pic(ctx)
             else:
-                refine_ctx = refine_pic_friend_msg(ctx)  # type:_PicFriendMsg
-            if refine_ctx is not None:
-                content = refine_ctx.Content
+                pic_data = fp.pic(ctx)
+            if pic_data is not None:
+                content = pic_data.Content
             else:
                 content = ctx.Content
             # 这里的content按理永远不可能为None，但就是碰到了这种情况，startswith用得比较多

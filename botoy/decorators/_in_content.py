@@ -1,7 +1,8 @@
 import re
 
 from ..model import FriendMsg, GroupMsg
-from ..refine import refine_pic_friend_msg, refine_pic_group_msg
+from ..parser import friend as fp
+from ..parser import group as gp
 
 
 def in_content(string: str, raw: bool = True):
@@ -20,11 +21,11 @@ def in_content(string: str, raw: bool = True):
                     return func(ctx)
             else:
                 if isinstance(ctx, GroupMsg):
-                    pic_ctx = refine_pic_group_msg(ctx)
+                    pic_data = gp.pic(ctx)
                 else:
-                    pic_ctx = refine_pic_friend_msg(ctx)
-                if pic_ctx is not None:
-                    content = pic_ctx.Content
+                    pic_data = fp.pic(ctx)
+                if pic_data is not None:
+                    content = pic_data.Content
                 else:
                     content = ctx.Content
                 if re.findall(string, content):
