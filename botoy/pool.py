@@ -88,8 +88,8 @@ class WorkerExecutor(futures.Executor):
         if max_workers <= 0:
             raise ValueError("max_workers must be greater than 0")
         self._max_workers = max_workers
-        self._min_workers = 2  # 允许的空闲线程数
-        self._keep_alive_time = 30  # 空闲线程存活时间
+        self._min_workers = 5  # 允许的空闲线程数
+        self._keep_alive_time = 60  # 空闲线程存活时间
 
         self._worker_queue = queue.Queue()
         self._worker_threads = weakref.WeakSet()
@@ -129,7 +129,7 @@ class WorkerExecutor(futures.Executor):
             len(self._worker_threads) < self._max_workers
             and self._free_threads < self._min_workers
         ):
-            thread = WorkerThread(self)  # TODO: use executor reference??
+            thread = WorkerThread(self)  # use executor reference??
             thread.setDaemon(True)
             thread.start()
 
