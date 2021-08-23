@@ -212,7 +212,7 @@ def add(name, friend, group, event):
 
     with open(write_file, "w", encoding="utf8") as f:
         f.write("from botoy import {}".format(", ".join(imports)))
-        f.write("from botoy import decorators as deco")
+        f.write("\nfrom botoy import decorators as deco")
         f.write("\n\n")
         f.write("\n".join(receivers))
     echo("ok")
