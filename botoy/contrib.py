@@ -33,8 +33,8 @@ def file_to_base64(path):
 
 def get_cache_dir(dir_name: str) -> Path:
     """获取缓存目录
-    :param dir_name: the cache directory's name.
-    :return: A Path object of the cache directory
+    :param dir_name: 目录(文件夹)名
+    :return: 返回对应目录的Path对象
     """
     # 确定主缓存目录
     for i in os.listdir(Path(".")):
