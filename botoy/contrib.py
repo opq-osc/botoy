@@ -190,7 +190,9 @@ class SwitcherManager:
         return self.storage[key]
 
 
-def download(url: str, dist: Union[str, Path], timeout=20, status=True, **kwargs):
+def download(
+    url: str, dist: Union[str, Path], timeout: int = 20, status: bool = True, **kwargs
+):
     """下载文件
     :param url: 文件URL
     :param dist: 下载保存路径
