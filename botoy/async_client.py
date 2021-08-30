@@ -2,7 +2,7 @@
 import asyncio
 import copy
 import traceback
-from typing import Callable
+from typing import Callable, Union
 
 import socketio
 
@@ -12,71 +12,42 @@ from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 
 class AsyncBotoy(Botoy):
-    def _initialize_socketio(self):
-        self.socketio = socketio.AsyncClient()
-        self.socketio.event()(self.connect)
-        self.socketio.event()(self.disconnect)
-
-    def asyncRun(self, func: Callable, *args):
+    def run_in_pool(self, func: Callable, *args):
         self.pool.submit(func, *args)
 
-    async def close(self):
-        await self.socketio.disconnect()
-        self.pool.shutdown(wait=False)
-        self._exit = True
+    async def _context_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+        if isinstance(context, FriendMsg):
+            receivers = [
+                *self._friend_msg_receivers,
+                *self.plugMgr.friend_msg_receivers,
+            ]
+        elif isinstance(context, GroupMsg):
+            receivers = [
+                *self._group_msg_receivers,
+                *self.plugMgr.group_msg_receivers,
+            ]
+        elif isinstance(context, EventMsg):
+            receivers = [
+                *self._event_receivers,
+                *self.plugMgr.event_receivers,
+            ]
+        else:
+            return
 
-    async def run(self):
+        coros = []
+
+        for receiver in receivers:
+            new_context = copy.deepcopy(context)
+            if asyncio.iscoroutinefunction(receiver):
+                coros.append(receiver(new_context))  # type: ignore
+            else:
+                self.pool.submit(receiver, new_context)
+
         try:
-            await self.socketio.connect(self.config.address, transports=["websocket"])
+            await asyncio.gather(*coros)
         except Exception:
             logger.error(traceback.format_exc())
-            await self.close()
-        else:
-            try:
-                await self.socketio.wait()
-            finally:
-                print("bye~")
-                await self.close()
 
-    ########################################################################
-    # context distributor
-    ########################################################################
-    async def _friend_context_distributor(self, context: FriendMsg):
-        for f_receiver in [
-            *self._friend_msg_receivers,
-            *self.plugMgr.friend_msg_receivers,
-        ]:
-            new_context = copy.deepcopy(context)
-            if asyncio.iscoroutinefunction(f_receiver):
-                await f_receiver(new_context)
-            else:
-                self.asyncRun(f_receiver, new_context)
-
-    async def _group_context_distributor(self, context: GroupMsg):
-        for g_receiver in [
-            *self._group_msg_receivers,
-            *self.plugMgr.group_msg_receivers,
-        ]:
-            new_context = copy.deepcopy(context)
-            if asyncio.iscoroutinefunction(g_receiver):
-                await g_receiver(new_context)
-            else:
-                self.asyncRun(g_receiver, new_context)
-
-    async def _event_context_distributor(self, context: EventMsg):
-        for e_receiver in [
-            *self._event_receivers,
-            *self.plugMgr.event_receivers,
-        ]:
-            new_context = copy.deepcopy(context)
-            if asyncio.iscoroutinefunction(e_receiver):
-                await e_receiver(new_context)
-            else:
-                self.asyncRun(e_receiver, new_context)
-
-    ########################################################################
-    # message handler
-    ########################################################################
     async def _friend_msg_handler(self, msg):
         context = FriendMsg(msg)
         if self.qq and context.CurrentQQ not in self.qq:
@@ -91,17 +62,16 @@ class AsyncBotoy(Botoy):
         # 中间件
         if self._friend_context_middlewares:
             for middleware in self._friend_context_middlewares:
-                if asyncio.iscoroutinefunction(middleware):
-                    new_context = await middleware(context)
-                else:
-                    new_context = middleware(context)
+                new_context = middleware(context)
                 if isinstance(new_context, type(context)):
                     context = new_context
                 else:
                     return
-        context._host = self.config.host
-        context._port = self.config.port
-        await self._friend_context_distributor(context)
+        # 传递几个数据供(插件中的)接收函数调用, 其他不再注释
+        setattr(context, "_host", self.config.host)
+        setattr(context, "_port", self.config.port)
+        # return await asyncio.gather(self._context_distributor(context))
+        return await self._context_distributor(context)
 
     async def _group_msg_handler(self, msg):
         context = GroupMsg(msg)
@@ -117,17 +87,14 @@ class AsyncBotoy(Botoy):
         # 中间件
         if self._group_context_middlewares:
             for middleware in self._group_context_middlewares:
-                if asyncio.iscoroutinefunction(middleware):
-                    new_context = await middleware(context)
-                else:
-                    new_context = middleware(context)
+                new_context = middleware(context)
                 if isinstance(new_context, type(context)):
                     context = new_context
                 else:
                     return
-        context._host = self.config.host
-        context._port = self.config.port
-        await self._group_context_distributor(context)
+        setattr(context, "_host", self.config.host)
+        setattr(context, "_port", self.config.port)
+        return await self._context_distributor(context)
 
     async def _event_handler(self, msg):
         context = EventMsg(msg)
@@ -137,23 +104,37 @@ class AsyncBotoy(Botoy):
         # 中间件
         if self._event_context_middlewares:
             for middleware in self._event_context_middlewares:
-                if asyncio.iscoroutinefunction(middleware):
-                    new_context = await middleware(context)
-                else:
-                    new_context = middleware(context)
+                new_context = middleware(context)
                 if isinstance(new_context, type(context)):
                     context = new_context
                 else:
                     return
-        context._host = self.config.host
-        context._port = self.config.port
-        await self._event_context_distributor(context)
+        setattr(context, "_host", self.config.host)
+        setattr(context, "_port", self.config.port)
+        return await self._context_distributor(context)
 
-    ########################################################################
-    def __repr__(self):
-        return "AsyncBotoy <{}> <host-{}> <port-{}> <address-{}>".format(
-            " ".join([str(i) for i in self.qq]),
-            self.config.host,
-            self.config.port,
-            self.config.address,
-        )
+    async def run(self):
+        sio = socketio.AsyncClient()
+        sio.event(self.connect)
+        sio.event(self.disconnect)
+        sio.on("OnGroupMsgs")(self._group_msg_handler)  # type: ignore
+        sio.on("OnFriendMsgs")(self._friend_msg_handler)  # type: ignore
+        sio.on("OnEvents")(self._event_handler)  # type: ignore
+
+        logger.info("Connecting to the server...")
+
+        try:
+            await sio.connect(self.config.address, transports=["websocket"])
+        except Exception:
+            logger.error(traceback.format_exc())
+            await sio.disconnect()
+            self.pool.shutdown(wait=False)
+        else:
+            try:
+                await sio.wait()
+            except KeyboardInterrupt:
+                pass
+            finally:
+                print("bye~")
+                await sio.disconnect()
+                self.pool.shutdown(wait=False)

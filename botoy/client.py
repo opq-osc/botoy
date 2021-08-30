@@ -210,7 +210,6 @@ class Botoy:
         for receiver in receivers:
             self.pool.submit(receiver, copy.deepcopy(context))
 
-
     ########################################################################
     # message handler
     ########################################################################
@@ -236,7 +235,7 @@ class Botoy:
         # 传递几个数据供(插件中的)接收函数调用, 其他不再注释
         setattr(context, "_host", self.config.host)
         setattr(context, "_port", self.config.port)
-        self.pool.submit(self._context_distributor, context)
+        return self.pool.submit(self._context_distributor, context)
 
     def _group_msg_handler(self, msg):
         context = GroupMsg(msg)
@@ -259,7 +258,7 @@ class Botoy:
                     return
         setattr(context, "_host", self.config.host)
         setattr(context, "_port", self.config.port)
-        self.pool.submit(self._context_distributor, context)
+        return self.pool.submit(self._context_distributor, context)
 
     def _event_handler(self, msg):
         context = EventMsg(msg)
@@ -276,7 +275,7 @@ class Botoy:
                     return
         setattr(context, "_host", self.config.host)
         setattr(context, "_port", self.config.port)
-        self.pool.submit(self._context_distributor, context)
+        return self.pool.submit(self._context_distributor, context)
 
     def group_msg_handler(self, msg: dict):
         """群消息入口函数
