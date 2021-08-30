@@ -188,29 +188,36 @@ class Botoy:
     ########################################################################
     # context distributor
     ########################################################################
+    def _base_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+        if isinstance(context, FriendMsg):
+            receivers = [
+                *self._friend_msg_receivers,
+                *self.plugMgr.friend_msg_receivers,
+            ]
+        elif isinstance(context, GroupMsg):
+            receivers = [
+                *self._group_msg_receivers,
+                *self.plugMgr.group_msg_receivers,
+            ]
+        elif isinstance(context, EventMsg):
+            receivers = [
+                *self._event_receivers,
+                *self.plugMgr.event_receivers,
+            ]
+        else:
+            return
+
+        for receiver in receivers:
+            self.pool.submit(receiver, copy.deepcopy(context))
+
     def _friend_context_distributor(self, context: FriendMsg):
-        for f_receiver in [
-            *self._friend_msg_receivers,
-            *self.plugMgr.friend_msg_receivers,
-        ]:
-            distributive_context = copy.deepcopy(context)
-            self.pool.submit(f_receiver, distributive_context)
+        self._base_distributor(context)
 
     def _group_context_distributor(self, context: GroupMsg):
-        for g_receiver in [
-            *self._group_msg_receivers,
-            *self.plugMgr.group_msg_receivers,
-        ]:
-            distributive_context = copy.deepcopy(context)
-            self.pool.submit(g_receiver, distributive_context)
+        self._base_distributor(context)
 
     def _event_context_distributor(self, context: EventMsg):
-        for e_receiver in [
-            *self._event_receivers,
-            *self.plugMgr.event_receivers,
-        ]:
-            distributive_context = copy.deepcopy(context)
-            self.pool.submit(e_receiver, distributive_context)
+        self._base_distributor(context)
 
     ########################################################################
     # message handler
