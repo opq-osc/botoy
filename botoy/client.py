@@ -113,6 +113,90 @@ class Botoy:
         thread_works = 50
         self.pool = WorkerPool(thread_works)
 
+        # 初始化消息包接收函数
+        self._friend_msg_handler = self._msg_handler_factory(FriendMsg)
+        self._group_msg_handler = self._msg_handler_factory(GroupMsg)
+        self._event_handler = self._msg_handler_factory(EventMsg)
+
+    ########################################################################
+    # message handler
+    ########################################################################
+    def _msg_handler_factory(self, cls):
+        def handler(msg):
+            return self._context_handler(cls(msg))
+
+        return handler
+
+    def _context_handler(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+        passed_context = self._context_checker(context)
+        if passed_context:
+            return self.pool.submit(self._context_distributor, context)
+        return
+
+    def _context_checker(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+        if self.qq and context.CurrentQQ not in self.qq:
+            return
+
+        logger.info(f"{context.__class__.__name__} ->  {context.data}")
+
+        if isinstance(context, FriendMsg):
+            if context.FromUin in (
+                *self.config.friend_blacklist,
+                *self.config.blocked_users,
+            ):
+                return
+            middlewares = self._friend_context_middlewares
+
+        elif isinstance(context, GroupMsg):
+            if (
+                context.FromGroupId in self.config.group_blacklist
+                or context.FromUserId in self.config.blocked_users
+            ):
+                return
+            middlewares = self._group_context_middlewares
+
+        else:
+            middlewares = self._event_context_middlewares
+
+        context_type = type(context)
+        for middleware in middlewares:
+            new_context = middleware(context)  # type: ignore
+            if not (new_context and isinstance(new_context, context_type)):
+                return
+            context = new_context
+
+        setattr(context, "_host", self.config.host)
+        setattr(context, "_port", self.config.port)
+
+        return context
+
+    ########################################################################
+    # context distributor
+    ########################################################################
+    def _context_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+        for receiver in self._get_context_receivers(context):
+            self.pool.submit(receiver, copy.deepcopy(context))
+
+    def _get_context_receivers(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+
+        if isinstance(context, FriendMsg):
+            receivers = [
+                *self._friend_msg_receivers,
+                *self.plugMgr.friend_msg_receivers,
+            ]
+        elif isinstance(context, GroupMsg):
+            receivers = [
+                *self._group_msg_receivers,
+                *self.plugMgr.group_msg_receivers,
+            ]
+        else:
+            receivers = [
+                *self._event_receivers,
+                *self.plugMgr.event_receivers,
+            ]
+
+        return receivers
+
     ########################################################################
     # Add context receivers
     ########################################################################
@@ -186,97 +270,8 @@ class Botoy:
                 self._when_disconnected_do = None
 
     ########################################################################
-    # context distributor
+    # 开放出来的用于多种连接方式的入口函数
     ########################################################################
-    def _context_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
-        if isinstance(context, FriendMsg):
-            receivers = [
-                *self._friend_msg_receivers,
-                *self.plugMgr.friend_msg_receivers,
-            ]
-        elif isinstance(context, GroupMsg):
-            receivers = [
-                *self._group_msg_receivers,
-                *self.plugMgr.group_msg_receivers,
-            ]
-        elif isinstance(context, EventMsg):
-            receivers = [
-                *self._event_receivers,
-                *self.plugMgr.event_receivers,
-            ]
-        else:
-            return
-
-        for receiver in receivers:
-            self.pool.submit(receiver, copy.deepcopy(context))
-
-    ########################################################################
-    # message handler
-    ########################################################################
-    def _friend_msg_handler(self, msg):
-        context = FriendMsg(msg)
-        if self.qq and context.CurrentQQ not in self.qq:
-            return
-        logger.info(f"{context.__class__.__name__} ->  {context.data}")
-        # 黑名单
-        if context.FromUin in self.config.friend_blacklist:
-            return
-        # 屏蔽用户
-        if context.FromUin in self.config.blocked_users:
-            return
-        # 中间件
-        if self._friend_context_middlewares:
-            for middleware in self._friend_context_middlewares:
-                new_context = middleware(context)
-                if isinstance(new_context, type(context)):
-                    context = new_context
-                else:
-                    return
-        # 传递几个数据供(插件中的)接收函数调用, 其他不再注释
-        setattr(context, "_host", self.config.host)
-        setattr(context, "_port", self.config.port)
-        return self.pool.submit(self._context_distributor, context)
-
-    def _group_msg_handler(self, msg):
-        context = GroupMsg(msg)
-        if self.qq and context.CurrentQQ not in self.qq:
-            return
-        logger.info(f"{context.__class__.__name__} ->  {context.data}")
-        # 黑名单
-        if context.FromGroupId in self.config.group_blacklist:
-            return
-        # 屏蔽用户
-        if context.FromUserId in self.config.blocked_users:
-            return
-        # 中间件
-        if self._group_context_middlewares:
-            for middleware in self._group_context_middlewares:
-                new_context = middleware(context)
-                if isinstance(new_context, type(context)):
-                    context = new_context
-                else:
-                    return
-        setattr(context, "_host", self.config.host)
-        setattr(context, "_port", self.config.port)
-        return self.pool.submit(self._context_distributor, context)
-
-    def _event_handler(self, msg):
-        context = EventMsg(msg)
-        if self.qq and context.CurrentQQ not in self.qq:
-            return
-        logger.info(f"{context.__class__.__name__} ->  {context.data}")
-        # 中间件
-        if self._event_context_middlewares:
-            for middleware in self._event_context_middlewares:
-                new_context = middleware(context)
-                if isinstance(new_context, type(context)):
-                    context = new_context
-                else:
-                    return
-        setattr(context, "_host", self.config.host)
-        setattr(context, "_port", self.config.port)
-        return self.pool.submit(self._context_distributor, context)
-
     def group_msg_handler(self, msg: dict):
         """群消息入口函数
         :param msg: 完整的消息数据
