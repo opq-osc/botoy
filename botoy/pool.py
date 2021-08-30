@@ -111,9 +111,9 @@ class WorkerExecutor(futures.Executor):
     def submit(self, target, *args, **kwargs):
         with self._shutdown_lock:
             if self._shutdown:
-                raise RuntimeError('工作池已关闭，无法添加新任务')
+                raise RuntimeError("工作池已关闭，无法添加新任务")
             if _exit:
-                raise RuntimeError('程序已退出，无法添加新任务')
+                raise RuntimeError("程序已退出，无法添加新任务")
 
             future = futures.Future()
             worker = Worker(future, target, args, kwargs)

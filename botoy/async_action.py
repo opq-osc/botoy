@@ -1,12 +1,19 @@
+import asyncio
 import time
 import traceback
-from typing import List, Union
+from typing import Callable, List, Union
 
 import httpx
 
 from botoy import macro
 from botoy.config import Config
 from botoy.log import logger
+
+
+async def timer(interval: int, function: Callable):
+    future = asyncio.ensure_future(asyncio.sleep(interval))
+    await future
+    future.add_done_callback(function)
 
 
 class AsyncAction:
@@ -19,6 +26,7 @@ class AsyncAction:
             base_url=self.config.address,
             params={"qq": self.qq, "timeout": timeout},
         )
+        self.lock = asyncio.Lock()
 
     ############发送相关############
     async def sendFriendText(self, user: int, content: str) -> dict:
@@ -454,30 +462,35 @@ class AsyncAction:
 
         # 发送请求
         try:
+            await self.lock.acquire()
+            await timer(5, self.release_lock)
             resp = await self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
             resp.raise_for_status()
-        except httpx.HTTPError as e:
-            if isinstance(e, httpx.TimeoutException):
-                logger.warning(f"响应超时，但不代表处理未成功, 结果未知! => {e}")
-            elif isinstance(e, httpx.HTTPStatusError):
-                logger.error(
-                    f"响应码出错 => {resp.status_code}",
-                )
-            else:
-                logger.error(f"请求出错: {traceback.format_exc()}")
+        except httpx.TimeoutException:
+            logger.warning(f"响应超时，但不代表处理未成功, 结果未知!")
             return {}
+        except httpx.HTTPStatusError:
+            logger.error(
+                f"响应码出错 => {resp.status_code}",  # type:ignore
+            )
+            return {}
+        except Exception:
+            logger.error(f"请求出错: {traceback.format_exc()}")
+            return {}
+        finally:
+            self.release_lock()
 
         # 处理数据
         try:
             data = resp.json()
-        except Exception as e:
+        except Exception:
             logger.error("API响应结果非json格式")
             return {}
 
         if data is None:
-            logger.error("返回为null")
+            logger.error("返回为null, 该类情况多数是因为响应超时或者该API不存在，或服务端操作超时(此时不代表未成功)")
             return {}
 
         # 返回码提示
@@ -522,3 +535,9 @@ class AsyncAction:
         return await self.baseRequest(
             "GET", funcname=funcname, path=path, params=params
         )
+
+    def release_lock(self):
+        try:
+            self.lock.release()
+        except Exception:
+            pass
