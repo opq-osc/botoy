@@ -188,7 +188,7 @@ class Botoy:
     ########################################################################
     # context distributor
     ########################################################################
-    def _base_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
+    def _context_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
         if isinstance(context, FriendMsg):
             receivers = [
                 *self._friend_msg_receivers,
@@ -210,14 +210,6 @@ class Botoy:
         for receiver in receivers:
             self.pool.submit(receiver, copy.deepcopy(context))
 
-    def _friend_context_distributor(self, context: FriendMsg):
-        self._base_distributor(context)
-
-    def _group_context_distributor(self, context: GroupMsg):
-        self._base_distributor(context)
-
-    def _event_context_distributor(self, context: EventMsg):
-        self._base_distributor(context)
 
     ########################################################################
     # message handler
@@ -244,7 +236,7 @@ class Botoy:
         # 传递几个数据供(插件中的)接收函数调用, 其他不再注释
         setattr(context, "_host", self.config.host)
         setattr(context, "_port", self.config.port)
-        self.pool.submit(self._friend_context_distributor, context)
+        self.pool.submit(self._context_distributor, context)
 
     def _group_msg_handler(self, msg):
         context = GroupMsg(msg)
@@ -267,7 +259,7 @@ class Botoy:
                     return
         setattr(context, "_host", self.config.host)
         setattr(context, "_port", self.config.port)
-        self.pool.submit(self._group_context_distributor, context)
+        self.pool.submit(self._context_distributor, context)
 
     def _event_handler(self, msg):
         context = EventMsg(msg)
@@ -284,7 +276,7 @@ class Botoy:
                     return
         setattr(context, "_host", self.config.host)
         setattr(context, "_port", self.config.port)
-        self.pool.submit(self._event_context_distributor, context)
+        self.pool.submit(self._context_distributor, context)
 
     def group_msg_handler(self, msg: dict):
         """群消息入口函数
