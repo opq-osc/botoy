@@ -17,7 +17,7 @@ def in_content(string: str, raw: bool = True):
         def inner(ctx):
             assert isinstance(ctx, (GroupMsg, FriendMsg))
             if raw:
-                if re.match(string, ctx.Content):
+                if re.findall(string, ctx.Content):
                     return func(ctx)
             else:
                 if isinstance(ctx, GroupMsg):
