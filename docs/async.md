@@ -64,7 +64,7 @@ async def receive_group_msg(ctx):
 
 ## 语法糖 `S`
 
-```
+```python
 await S.atext()
 await S.aimage()
 await S.avoice()
