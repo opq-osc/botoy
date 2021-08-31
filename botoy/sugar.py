@@ -9,13 +9,14 @@ from typing import BinaryIO, List, Tuple, Union
 
 from . import macro
 from .action import Action
+from .async_action import AsyncAction
 from .collection import MsgTypes
 from .log import logger
 from .model import FriendMsg, GroupMsg
 from .utils import file_to_base64
 
 
-def find_local(back_stack: int = 1) -> Tuple[Union[FriendMsg, GroupMsg], Action]:
+def find_ctx(back_stack: int = 1) -> Union[FriendMsg, GroupMsg]:
     back = inspect.currentframe().f_back  # type: ignore
     for _ in range(back_stack):
         back = back.f_back  # type: ignore
@@ -31,15 +32,7 @@ def find_local(back_stack: int = 1) -> Tuple[Union[FriendMsg, GroupMsg], Action]
     # FIXME: 更好的处理方式
     assert ctx is not None  # 这里应该是不可能发生的
 
-    action = Action(
-        ctx.CurrentQQ,
-        host=getattr(ctx, "_host", None),
-        port=getattr(ctx, "_port", None),
-    )
-    logger.debug(
-        f"find locals: ctx => {id(ctx)} host => {action.config.host} port => {action.config.port}"
-    )
-    return (ctx, action)
+    return ctx
 
 
 def Text(text: str, at=False):
@@ -49,7 +42,12 @@ def Text(text: str, at=False):
     """
     text = str(text)
 
-    ctx, action = find_local()
+    ctx = find_ctx()
+    action = Action(
+        ctx.CurrentQQ,
+        host=getattr(ctx, "_host", None),
+        port=getattr(ctx, "_port", None),
+    )
 
     if isinstance(ctx, GroupMsg):
         return action.sendGroupText(
@@ -77,7 +75,12 @@ def Picture(pic_url="", pic_base64="", pic_path="", pic_md5="", text=""):
     """
     assert any([pic_url, pic_base64, pic_path, pic_md5]), "必须给定一项"
 
-    ctx, action = find_local()
+    ctx = find_ctx()
+    action = Action(
+        ctx.CurrentQQ,
+        host=getattr(ctx, "_host", None),
+        port=getattr(ctx, "_port", None),
+    )
 
     if isinstance(ctx, GroupMsg):
         if pic_url:
@@ -149,7 +152,12 @@ def Voice(voice_url="", voice_base64="", voice_path=""):
     """
     assert any([voice_url, voice_base64, voice_path]), "必须给定一项"
 
-    ctx, action = find_local()
+    ctx = find_ctx()
+    action = Action(
+        ctx.CurrentQQ,
+        host=getattr(ctx, "_host", None),
+        port=getattr(ctx, "_port", None),
+    )
 
     if isinstance(ctx, GroupMsg):
         if voice_url:
@@ -279,34 +287,27 @@ class _S:
     TYPE_PATH = TYPE_PATH
 
     def __init__(self, ctx: Union[FriendMsg, GroupMsg] = None):
-        if ctx is not None:
-            self._locals = (
-                ctx,
-                Action(
-                    ctx.CurrentQQ,
-                    host=getattr(ctx, "_host", None),
-                    port=getattr(ctx, "_port", None),
-                ),
-            )
-        else:
-            self._locals = None
+        self._ctx = ctx
 
     def bind(self, ctx: Union[FriendMsg, GroupMsg]) -> "_S":
         """绑定该上下文对象，获取一个与该上下文对应的新的S"""
         return _S(ctx)
 
     @property
-    def __locals(self) -> Tuple[Union[FriendMsg, GroupMsg], Action]:
-        if self._locals is not None:
-            return self._locals
-        return find_local(2)
+    def ctx(self) -> Union[FriendMsg, GroupMsg]:
+        return self._ctx or find_ctx(2)
 
     def text(self, text: str, at: bool = False):
         """发送文字
         :param text: 发送的文字内容
         :param at: 是否要艾特该用户
         """
-        ctx, action = self.__locals
+        ctx = self.ctx
+        action = Action(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+        )
 
         if isinstance(ctx, GroupMsg):
             logger.debug("发送群聊文字")
@@ -334,7 +335,12 @@ class _S:
         :param at: 是否要艾特该用户
         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
         """
-        ctx, action = self.__locals
+        ctx = self.ctx
+        action = Action(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+        )
 
         if type not in (
             TYPE_URL,
@@ -412,7 +418,12 @@ class _S:
 
         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
         """
-        ctx, action = self.__locals
+        ctx = self.ctx
+        action = Action(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+        )
 
         if type not in (
             TYPE_URL,
@@ -464,6 +475,183 @@ class _S:
                     return action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=file_to_base64(data))  # type: ignore
 
         return None
+
+    async def atext(self, text: str, at: bool = False):
+        """发送文字
+        :param text: 发送的文字内容
+        :param at: 是否要艾特该用户
+        """
+        ctx = self.ctx
+        async with AsyncAction(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+        ) as action:
+            if isinstance(ctx, GroupMsg):
+                logger.debug("发送群聊文字")
+                return await action.sendGroupText(
+                    ctx.FromGroupId, text, atUser=ctx.FromUserId if at else 0
+                )
+            elif isinstance(ctx, FriendMsg):
+                if ctx.TempUin:
+                    logger.debug("发送私聊文字")
+                    return await action.sendPrivateText(ctx.FromUin, ctx.TempUin, text)
+                elif ctx.MsgType == MsgTypes.PhoneMsg:
+                    logger.debug("发送手机文字")
+                    return await action.sendPhoneText(text)
+                else:
+                    logger.debug("发送好友文字")
+                    return await action.sendFriendText(ctx.FromUin, text)
+
+    async def aimage(
+        self, data: _T_Data, text: str = "", at: bool = False, type: int = 0
+    ):
+        """发送图片
+        :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
+        或者 base64 字符串, 或者为bytes(此时为base64)，或者为MD5或MD5列表，当为MD5列表(发送多图)时，参数text将无效
+
+        :param text: 图片附带的文字信息
+        :param at: 是否要艾特该用户
+        :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
+        """
+
+        if type not in (
+            TYPE_URL,
+            TYPE_MD5,
+            TYPE_BASE64,
+            TYPE_PATH,
+        ):
+            type, data = _resolve_data_type(data)
+
+        ctx = self.ctx
+        async with AsyncAction(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+        ) as action:
+
+            if isinstance(ctx, GroupMsg):
+                if at:
+                    text = macro.atUser(ctx.FromUserId) + text
+
+                if type == TYPE_URL:
+                    logger.debug("发送群聊网络图片")
+                    return await action.sendGroupPic(ctx.FromGroupId, content=text, picUrl=data)  # type: ignore
+                elif type == TYPE_BASE64:
+                    logger.debug("发送群聊base64图片")
+                    return await action.sendGroupPic(ctx.FromGroupId, content=text, picBase64Buf=data)  # type: ignore
+                elif type == TYPE_MD5:
+                    logger.debug("发送群聊md5图片")
+                    return await action.sendGroupPic(
+                        ctx.FromGroupId, content=text, picMd5s=data  # type:ignore
+                    )
+                elif type == TYPE_PATH:
+                    logger.debug("发送群聊本地图片")
+                    return await action.sendGroupPic(
+                        ctx.FromGroupId, content=text, picBase64Buf=file_to_base64(data)
+                    )
+            elif isinstance(ctx, FriendMsg):
+                if ctx.TempUin:
+                    if type == TYPE_URL:
+                        logger.debug("发送私聊网络图片")
+                        return await action.sendPrivatePic(
+                            ctx.FromUin, ctx.TempUin, content=text, picUrl=data  # type: ignore
+                        )
+                    elif type == TYPE_BASE64:
+                        logger.debug("发送私聊base64图片")
+                        return await action.sendPrivatePic(
+                            ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=data  # type: ignore
+                        )
+                    elif type == TYPE_MD5:
+                        logger.debug("发送私聊md5图片")
+                        return await action.sendPrivatePic(
+                            ctx.FromUin,
+                            ctx.TempUin,
+                            content=text,
+                            fileMd5=data,  # type:ignore
+                        )
+                    elif type == TYPE_PATH:
+                        logger.debug("发送私聊本地图片")
+                        return await action.sendPrivatePic(
+                            ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=file_to_base64(data)  # type: ignore
+                        )
+                else:
+                    if type == TYPE_URL:
+                        logger.debug("发送好友链接图片")
+                        return await action.sendFriendPic(ctx.FromUin, content=text, picUrl=data)  # type: ignore
+                    elif type == TYPE_BASE64:
+                        logger.debug("发送好友base64图片")
+                        return await action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=data)  # type: ignore
+                    elif type == TYPE_MD5:
+                        logger.debug("发送好友md5图片")
+                        return await action.sendFriendPic(ctx.FromUin, content=text, fileMd5=data)  # type: ignore
+                    elif type == TYPE_PATH:
+                        logger.debug("发送好友本地图片")
+                        return await action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=file_to_base64(data))  # type: ignore
+
+    async def avoice(self, data: _T_Data, type: int = 0):
+        """发送语音
+        :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
+        或者 base64 字符串, 或者为bytes(此时当作base64), 不支持MD5
+
+        :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
+        """
+
+        if type not in (
+            TYPE_URL,
+            TYPE_MD5,
+            TYPE_BASE64,
+            TYPE_PATH,
+        ):
+            type, data = _resolve_data_type(data)
+
+        assert type != TYPE_MD5, "语音不支持MD5发送"
+
+        ctx = self.ctx
+        async with AsyncAction(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+        ) as action:
+
+            if isinstance(ctx, GroupMsg):
+                if type == TYPE_URL:
+                    logger.debug("发送群聊网络语音")
+                    return await action.sendGroupVoice(ctx.FromGroupId, voiceUrl=data)  # type: ignore
+                elif type == TYPE_BASE64:
+                    logger.debug("发送群聊base64语音")
+                    return await action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=data)  # type: ignore
+                elif type == TYPE_PATH:
+                    logger.debug("发送群聊本地语音")
+                    return await action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=file_to_base64(data))  # type: ignore
+
+            elif isinstance(ctx, FriendMsg):
+                if ctx.TempUin:
+                    if type == TYPE_URL:
+                        logger.debug("发送私聊网络语音")
+                        return await action.sendPrivateVoice(
+                            ctx.FromUin, ctx.TempUin, voiceUrl=data  # type: ignore
+                        )
+                    elif type == TYPE_BASE64:
+                        logger.debug("发送私聊base64语音")
+                        return await action.sendPrivateVoice(
+                            ctx.FromUin, ctx.TempUin, voiceBase64Buf=data  # type: ignore
+                        )
+                    elif type == TYPE_PATH:
+                        logger.debug("发送私聊本地语音")
+                        return await action.sendPrivateVoice(
+                            ctx.FromUin, ctx.TempUin, voiceBase64Buf=file_to_base64(data)  # type: ignore
+                        )
+                else:
+                    if type == TYPE_URL:
+                        logger.debug("发送好友网络语音")
+                        return await action.sendFriendVoice(ctx.FromUin, voiceUrl=data)  # type: ignore
+                    elif type == TYPE_BASE64:
+                        logger.debug("发送好友base64语音")
+                        return await action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=data)  # type: ignore
+                    elif type == TYPE_PATH:
+                        logger.debug("发送好友本地语音")
+                        return await action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=file_to_base64(data))  # type: ignore
 
 
 S = _S()
