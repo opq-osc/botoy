@@ -113,6 +113,7 @@ def common_text(
                     iusers = ignore_user
                 if ctx.FromUin in iusers:
                     return None
-        return None
+
+        return func(ctx)
 
     return inner
