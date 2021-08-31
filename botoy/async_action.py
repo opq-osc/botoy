@@ -1,19 +1,12 @@
-import asyncio
 import time
 import traceback
-from typing import Callable, List, Union
+from typing import List, Union
 
 import httpx
 
 from botoy import macro
 from botoy.config import Config
 from botoy.log import logger
-
-
-async def timer(interval: int, function: Callable):
-    future = asyncio.ensure_future(asyncio.sleep(interval))
-    await future
-    future.add_done_callback(function)
 
 
 class AsyncAction:
@@ -26,7 +19,15 @@ class AsyncAction:
             base_url=self.config.address,
             params={"qq": self.qq, "timeout": timeout},
         )
-        self.lock = asyncio.Lock()
+
+    async def close(self):
+        return await self.c.aclose()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        return await self.c.__aexit__(*args)
 
     ############发送相关############
     async def sendFriendText(self, user: int, content: str) -> dict:
@@ -462,8 +463,6 @@ class AsyncAction:
 
         # 发送请求
         try:
-            await self.lock.acquire()
-            await timer(5, self.release_lock)
             resp = await self.c.request(
                 method, httpx.URL(url=path, params=params), json=payload
             )
@@ -479,8 +478,6 @@ class AsyncAction:
         except Exception:
             logger.error(f"请求出错: {traceback.format_exc()}")
             return {}
-        finally:
-            self.release_lock()
 
         # 处理数据
         try:
@@ -535,9 +532,3 @@ class AsyncAction:
         return await self.baseRequest(
             "GET", funcname=funcname, path=path, params=params
         )
-
-    def release_lock(self):
-        try:
-            self.lock.release()
-        except Exception:
-            pass
