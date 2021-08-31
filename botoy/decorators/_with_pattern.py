@@ -1,4 +1,5 @@
 import re
+import warnings
 
 from ..model import FriendMsg, GroupMsg
 
@@ -12,6 +13,8 @@ def with_pattern(pattern: str):
 
     :param pattern: 需要进行匹配的``正则表达式字符串``
     """
+
+    warnings.warn("with_pattern即将被移除，请使用in_content或on_regexp替代", SyntaxWarning, 2)
 
     def deco(func):
         def inner(ctx):
