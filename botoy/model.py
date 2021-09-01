@@ -65,6 +65,9 @@ class GroupMsg:
 
         self.__dict__[name] = value
 
+    def __getattr__(self, name):
+        return super().__getattribute__(name)
+
     def __repr__(self):
         return f"GroupMsg => {self.data}"
 
@@ -120,6 +123,9 @@ class FriendMsg:
         ):
             warnings.warn(f"{name} 为保留属性，不建议修改", SyntaxWarning, 2)
         self.__dict__[name] = value
+
+    def __getattr__(self, name):
+        return super().__getattribute__(name)
 
     def __repr__(self):
         return f"FriendMsg => {self.data}"
@@ -177,6 +183,9 @@ class EventMsg:
         ):
             warnings.warn(f"{name} 为保留属性，不建议修改", SyntaxWarning, 2)
         self.__dict__[name] = value
+
+    def __getattr__(self, name):
+        return super().__getattribute__(name)
 
     def __repr__(self):
         return f"EventMsg => {self.data}"
