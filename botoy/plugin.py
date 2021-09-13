@@ -13,7 +13,7 @@ import os
 import re
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import colorama
 from prettytable import PrettyTable
@@ -50,6 +50,14 @@ class Plugin:
             when_disable = self.module.__dict__.get("when_disable")
             if when_disable:
                 when_disable()
+
+    @property
+    def when_connected(self) -> Optional[Callable[[List[int], str, int], Any]]:
+        return self.module.__dict__.get("when_connected")
+
+    @property
+    def when_disconnected(self) -> Optional[Callable[[List[int], str, int], Any]]:
+        return self.module.__dict__.get("when_disconnected")
 
     @property
     def loaded(self) -> bool:
@@ -259,6 +267,22 @@ class PluginManager:
             if plugin.enabled and plugin.receive_events is not None:
                 receivers.append(plugin.receive_events)
         return receivers
+
+    @property
+    def when_connected_funcs(self) -> List[Callable[[List[int], str, int], Any]]:
+        funcs = []
+        for plugin in self.plugins.values():
+            if plugin.enabled and plugin.when_connected:
+                funcs.append(plugin.when_connected)
+        return funcs
+
+    @property
+    def when_disconnected_funcs(self) -> List[Callable[[List[int], str, int], Any]]:
+        funcs = []
+        for plugin in self.plugins.values():
+            if plugin.enabled and plugin.when_disconnected:
+                funcs.append(plugin.when_disconnected)
+        return funcs
 
     @property
     def info(self) -> str:

@@ -63,10 +63,10 @@ class Botoy:
             if not isinstance(qq, str) and isinstance(qq, Sequence):
                 self.qq = list(qq)
             else:
-                self.qq = [qq]
+                self.qq = [qq]  # type: ignore
         else:
             self.qq = []
-        self.qq = [int(qq) for qq in self.qq]
+        self.qq: List[int] = [int(qq) for qq in self.qq]
 
         self.config = Config(
             host, port, group_blacklist, friend_blacklist, blocked_users
@@ -261,6 +261,9 @@ class Botoy:
             if not self._when_connected_do[1]:
                 self._when_connected_do = None
 
+        for func in self.plugMgr.when_connected_funcs:
+            self.pool.submit(func, self.qq, self.config.host, self.config.port)
+
     def disconnect(self):
         logger.warning("Disconnected to the server!")
         # 断开连接后执行用户定义的函数，如果有
@@ -268,6 +271,9 @@ class Botoy:
             self._when_disconnected_do[0]()
             if not self._when_disconnected_do[1]:
                 self._when_disconnected_do = None
+
+        for func in self.plugMgr.when_disconnected_funcs:
+            self.pool.submit(func, self.qq, self.config.host, self.config.port)
 
     ########################################################################
     # 开放出来的用于多种连接方式的入口函数
