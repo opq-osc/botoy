@@ -50,7 +50,6 @@ class Plugin:
             when_disable = self.module.__dict__.get("when_disable")
             if when_disable:
                 when_disable()
-            
 
     @property
     def loaded(self) -> bool:
