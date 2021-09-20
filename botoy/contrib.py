@@ -249,6 +249,8 @@ def to_async(func: Callable[..., Any]) -> Callable[..., Awaitable[Any]]:
 
 async def async_run(func, *args, **kwargs):
     """异步执行函数
+    提供的任何 *args 和 **kwargs 会被直接传给 func
+
     :param func: 目标函数
     """
     if asyncio.iscoroutine(func):
