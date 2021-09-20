@@ -3,15 +3,18 @@
 """
 
 # NOTE: 这是独立的模块，不应该在框架其他位置被导入，以免循环依赖
+import asyncio
 import base64
+import contextvars
 import inspect
 import os
 import sys
 import threading
-from functools import wraps
+from asyncio import events
+from functools import partial, wraps
 from pathlib import Path
 from time import monotonic as clock
-from typing import Dict, Union
+from typing import Any, Awaitable, Callable, Dict, Union
 
 import httpx
 
@@ -227,3 +230,32 @@ def download(
         if dist.exists():
             os.remove(dist)
         raise e
+
+
+def to_async(func: Callable[..., Any]) -> Callable[..., Awaitable[Any]]:
+    """将函数包装为异步函数
+    :param func: 被装饰的同步函数
+    """
+
+    @wraps(func)
+    async def _wrapper(*args: Any, **kwargs: Any) -> Any:
+        loop = events.get_running_loop()
+        ctx = contextvars.copy_context()
+        func_call = partial(ctx.run, func, *args, **kwargs)
+        return await loop.run_in_executor(None, func_call)
+
+    return _wrapper
+
+
+async def async_run(func, *args, **kwargs):
+    """异步执行函数
+    提供的任何 *args 和 **kwargs 会被直接传给 func
+
+    :param func: 目标函数
+    """
+    if asyncio.iscoroutine(func):
+        return await func(*args, **kwargs)
+    loop = events.get_running_loop()
+    ctx = contextvars.copy_context()
+    func_call = partial(ctx.run, func, *args, **kwargs)
+    return await loop.run_in_executor(None, func_call)
