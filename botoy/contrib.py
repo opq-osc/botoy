@@ -11,10 +11,10 @@ import os
 import sys
 import threading
 from asyncio import events
-from functools import wraps, partial
+from functools import partial, wraps
 from pathlib import Path
 from time import monotonic as clock
-from typing import Any, Dict, Union, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict, Union
 
 import httpx
 
