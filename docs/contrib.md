@@ -19,6 +19,34 @@ assert get_cache_dir('botoy') == Path('botoy-cache/botoy')
 assert get_cache_dir('test') == Path('botoy-cache/test')
 ```
 
+## `to_async` 将同步函数包装为异步函数的装饰器
+
+防止在使用异步时被耗时很长的同步函数堵住
+
+```python
+import time
+
+from botoy.contrib import to_async
+
+@to_async
+def sleep(sec):
+    time.sleep(sec)  # 模拟一个同步耗时操作
+
+await sleep(5)
+```
+## `async_run` 将同步函数以异步方法执行
+
+和`to_async`装饰器基本一致
+
+```python
+import time
+
+from botoy.contrib import async_run
+
+await async_run(time.sleep, 5)  # 模拟一个同步耗时操作
+```
+
+
 ## `RateLimit` 调用速率控制
 
 ```python
