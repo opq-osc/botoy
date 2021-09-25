@@ -92,9 +92,11 @@ class Botoy:
         if self.config.webhook:
             from . import webhook  # pylint: disable=C0415
 
-            self._friend_msg_receivers.append(webhook.receive_friend_msg)
-            self._group_msg_receivers.append(webhook.receive_group_msg)
-            self._event_receivers.append(webhook.receive_events)
+            flag = self.__class__.__name__.startswith("Async") and "async_" or ""
+
+            self._friend_msg_receivers.append(getattr(webhook, f"{flag}friend"))
+            self._group_msg_receivers.append(getattr(webhook, f"{flag}group"))
+            self._event_receivers.append(getattr(webhook, f"{flag}event"))
 
         # 插件管理
         # 管理插件提供的接收函数

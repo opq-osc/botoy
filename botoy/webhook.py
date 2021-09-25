@@ -1,33 +1,56 @@
 import httpx
 
-from botoy import EventMsg, FriendMsg, GroupMsg
-from botoy.config import Config
+from botoy import EventMsg, FriendMsg, GroupMsg, jconfig
 from botoy.log import logger
 
 # 以内置插件方式实现简单的webhook，将原始数据上报至指定地址
 # 因为webhook功能只能通过配置文件开启，所以直接新建Config, 读取配置文件即可
-# TODO: resolve response
+# TODO: 处理响应，并进行简单的操作
 
-_config = Config()
-_c = httpx.Client(base_url=_config.address, timeout=_config.webhook_timeout)
+address = jconfig.address
+timeout = jconfig.webhook_timeout
 
 
-def receive_friend_msg(ctx: FriendMsg):
+def friend(ctx: FriendMsg):
     try:
-        _c.post(httpx.URL(), json=ctx.message)
+        httpx.post(address, json=ctx.message, timeout=timeout)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
 
-def receive_group_msg(ctx: GroupMsg):
+def group(ctx: GroupMsg):
     try:
-        _c.post(httpx.URL(), json=ctx.message)
+        httpx.post(address, json=ctx.message, timeout=timeout)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
 
-def receive_events(ctx: EventMsg):
+def event(ctx: EventMsg):
     try:
-        _c.post(httpx.URL(), json=ctx.message)
+        httpx.post(address, json=ctx.message, timeout=timeout)
+    except Exception as e:
+        logger.warning("Webhook请求中的错误: %s" % e)
+
+
+async def async_friend(ctx: FriendMsg):
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as cilent:
+            await cilent.post(ctx.address, json=ctx.message)
+    except Exception as e:
+        logger.warning("Webhook请求中的错误: %s" % e)
+
+
+async def async_group(ctx: GroupMsg):
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as cilent:
+            await cilent.post(ctx.address, json=ctx.message)
+    except Exception as e:
+        logger.warning("Webhook请求中的错误: %s" % e)
+
+
+async def async_event(ctx: EventMsg):
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as cilent:
+            await cilent.post(ctx.address, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
