@@ -24,6 +24,9 @@ __all__ = [
     "RateLimit",
     "Switcher",
     "SwitcherManager",
+    'async_run',
+    'download',
+    'to_async',
 ]
 
 
