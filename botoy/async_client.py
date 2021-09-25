@@ -2,7 +2,7 @@
 import asyncio
 import copy
 import traceback
-from typing import Callable, Union
+from typing import Union
 
 import socketio
 
@@ -12,9 +12,6 @@ from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 
 class AsyncBotoy(Botoy):
-    def run_in_pool(self, func: Callable, *args):
-        self.pool.submit(func, *args)
-
     def _msg_handler_factory(self, cls):
         async def handler(msg):
             return await self._context_handler(cls(msg))
@@ -25,7 +22,6 @@ class AsyncBotoy(Botoy):
         passed_context = self._context_checker(context)
         if passed_context:
             return await self._context_distributor(passed_context)
-        return
 
     async def _context_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
         coros = []
