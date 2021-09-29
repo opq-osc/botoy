@@ -1,5 +1,6 @@
 import logging
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from .config import jconfig
@@ -12,6 +13,7 @@ apscheduler_logger.handlers.clear()
 apscheduler_logger.addHandler(LoguruHandler())
 
 scheduler = BackgroundScheduler()
+async_scheduler = AsyncIOScheduler()
 
 
 def start_scheduler():
@@ -23,10 +25,19 @@ def start_scheduler():
             }
         )
         scheduler.start()
-        logger.info("定时任务已启动")
+        logger.info("同步定时任务已启动")
+    if not async_scheduler.running:
+        scheduler.configure(
+            {
+                "apscheduler.timezone": "Asia/Shanghai",
+                **(jconfig.apscheduler_config or {}),
+            }
+        )
+        scheduler.start()
+        logger.info("异步定时任务已启动")
 
 
 if jconfig.apscheduler_autostart is None or jconfig.apscheduler_autostart:
     start_scheduler()
 
-__all__ = ["scheduler", "start_scheduler"]
+__all__ = ["scheduler", "async_scheduler", "start_scheduler"]

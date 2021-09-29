@@ -4,10 +4,20 @@
 
 ## 示例
 
+同步
+
 ```python
 from botoy.schedule import scheduler
 
 job1 = scheduler.add_job(lambda: print("我一分钟出现一次"), 'interval', minutes=1)
+```
+
+异步
+
+```python
+from botoy.schedule import async_scheduler
+
+job1 = async_scheduler.add_job(lambda: print("我一分钟出现一次"), 'interval', minutes=1)
 ```
 
 具体使用方式见:[apscheduler adding jobs](https://apscheduler.readthedocs.io/en/latest/userguide.html#adding-jobs)
