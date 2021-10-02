@@ -262,3 +262,24 @@ async def async_run(func, *args, **kwargs):
     ctx = contextvars.copy_context()
     func_call = partial(ctx.run, func, *args, **kwargs)
     return await loop.run_in_executor(None, func_call)
+
+
+def sync_run(func):
+    """同步执行异步函数，获取结果(该函数始终新建一个事件循环)
+    例如::
+
+        async def hello(name=None):
+            if name:
+                return f'Hello {name}'
+            return 'Hello'
+
+
+        print(sync_run(hello()))  # Hello
+        print(sync_run(hello('World')))  # Hello World
+    """
+    loop = asyncio.new_event_loop()
+    coro = asyncio.iscoroutine(func) and func or func()
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()

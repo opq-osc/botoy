@@ -34,6 +34,7 @@ def sleep(sec):
 
 await sleep(5)
 ```
+
 ## `async_run` 将同步函数以异步方法执行
 
 和`to_async`装饰器基本一致
@@ -46,6 +47,18 @@ from botoy.contrib import async_run
 await async_run(time.sleep, 5)  # 模拟一个同步耗时操作
 ```
 
+## `sync_run` 同步执行异步函数
+
+```python
+async def hello(name=None):
+    if name:
+        return f'Hello {name}'
+    return 'Hello'
+
+
+print(sync_run(hello()))  # Hello
+print(sync_run(hello('World')))  # Hello World
+```
 
 ## `RateLimit` 调用速率控制
 
