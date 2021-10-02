@@ -63,8 +63,9 @@ def version():
 def init(name, qq, host, port):
     """创建程序入口文件和配置文件"""
     plug = click.confirm("是否使用插件功能", default=True, show_default=True)
-    template = textwrap.dedent(
-        """
+    template = (
+        textwrap.dedent(
+            """
         from botoy import Action, Botoy, EventMsg, FriendMsg, GroupMsg
         from botoy import decorators as deco
 
@@ -95,7 +96,10 @@ def init(name, qq, host, port):
         if __name__ == "__main__":
             bot.run()
     """
-    ).format(qq=qq, use_plugins=plug)
+        )
+        .format(qq=qq, use_plugins=plug)
+        .strip()
+    )
 
     # main
     confirm = click.confirm(
@@ -202,7 +206,7 @@ def add(name, friend, group, event):
         )
 
     use_file = click.confirm(
-        "插件使用单文件还是文件夹形式, 默认选是表示单文件", default=True, show_default=True
+        "插件使用单文件还是文件夹形式, 默认选是表示单文件(是表示单文件，否表示文件夹)", default=True, show_default=True
     )
     if use_file:
         write_file = plugin_path_file
