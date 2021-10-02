@@ -1,4 +1,5 @@
 # pylint: disable = too-many-instance-attributes, W0212
+import asyncio
 import copy
 import functools
 import traceback
@@ -20,6 +21,7 @@ from .typing import (
     T_GroupMsgMiddleware,
     T_GroupMsgReceiver,
 )
+from .utils import sync_run
 
 #######################
 #     socketio
@@ -177,7 +179,11 @@ class Botoy:
     ########################################################################
     def _context_distributor(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
         for receiver in self._get_context_receivers(context):
-            self.pool.submit(receiver, copy.deepcopy(context))
+            new_context = copy.deepcopy(context)
+            if asyncio.iscoroutinefunction(receiver):
+                self.pool.submit(sync_run, receiver(new_context))  # type: ignore
+            else:
+                self.pool.submit(receiver, new_context)
 
     def _get_context_receivers(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
 
