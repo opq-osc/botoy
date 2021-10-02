@@ -55,7 +55,9 @@ def version():
 
 @cli.command()
 @click.option("-n", "--name", prompt="程序入口文件名", default="bot", show_default=True)
-@click.option("-q", "--qq", prompt="机器人qq号", type=int, required=True)
+@click.option(
+    "-q", "--qq", prompt="机器人qq号", type=int, required=True, default=0, show_default=True
+)
 @click.option(
     "--host", prompt="机器人运行host", default="http://127.0.0.1", show_default=True
 )

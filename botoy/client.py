@@ -35,7 +35,7 @@ from .typing import (
 class Botoy:
     """
     :param qq: 机器人QQ号(多Q就传qq号列表), 如果不传则会监听服务端传过来的所有机器人的
-                所有信息，如果传了，则只会接收对应机器人的信息
+                所有信息，如果传了，则只会接收对应机器人的信息. 0会被忽略，相当于没传
     :param use_plugins: 是否开启插件功能, 默认``False``
     :param port: 运行端口, 默认为``8888``
     :param host: ip，默认为``http://127.0.0.1``
@@ -66,7 +66,7 @@ class Botoy:
                 self.qq = [qq]  # type: ignore
         else:
             self.qq = []
-        self.qq: List[int] = [int(qq) for qq in self.qq]
+        self.qq: List[int] = [int(qq) for qq in self.qq if int(qq) != 0]
 
         self.config = Config(
             host, port, group_blacklist, friend_blacklist, blocked_users
