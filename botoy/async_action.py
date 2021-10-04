@@ -10,7 +10,7 @@ from botoy.log import logger
 
 
 class AsyncAction:
-    def __init__(self, qq: int=None, port: int = None, host: str = None, timeout=20):
+    def __init__(self, qq: int = None, port: int = None, host: str = None, timeout=20):
         self.config = Config(host=host, port=port)
 
         self.qq = int(qq or self.config.qq)
