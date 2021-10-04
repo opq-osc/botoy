@@ -10,9 +10,11 @@ from botoy.log import logger
 
 
 class AsyncAction:
-    def __init__(self, qq: int, port: int = None, host: str = None, timeout=20):
-        self.qq = qq
+    def __init__(self, qq: int=None, port: int = None, host: str = None, timeout=20):
         self.config = Config(host=host, port=port)
+
+        self.qq = int(qq or self.config.qq)
+
         self.c = httpx.AsyncClient(
             headers={"Content-Type": "application/json"},
             timeout=timeout + 5,
