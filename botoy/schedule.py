@@ -33,7 +33,7 @@ def start_scheduler():
                 **(jconfig.apscheduler_config or {}),
             }
         )
-        scheduler.start()
+        async_scheduler.start()
         logger.info("异步定时任务已启动")
 
 
