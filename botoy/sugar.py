@@ -42,11 +42,7 @@ def Text(text: str, at=False):
     text = str(text)
 
     ctx = find_ctx()
-    action = Action(
-        ctx.CurrentQQ,
-        host=getattr(ctx, "_host", None),
-        port=getattr(ctx, "_port", None),
-    )
+    action = Action.from_ctx(ctx)
 
     if isinstance(ctx, GroupMsg):
         return action.sendGroupText(
@@ -75,11 +71,7 @@ def Picture(pic_url="", pic_base64="", pic_path="", pic_md5="", text=""):
     assert any([pic_url, pic_base64, pic_path, pic_md5]), "必须给定一项"
 
     ctx = find_ctx()
-    action = Action(
-        ctx.CurrentQQ,
-        host=getattr(ctx, "_host", None),
-        port=getattr(ctx, "_port", None),
-    )
+    action = Action.from_ctx(ctx)
 
     if isinstance(ctx, GroupMsg):
         if pic_url:
@@ -152,11 +144,7 @@ def Voice(voice_url="", voice_base64="", voice_path=""):
     assert any([voice_url, voice_base64, voice_path]), "必须给定一项"
 
     ctx = find_ctx()
-    action = Action(
-        ctx.CurrentQQ,
-        host=getattr(ctx, "_host", None),
-        port=getattr(ctx, "_port", None),
-    )
+    action = Action.from_ctx(ctx)
 
     if isinstance(ctx, GroupMsg):
         if voice_url:
@@ -302,11 +290,7 @@ class _S:
         :param at: 是否要艾特该用户
         """
         ctx = self.ctx
-        action = Action(
-            ctx.CurrentQQ,
-            host=getattr(ctx, "_host", None),
-            port=getattr(ctx, "_port", None),
-        )
+        action = Action.from_ctx(ctx)
 
         if isinstance(ctx, GroupMsg):
             return action.sendGroupText(
@@ -331,11 +315,7 @@ class _S:
         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
         """
         ctx = self.ctx
-        action = Action(
-            ctx.CurrentQQ,
-            host=getattr(ctx, "_host", None),
-            port=getattr(ctx, "_port", None),
-        )
+        action = Action.from_ctx(ctx)
 
         if type not in (
             TYPE_URL,
@@ -402,11 +382,7 @@ class _S:
         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
         """
         ctx = self.ctx
-        action = Action(
-            ctx.CurrentQQ,
-            host=getattr(ctx, "_host", None),
-            port=getattr(ctx, "_port", None),
-        )
+        action = Action.from_ctx(ctx)
 
         if type not in (
             TYPE_URL,
@@ -456,11 +432,7 @@ class _S:
         :param at: 是否要艾特该用户
         """
         ctx = self.ctx
-        async with AsyncAction(
-            ctx.CurrentQQ,
-            host=getattr(ctx, "_host", None),
-            port=getattr(ctx, "_port", None),
-        ) as action:
+        async with AsyncAction.from_ctx(ctx) as action:
             if isinstance(ctx, GroupMsg):
                 return await action.sendGroupText(
                     ctx.FromGroupId, text, atUser=ctx.FromUserId if at else 0
@@ -494,11 +466,7 @@ class _S:
             type, data = _resolve_data_type(data)
 
         ctx = self.ctx
-        async with AsyncAction(
-            ctx.CurrentQQ,
-            host=getattr(ctx, "_host", None),
-            port=getattr(ctx, "_port", None),
-        ) as action:
+        async with AsyncAction.from_ctx(ctx) as action:
 
             if isinstance(ctx, GroupMsg):
                 if at:
@@ -566,11 +534,7 @@ class _S:
         assert type != TYPE_MD5, "语音不支持MD5发送"
 
         ctx = self.ctx
-        async with AsyncAction(
-            ctx.CurrentQQ,
-            host=getattr(ctx, "_host", None),
-            port=getattr(ctx, "_port", None),
-        ) as action:
+        async with AsyncAction.from_ctx(ctx) as action:
 
             if isinstance(ctx, GroupMsg):
                 if type == TYPE_URL:
