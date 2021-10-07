@@ -325,6 +325,99 @@ class AsyncAction:
             },
         )
 
+    async def poke(self, user: int, group=0):
+        """戳一戳，未设置群ID就是戳好友"""
+        payload = {"UserID": user, "GroupID": group}
+        if group == 0:
+            payload["Type"] = 0
+        else:
+            payload["Type"] = 1
+        return await self.post("OidbSvc.0xed3_1", payload)
+
+    async def repostVideo2Group(self, group: int, forwordBuf: str) -> dict:
+        """转发视频到群聊
+        :param group: 群号
+        :param forwordBuf: 原视频的forwordBuf字段
+        """
+        return await self.post(
+            "SendMsg",
+            {
+                "toUser": group,
+                "sendToType": 2,
+                "sendMsgType": "ForwordMsg",
+                "forwordBuf": forwordBuf,
+                "forwordField": 19,
+            },
+        )
+
+    async def getVideoURL(self, group: int, videoMD5: str, videoURL: str) -> dict:
+        """获取视频链接
+        :param group: 群号
+        :param videoMD5: 视频的 MD5 值，可以从上报的消息中获得
+        :param videoURL: 上报的消息中传给的 url 值
+        """
+        return await self.post(
+            "PttCenterSvr.ShortVideoDownReq",
+            {"GroupID": group, "VideoUrl": videoURL, "VideoMd5": videoMD5},
+        )
+
+    async def getFriendFileURL(self, fileID: str) -> dict:
+        """获取好友文件链接
+        :param fileID: 文件 ID，可由上报的消息中获得
+        """
+        return await self.post(
+            "OfflineFilleHandleSvr.pb_ftn_CMD_REQ_APPLY_DOWNLOAD-1200",
+            {"FileID": fileID},
+        )
+
+    async def getGroupFileURL(self, group: int, fileID: str) -> dict:
+        """获取好友文件链接
+        :param group: 群号
+        :param fileID: 文件 ID，可由上报的消息中获得
+        """
+        return await self.post(
+            "OidbSvc.0x6d6_2",
+            {"GroupID": group, "FileID": fileID},
+        )
+
+    async def repostVideo2Friend(self, user: int, forwordBuf: str) -> dict:
+        """转发视频到好友
+        :param user: 好友QQ
+        :param forwordBuf: 原视频的forwordBuf字段
+        """
+        return await self.post(
+            "SendMsg",
+            {
+                "toUser": user,
+                "sendToType": 1,
+                "sendMsgType": "ForwordMsg",
+                "forwordBuf": forwordBuf,
+                "forwordField": 19,
+            },
+        )
+
+    async def groupJoinAuth(self, seq: int, group: int, userid: int, cmd=None):
+        """
+        :param Seq:  GroupAdminsysnotify消息中的Seq
+        :param group: QQ群号
+        :param userid: 申请进群的QQ号
+        :param cmd: True:同意进群,False:拒绝,None:忽略
+        :return:
+        """
+        return await self.post(
+            "AnswerInviteGroup",
+            {
+                "Seq": seq,
+                "Who": userid,
+                "Flag_7": 3,  # 这2个flag不知道会不会变
+                "Flag_8": 21,
+                "GroupId": group,
+                "Action": {True: 11, False: 12, None: 14}[
+                    cmd
+                ],  # 11 agree , 14 忽略 , 12/21 disagree
+            },
+        )
+
     async def setUniqueTitle(self, user: int, group: int, title: str):
         """设置群头衔"""
         return await self.post(
