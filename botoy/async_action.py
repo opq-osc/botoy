@@ -7,10 +7,13 @@ import httpx
 from botoy import macro
 from botoy.config import Config
 from botoy.log import logger
+from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 
 class AsyncAction:
-    def __init__(self, qq: int = None, port: int = None, host: str = None, timeout=20):
+    def __init__(
+        self, qq: int = None, port: int = None, host: str = None, timeout: int = 20
+    ):
         self.config = Config(host=host, port=port)
 
         self.qq = int(qq or self.config.qq)
@@ -20,6 +23,17 @@ class AsyncAction:
             timeout=timeout + 5,
             base_url=self.config.address,
             params={"qq": self.qq, "timeout": timeout},
+        )
+
+    @classmethod
+    def from_ctx(
+        cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20
+    ) -> "AsyncAction":
+        return cls(
+            ctx.CurrentQQ,
+            host=getattr(ctx, "_host", None),
+            port=getattr(ctx, "_port", None),
+            timeout=timeout,
         )
 
     async def close(self):
