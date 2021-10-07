@@ -66,4 +66,10 @@ class LoguruHandler(logging.Handler):
         )
 
 
+sio_logger = logging.getLogger("socketio.client")
+sio_logger.handlers.clear()
+sio_logger.addHandler(LoguruHandler())
+if sio_logger.level == logging.NOTSET:
+    sio_logger.setLevel(logging.INFO)
+
 logger_init()

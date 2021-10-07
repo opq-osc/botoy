@@ -49,6 +49,13 @@ if __name__ == '__main__':
 2. **如果你想通过一个域名连接 bot 的话，将 port 设置为 0 或 80 即可
    如 bot 连接地址为 http://example.com, 设置`host='http://example.com'`, `port=0`**
 3. 关于日志，环境变量`BOTOY_LOG_LEVEL`拥有最高优先级，如果设置了该环境变量，所有 log handler 的等级都以此为准.
+4. socketio 日志默认为`INFO`， 有需要的话通过这样修改
+
+   ```python
+   import logging
+
+   logging.getLogger('socketio.client').setLevel(logging.ERROR)
+   ```
 
 ## 连接或断开连接时的钩子函数
 
