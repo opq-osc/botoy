@@ -266,7 +266,7 @@ class Session(SessionBase):
         :param always_prompt: 重试时是否再次发送提示
         :param timeout: 单次获取等待超时时间(秒)
         """
-        msg = "发送对应序号选择一项\n" + "\n".join(
+        msg = f"发送对应序号选择一项({retry_times}次机会, 每次你都只有{timeout}秒的选择时间)\n" + "\n".join(
             [f"【{idx}】 {candidate}" for idx, candidate in enumerate(candidates, 1)]
         )
         self.send_text(msg)
