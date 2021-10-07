@@ -252,11 +252,11 @@ class Session(SessionBase):
         return self.get(key, wait=True, timeout=timeout, default=default)
 
     def choose(
-            self,
-            candidates: List[T],
-            retry_times: int = 1,
-            always_prompt: bool = True,
-            timeout: int = 30,
+        self,
+        candidates: List[T],
+        retry_times: int = 1,
+        always_prompt: bool = True,
+        timeout: int = 30,
     ) -> Optional[Tuple[T, int]]:
         """提示用户发送序号选择列表中的一项,
         返回值是一个元组，第一项为选择项，第二项为选择项的索引. 超过重试次数，返回None
