@@ -259,7 +259,7 @@ class Session(SessionBase):
         timeout: int = 30,
     ) -> Optional[Tuple[T, int]]:
         """提示用户发送序号选择列表中的一项,
-        返回值是一个元组，第一项为选择项，第二项为选择项的索引. 超过重试次数，返回None
+        返回值是一个元组，第一项为选择项，第二项为选择项的索引. 超过重试次数或超时，返回None
 
         :param candidates: 选项列表
         :param retry_times: 获取重试次数
@@ -278,18 +278,16 @@ class Session(SessionBase):
                 prompt = None
             else:
                 prompt = msg if always_prompt else None
+
             what: str = self.want(str(uuid4()), prompt, pop=True, timeout=timeout)
             if what is None:
-                continue
-            if what.isdigit():
+                return
+            try:
                 idx = int(what) - 1
-                if len(candidates) > idx >= 0:
-                    return candidates[idx], idx
-                else:
-                    self.send_text("超出范围")
-            else:
+                assert idx > 0
+                return candidates[idx], idx
+            except Exception:
                 self.send_text("序号错误")
-        return None
 
 
 class SessionController:
