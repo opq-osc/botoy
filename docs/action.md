@@ -19,6 +19,9 @@ action = Action(qq=123456)
 
 port 和 host 的含义和 Botoy 实例中的一致
 
+如果是在接收函数中，可以通过类方法`Action.from_ctx`获取`action`,
+该方法会处理`ctx`中的`_host`和`_port`属性
+
 ## Action.baseRequest 方法
 
 这是最基础的请求方法，封装了错误处理和提示
