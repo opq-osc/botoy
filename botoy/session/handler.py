@@ -86,39 +86,6 @@ class SessionHandler:
             msg_ctx.FromUserId if isinstance(msg_ctx, GroupMsg) else msg_ctx.FromUin
         ):
             return
-        filters = self.filters.copy()
-        ret = FILTER_SUCCESS
-        if filters:
-            try:
-                ret = filters[0](lambda _: FILTER_SUCCESS)(msg_ctx)
-            except AttributeError:
-                ret = filters[0](msg_ctx)
-            del filters[0]
-        for filter in filters:
-            try:
-                ret = filter(lambda _: ret)(msg_ctx)
-            except AttributeError:
-                ret = filter(msg_ctx)
-            if ret != FILTER_SUCCESS:
-                break
-
-        # 新建session
-        # 过滤成功表示符合创建sesion条件
-        # 当且仅当新建session就开始运行handler，直到handler退出
-        if ret == FILTER_SUCCESS:
-            if not self.sc.session_existed(msg_ctx, self.single_user):
-                session: Session = self.sc.get_session(  # type:ignore
-                    msg_ctx, self.single_user
-                )
-                logger.debug(f"新建session => {session}")
-                _ctx.set(msg_ctx)
-                _session.set(session)
-                try:
-                    if self.handler is not None:
-                        self.handler()
-                except (RejectException, FinishException):
-                    session.close()
-                return
 
         # 如果session存在，则需要对该消息进行各种操作
         if self.sc.session_existed(msg_ctx, self.single_user):
@@ -169,6 +136,42 @@ class SessionHandler:
                         c_h.work()
                     except FinishException:
                         pass
+            return
+
+        # session不存在，判断是否需要新建session
+        filters = self.filters.copy()
+        ret = FILTER_SUCCESS
+        if filters:
+            try:
+                ret = filters[0](lambda _: FILTER_SUCCESS)(msg_ctx)
+            except AttributeError:
+                ret = filters[0](msg_ctx)
+            del filters[0]
+        for filter in filters:
+            try:
+                ret = filter(lambda _: ret)(msg_ctx)
+            except AttributeError:
+                ret = filter(msg_ctx)
+            if ret != FILTER_SUCCESS:
+                break
+
+        # 新建session
+        # 过滤成功表示符合创建sesion条件
+        # 当且仅当新建session就开始运行handler，直到handler退出
+        if ret == FILTER_SUCCESS and not self.sc.session_existed(
+            msg_ctx, self.single_user
+        ):
+            session: Session = self.sc.get_session(  # type:ignore
+                msg_ctx, self.single_user
+            )
+            logger.debug(f"新建session => {session}")
+            _ctx.set(msg_ctx)
+            _session.set(session)
+            try:
+                if self.handler is not None:
+                    self.handler()
+            except (RejectException, FinishException):
+                session.close()
 
     def reject(self, prompt: Union[str, Prompt, Callable] = None, **kwargs) -> NoReturn:
         """该方法调用对应session的resolve_prompt方法
