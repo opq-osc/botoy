@@ -27,7 +27,7 @@ def start_scheduler():
         scheduler.start()
         logger.info("同步定时任务已启动")
     if not async_scheduler.running:
-        scheduler.configure(
+        async_scheduler.configure(
             {
                 "apscheduler.timezone": "Asia/Shanghai",
                 **(jconfig.apscheduler_config or {}),
