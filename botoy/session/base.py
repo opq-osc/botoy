@@ -284,7 +284,7 @@ class Session(SessionBase):
                 return
             try:
                 idx = int(what) - 1
-                assert idx > 0
+                assert idx >= 0
                 return candidates[idx], idx
             except Exception:
                 self.send_text("序号错误")
