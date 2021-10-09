@@ -255,6 +255,7 @@ class Session(SessionBase):
         self,
         candidates: List[T],
         retry_times: int = 1,
+        key: Callable[[T], Any] = None,
         always_prompt: bool = True,
         timeout: int = 30,
     ) -> Optional[Tuple[T, int]]:
@@ -263,11 +264,14 @@ class Session(SessionBase):
 
         :param candidates: 选项列表
         :param retry_times: 获取重试次数
+        :param key: 一个函数，参数为候选列表中项，返回的值将用于发送给用户的提示信息, 默认为`str`
         :param always_prompt: 重试时是否再次发送提示
         :param timeout: 单次获取等待超时时间(秒)
         """
+        key = key or str
+        items = (key(candidate) for candidate in candidates)
         msg = f"发送对应序号选择一项({retry_times}次机会, 每次你都只有{timeout}秒的选择时间)\n" + "\n".join(
-            [f"【{idx}】 {candidate}" for idx, candidate in enumerate(candidates, 1)]
+            [f"【{idx}】 {item}" for idx, item in enumerate(items, 1)]
         )
         self.send_text(msg)
 
