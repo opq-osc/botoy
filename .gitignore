@@ -131,7 +131,6 @@ dmypy.json
 .pyre/
 ########
 .vscode
-plugins
 REMOVED_PLUGINS
 local*
 ./bot.py
