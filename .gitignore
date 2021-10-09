@@ -134,6 +134,8 @@ dmypy.json
 plugins
 REMOVED_PLUGINS
 local*
-bot.py
+./bot.py
+./plugins
 .nvimlog
 botoy-cache
+tests/botoy.json
