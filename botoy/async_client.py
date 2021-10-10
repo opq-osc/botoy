@@ -64,3 +64,21 @@ class AsyncBotoy(Botoy):
                 print("bye~")
                 await sio.disconnect()
                 self.pool.shutdown(wait=False)
+
+    async def run_no_wait(self):
+        sio = socketio.AsyncClient()
+
+        sio.event(self.connect)
+        sio.event(self.disconnect)
+        sio.on("OnGroupMsgs", handler=self._group_msg_handler)
+        sio.on("OnFriendMsgs", handler=self._friend_msg_handler)
+        sio.on("OnEvents", handler=self._event_handler)
+
+        logger.info("Connecting to the server...")
+
+        try:
+            await sio.connect(self.config.address, transports=["websocket"])
+        except Exception:
+            logger.error(traceback.format_exc())
+            await sio.disconnect()
+            self.pool.shutdown(wait=False)

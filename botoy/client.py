@@ -329,3 +329,20 @@ class Botoy:
                 print("bye~")
                 sio.disconnect()
                 self.pool.shutdown(wait=False)
+
+    def run_no_wait(self):
+        sio = socketio.Client()
+
+        sio.event(self.connect)
+        sio.event(self.disconnect)
+        sio.on("OnGroupMsgs")(self._group_msg_handler)  # type: ignore
+        sio.on("OnFriendMsgs")(self._friend_msg_handler)  # type: ignore
+        sio.on("OnEvents")(self._event_handler)  # type: ignore
+
+        logger.info("Connecting to the server...")
+        try:
+            sio.connect(self.config.address, transports=["websocket"])
+        except Exception:
+            logger.error(traceback.format_exc())
+            sio.disconnect()
+            self.pool.shutdown(wait=False)
