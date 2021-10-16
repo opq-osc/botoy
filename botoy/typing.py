@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from .model import EventMsg, FriendMsg, GroupMsg
 
@@ -10,6 +10,9 @@ T_FriendMsgReceiver = Callable[[FriendMsg], Any]
 
 """事件接收函数"""
 T_EventReceiver = Callable[[EventMsg], Any]
+
+"""通用接收函数"""
+T_GeneralReceiver = Union[T_GroupMsgReceiver, T_FriendMsgReceiver, T_EventReceiver]
 
 """群消息中间件"""
 T_GroupMsgMiddleware = Callable[[GroupMsg], Optional[GroupMsg]]
