@@ -222,34 +222,26 @@ class Botoy:
         is_event = False
         # 1. 未指定类型，全部接收
         if annotation == inspect._empty:
-            logger.debug("空")
             is_friend = is_group = is_event = True
         # 2. 单个类型
         elif annotation in ("FriendMsg", FriendMsg):
-            logger.debug("FriendMsg")
             is_friend = True
         elif annotation in ("GroupMsg", GroupMsg):
-            logger.debug("GroupMsg")
             is_group = True
         elif annotation in ("EventMsg", EventMsg):
-            logger.debug("EventMsg")
             is_event = True
         # 3. 联合类型
         else:
             args = annotation.__args__
-            logger.debug("args: ", args)
             is_friend = FriendMsg in args
             is_group = GroupMsg in args
             is_event = EventMsg in args
 
         if is_friend:
-            logger.debug("append friend")
             self._friend_msg_receivers.append(receiver)  # type: ignore
         if is_group:
-            logger.debug("append group")
             self._group_msg_receivers.append(receiver)  # type: ignore
         if is_event:
-            logger.debug("append event")
             self._event_receivers.append(receiver)  # type: ignore
 
         return self
