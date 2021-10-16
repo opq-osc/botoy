@@ -2,6 +2,7 @@
 import asyncio
 import copy
 import functools
+import inspect
 import traceback
 from collections.abc import Sequence
 from typing import Callable, List, Optional, Tuple, Union
@@ -18,6 +19,7 @@ from .typing import (
     T_EventReceiver,
     T_FriendMsgMiddleware,
     T_FriendMsgReceiver,
+    T_GeneralReceiver,
     T_GroupMsgMiddleware,
     T_GroupMsgReceiver,
 )
@@ -208,6 +210,42 @@ class Botoy:
     ########################################################################
     # Add context receivers
     ########################################################################
+    def on(self, receiver: T_GeneralReceiver):
+        """添加通用接收函数"""
+        signature = inspect.signature(receiver)
+        parameters = list(signature.parameters.values())
+        ctx = parameters[0]
+        annotation = ctx.annotation
+
+        is_friend = False
+        is_group = False
+        is_event = False
+        # 1. 未指定类型，全部接收
+        if annotation == inspect._empty:
+            is_friend = is_group = is_event = True
+        # 2. 单个类型
+        elif annotation in ("FriendMsg", FriendMsg):
+            is_friend = True
+        elif annotation in ("GroupMsg", GroupMsg):
+            is_group = True
+        elif annotation in ("EventMsg", EventMsg):
+            is_event = True
+        # 3. 联合类型
+        else:
+            args = annotation.__args__
+            is_friend = FriendMsg in args
+            is_group = GroupMsg in args
+            is_event = EventMsg in args
+
+        if is_friend:
+            self._friend_msg_receivers.append(receiver)  # type: ignore
+        if is_group:
+            self._group_msg_receivers.append(receiver)  # type: ignore
+        if is_event:
+            self._event_receivers.append(receiver)  # type: ignore
+
+        return self
+
     def on_friend_msg(self, receiver: T_FriendMsgReceiver):
         """添加好友消息接收函数"""
         self._friend_msg_receivers.append(receiver)
