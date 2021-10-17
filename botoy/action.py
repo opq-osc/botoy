@@ -667,12 +667,11 @@ class Action:
             },
         )
 
-    def likeUser(self, user: int, cmd=0) -> dict:
+    def likeUser(self, user: int) -> dict:
         """给某人点赞
         :param user: 用户QQ号
-        :param cmd: 发送包选项, 0 或 1; 0表示使用``QQZan``; 1表示使用``OidbSvc.0x7e5_4``, 默认为0
         """
-        return self.post("QQZan" if cmd == 0 else "OidbSvc.0x7e5_4", {"UserID": user})
+        return self.post("QQZan", {"UserID": user})
 
     def toggleGroupAdmin(self, user: int, group: int, flag=1) -> dict:
         """设置和取消群管理员
