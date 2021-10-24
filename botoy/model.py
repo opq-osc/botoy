@@ -1,5 +1,6 @@
 # pylint: disable=too-many-instance-attributes
 import warnings
+from re import Match
 from typing import Optional
 
 
@@ -18,6 +19,11 @@ class GroupMsg:
     MsgSeq: int
     MsgRandom: int
     RedBaginfo: Optional[dict]
+
+    # 动态添加
+    _host: str
+    _port: int
+    _match: Match
 
     def __init__(self, message: dict):
         data = message["CurrentPacket"]["Data"]
@@ -85,6 +91,11 @@ class FriendMsg:
     TempUin: int  # 私聊(临时会话)特有, 入口群聊ID
     RedBaginfo: Optional[dict]
 
+    # 动态添加
+    _host: str
+    _port: int
+    _match: Match
+
     def __init__(self, message: dict):
         data = message["CurrentPacket"]["Data"]
 
@@ -146,6 +157,9 @@ class EventMsg:
     MsgType: str
     ToUin: int
     RedBaginfo: Optional[dict]
+
+    _host: str
+    _port: int
 
     def __init__(self, message: dict):
         data = message["CurrentPacket"]["Data"]
