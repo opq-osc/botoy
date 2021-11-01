@@ -22,6 +22,12 @@ botoy run
 
 要求机器人主文件命名为 bot.py
 
+## 测试连接
+
+```shell
+botoy test
+```
+
 ## 帮助
 
 ```shell
@@ -29,6 +35,7 @@ botoy
 botoy --help
 botoy init --help
 botoy add --help
+botoy test --help
 ```
 
 !!!tip
