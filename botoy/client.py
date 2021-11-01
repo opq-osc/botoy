@@ -3,11 +3,13 @@ import asyncio
 import copy
 import functools
 import inspect
-import traceback
+import random
+import time
 from collections.abc import Sequence
 from typing import Callable, List, Optional, Tuple, Union
 
 import socketio
+from socketio.exceptions import ConnectionError as SioConnectionError
 
 from .config import Config
 from .log import logger, logger_init
@@ -342,45 +344,44 @@ class Botoy:
         """
         return self._event_handler(msg)
 
-    def run(self):
+    def run(self, wait: bool = True):
+        """运行
+        :param wait: 是否阻塞
+        """
         sio = socketio.Client()
 
         sio.event(self.connect)
         sio.event(self.disconnect)
-        sio.on("OnGroupMsgs")(self._group_msg_handler)  # type: ignore
-        sio.on("OnFriendMsgs")(self._friend_msg_handler)  # type: ignore
-        sio.on("OnEvents")(self._event_handler)  # type: ignore
+        sio.on("OnGroupMsgs", self._group_msg_handler)
+        sio.on("OnFriendMsgs", self._friend_msg_handler)
+        sio.on("OnEvents", self._event_handler)
 
-        logger.info("Connecting to the server...")
+        delay = 1
+
         try:
-            sio.connect(self.config.address, transports=["websocket"])
-        except Exception:
-            logger.error(traceback.format_exc())
-            sio.disconnect()
-            self.pool.shutdown(wait=False)
-        else:
-            try:
+            while True:
+                try:
+                    logger.info(f"Connecting to the server[{self.config.address}]...")
+                    sio.connect(self.config.address, transports=["websocket"])
+                except (SioConnectionError, ValueError):
+                    current_delay = delay + (2 * random.random() - 1) / 2
+                    logger.error(
+                        f"连接失败，请检查ip端口是否配置正确，检查机器人是否启动，确保能够连接上! {current_delay:.1f} 后开始重试连接"
+                    )
+                    time.sleep(current_delay)
+                    delay *= 1.68
+                else:
+                    break
+
+            if wait:
                 sio.wait()
-            except KeyboardInterrupt:
-                pass
-            finally:
-                print("bye~")
-                sio.disconnect()
-                self.pool.shutdown(wait=False)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            print("\b\b\b\bbye~")
+            sio.disconnect()
+            self.pool.shutdown(False)
 
     def run_no_wait(self):
-        sio = socketio.Client()
-
-        sio.event(self.connect)
-        sio.event(self.disconnect)
-        sio.on("OnGroupMsgs")(self._group_msg_handler)  # type: ignore
-        sio.on("OnFriendMsgs")(self._friend_msg_handler)  # type: ignore
-        sio.on("OnEvents")(self._event_handler)  # type: ignore
-
-        logger.info("Connecting to the server...")
-        try:
-            sio.connect(self.config.address, transports=["websocket"])
-        except Exception:
-            logger.error(traceback.format_exc())
-            sio.disconnect()
-            self.pool.shutdown(wait=False)
+        """不阻塞运行"""
+        self.run(False)
