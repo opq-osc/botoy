@@ -375,13 +375,17 @@ class Botoy:
 
             if wait:
                 sio.wait()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            print("\b\b\b\bbye~")
+
+        except BaseException as e:
             sio.disconnect()
             self.pool.shutdown(False)
+            if isinstance(e, KeyboardInterrupt):
+                print("\b\b\b\bbye~")
+            else:
+                raise
+
+        return sio
 
     def run_no_wait(self):
         """不阻塞运行"""
-        self.run(False)
+        return self.run(False)

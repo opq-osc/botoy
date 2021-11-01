@@ -71,13 +71,16 @@ class AsyncBotoy(Botoy):
             if wait:
                 await sio.wait()
 
-        except KeyboardInterrupt:
-            pass
-        finally:
-            print("\b\b\b\bbye~")
+        except BaseException as e:
             await sio.disconnect()
             self.pool.shutdown(False)
+            if isinstance(e, KeyboardInterrupt):
+                print("\b\b\b\bbye~")
+            else:
+                raise
+
+        return sio
 
     async def run_no_wait(self):
         """不阻塞运行"""
-        await self.run(False)
+        return await self.run(False)
