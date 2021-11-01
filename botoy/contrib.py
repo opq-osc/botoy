@@ -256,7 +256,7 @@ async def async_run(func, *args, **kwargs):
 
     :param func: 目标函数
     """
-    if asyncio.iscoroutine(func):
+    if asyncio.iscoroutinefunction(func):
         return await func(*args, **kwargs)
     loop = events.get_running_loop()
     ctx = contextvars.copy_context()
