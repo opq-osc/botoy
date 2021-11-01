@@ -344,11 +344,11 @@ class Botoy:
         """
         return self._event_handler(msg)
 
-    def run(self, wait: bool = True):
+    def run(self, wait: bool = True, sio: socketio.Client = None):
         """运行
         :param wait: 是否阻塞
         """
-        sio = socketio.Client()
+        sio = sio or socketio.Client()
 
         sio.event(self.connect)
         sio.event(self.disconnect)
@@ -386,6 +386,6 @@ class Botoy:
 
         return sio
 
-    def run_no_wait(self):
+    def run_no_wait(self, sio: socketio.Client = None):
         """不阻塞运行"""
-        return self.run(False)
+        return self.run(False, sio)

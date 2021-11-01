@@ -41,11 +41,12 @@ class AsyncBotoy(Botoy):
         except Exception:
             logger.error(traceback.format_exc())
 
-    async def run(self, wait: bool = True):
+    async def run(self, wait: bool = True, sio: socketio.AsyncClient = None):
         """运行
         :param wait: 是否阻塞
         """
-        sio = socketio.AsyncClient()
+        sio = sio or socketio.AsyncClient()
+
         sio.event(self.connect)
         sio.event(self.disconnect)
         sio.on("OnGroupMsgs", self._group_msg_handler)
@@ -81,6 +82,6 @@ class AsyncBotoy(Botoy):
 
         return sio
 
-    async def run_no_wait(self):
+    async def run_no_wait(self, sio: socketio.AsyncClient = None):
         """不阻塞运行"""
-        return await self.run(False)
+        return await self.run(False, sio)

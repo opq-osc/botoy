@@ -117,6 +117,10 @@ def _():
 
 启动方法返回 sockeio 客户端实例，需要不阻塞启动才能获得返回值
 
+可以通过参数`sio`指定 socketio.(Async)Client 对象
+
+sockeio 事件或信息`connect`, `disconnect`, `OnGroupMsgs`, `OnFriendMsgs`, `OnEvents` 由框架保留，请勿自己绑定`handler`
+
 ## 消息上下文对象
 
 对三类消息及其字段的简要说明
