@@ -263,7 +263,7 @@ def test(address: str):
     items = address.split(":")
     items_count = len(items)
     if items_count == 3:  # http://host:port
-        host = items[0] + items[1]
+        host = items[0] + ":" + items[1]
         port = items[2]
     elif items_count == 2:  # http://host, host:port
         if address.startswith("http"):
