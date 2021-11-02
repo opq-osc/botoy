@@ -523,6 +523,10 @@ class AsyncAction:
             "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
         )
 
+    async def revoke(self, ctx: GroupMsg):
+        """撤回群消息"""
+        return await self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
+
     async def joinGroup(self, group: int, content: str = "") -> dict:
         """加入群聊
         :param group: 哪个群?
