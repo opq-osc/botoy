@@ -694,6 +694,10 @@ class Action:
             "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
         )
 
+    def revoke(self, ctx: GroupMsg):
+        """撤回群消息"""
+        return self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
+
     def inviteUserJoinGroup(self, group: int, user: int) -> dict:
         """拉人入群
         :param group: 哪个群?
