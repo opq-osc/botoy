@@ -747,15 +747,14 @@ class Action:
         """
         return self.post("LogOut", {"Flag": flag})
 
-
-    def getGroupPicInfo(self, url: str = '', base64: str = ''):
+    def getGroupPicInfo(self, url: str = "", base64: str = ""):
         """上传群图片获取图片信息
         :param url: 图片链接
         :param base64: 图片base64
         """
         assert any([url, base64]), "缺少参数"
         return self.post(
-            '', {'PicUrl': url, 'PicBase64Buf': base64}, path='/v1/GetGroupPicInfo'
+            "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
         )
 
     ############################################################################
