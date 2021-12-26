@@ -24,12 +24,46 @@ if __name__ == '__main__':
 
 同样的，好友消息和事件消息分别对应 bot.on_friend_msg, FriendMsg 和 bot.on_event, EventMsg
 
+### 通用接收函数
+
+有的时候想在一个函数中处理多个类型的消息，只要将同一个函数装饰为多个类型的接收函数即可。
+
+比如：
+
+```python
+def a(ctx):
+  pass
+
+bot.on_friend_msg(a).on_group_msg(a)
+```
+
+这样当接收到好友消息和群消息时，都会运行函数，参数为对应的消息
+
+`bot.on`方法可以用来装饰通用的接收函数,
+这个方法也算是一个语法糖，根据函数的参数签名来判断需要接收哪些消息
+
+这里省略函数名
+
+- 接收好友，群，事件三种消息，`ctx` 可能为 `FriendMsg`, `GroupMsg`, `EventMsg`
+  1.  `(ctx)`
+  2.  `(ctx: Union[FriendMsg, GroupMsg, EventMsg])`
+- 接收单个消息, 以好友消息为例(`FriendMsg`)
+  1. `(ctx: "FriendMsg")`
+  2. `(ctx: FriendMsg)`
+- 接收多个消息, 以好友消息(`FriendMsg`)和群消息为例(`GroupMsg`)
+  1. `(ctx: Union[FriendMsg, GroupMsg])`
+
 **注意**:
-你可以通过装饰器分别绑定任意多个接收函数，这样可以将不同的功能分隔开，而不是将逻辑全部挤在一个函数中
+注册通用接收函数，**不可以使用任何一个接收装饰器**(接收函数装饰器在后面有说明),
+因为这只是一个语法糖，可有可无而且需求很少，添加装饰器的支持，需要调整所有的装饰器，显得很没必要。
 
 !!! tip
 
-    装饰器也可以当做函数显式添加接收函数，该函数返回的是客户端实例本身，所以就有仓库 README.md 中的那行代码
+    1. 你可以通过装饰器分别绑定任意多个接收函数，这样可以将不同的功能分隔开，而不是将逻辑全部挤在一个函数中
+
+    2. 装饰器也可以当做函数显式添加接收函数，该函数返回的是客户端实例本身，所以就有仓库 README.md 中的那行代码
+
+    3. 消息上下文参数命名不一定要是`ctx`, 这只是习惯, 也推荐
 
 ## 配置实例
 
@@ -79,6 +113,13 @@ def _():
 ## 实例方法
 
 - `run` 启动
+- `run_no_wait` 启动，但不会阻塞
+
+启动方法返回 sockeio 客户端实例，需要不阻塞启动才能获得返回值
+
+可以通过参数`sio`指定 socketio.(Async)Client 对象
+
+sockeio 事件或信息`connect`, `disconnect`, `OnGroupMsgs`, `OnFriendMsgs`, `OnEvents` 由框架保留，请勿自己绑定`handler`
 
 ## 消息上下文对象
 

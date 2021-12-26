@@ -44,6 +44,9 @@ def cli():
 
     3. 启动机器人(要求入口文件名为bot.py)
     $ botoy run
+
+    4. 测试连接
+    $ botoy test http://127.0.0.1:8888
     """
 
 
@@ -248,6 +251,29 @@ def run():
             asyncio.run(client.run())
         else:
             client.run()
+
+
+@cli.command()
+@click.argument("address", required=False, default="http://127.0.0.1:8888")
+def test(address: str):
+    """测试连接
+    可以加参数 test http://127.0.0.1:8888, 这也是默认值
+    """
+
+    items = address.split(":")
+    items_count = len(items)
+    if items_count == 3:  # http://host:port
+        host = items[0] + ":" + items[1]
+        port = items[2]
+    elif items_count == 2:  # http://host, host:port
+        if address.startswith("http"):
+            host, port = address, 80
+        else:
+            host, port = items
+    else:  # host
+        host, port = address, 80
+
+    Botoy(host=host, port=int(port)).run()
 
 
 if __name__ == "__main__":

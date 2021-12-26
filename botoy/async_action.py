@@ -513,19 +513,19 @@ class AsyncAction:
             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
         )
 
-    async def revokeGroupMsg(
-        self, group: int, msgSeq: int, msgRandom: int, cmd: int = 0
-    ) -> dict:
+    async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
         """撤回群消息
         :param group: 群号
         :param msgSeq: 消息msgSeq
         :param msgRandom: 消息msgRandom
-        :param cmd: 0 或 1, 0表示使用: RevokeMsg , 1表示使用: PbMessageSvc.PbMsgWithDraw
         """
         return await self.post(
-            "RevokeMsg" if cmd == 0 else "PbMessageSvc.PbMsgWithDraw",
-            {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
+            "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
         )
+
+    async def revoke(self, ctx: GroupMsg):
+        """撤回群消息"""
+        return await self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
 
     async def joinGroup(self, group: int, content: str = "") -> dict:
         """加入群聊

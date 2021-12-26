@@ -9,6 +9,8 @@ API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原�
 
 所以可以新建一个配置文件，固定为`botoy.json`定义配置，配置项和默认值如下
 
+环境变量`BOTOY_HOST`, `BOTOY_PORT` 存在的情况下，将分别作为 host, port 的默认值
+
 ```json
 {!../botoy.json!}
 ```

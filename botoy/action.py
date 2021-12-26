@@ -667,12 +667,11 @@ class Action:
             },
         )
 
-    def likeUser(self, user: int, cmd=0) -> dict:
+    def likeUser(self, user: int) -> dict:
         """给某人点赞
         :param user: 用户QQ号
-        :param cmd: 发送包选项, 0 或 1; 0表示使用``QQZan``; 1表示使用``OidbSvc.0x7e5_4``, 默认为0
         """
-        return self.post("QQZan" if cmd == 0 else "OidbSvc.0x7e5_4", {"UserID": user})
+        return self.post("QQZan", {"UserID": user})
 
     def toggleGroupAdmin(self, user: int, group: int, flag=1) -> dict:
         """设置和取消群管理员
@@ -685,19 +684,19 @@ class Action:
             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
         )
 
-    def revokeGroupMsg(
-        self, group: int, msgSeq: int, msgRandom: int, cmd: int = 0
-    ) -> dict:
+    def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
         """撤回群消息
         :param group: 群号
         :param msgSeq: 消息msgSeq
         :param msgRandom: 消息msgRandom
-        :param cmd: 0 或 1, 0表示使用: RevokeMsg , 1表示使用: PbMessageSvc.PbMsgWithDraw
         """
         return self.post(
-            "RevokeMsg" if cmd == 0 else "PbMessageSvc.PbMsgWithDraw",
-            {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
+            "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
         )
+
+    def revoke(self, ctx: GroupMsg):
+        """撤回群消息"""
+        return self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
 
     def inviteUserJoinGroup(self, group: int, user: int) -> dict:
         """拉人入群
@@ -747,6 +746,16 @@ class Action:
         :param flag: 是否删除设备信息文件
         """
         return self.post("LogOut", {"Flag": flag})
+
+    def getGroupPicInfo(self, url: str = "", base64: str = ""):
+        """上传群图片获取图片信息
+        :param url: 图片链接
+        :param base64: 图片base64
+        """
+        assert any([url, base64]), "缺少参数"
+        return self.post(
+            "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
+        )
 
     ############################################################################
     def baseRequest(

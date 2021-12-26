@@ -131,9 +131,10 @@ dmypy.json
 .pyre/
 ########
 .vscode
-plugins
 REMOVED_PLUGINS
 local*
-bot.py
+./bot.py
+./plugins
 .nvimlog
 botoy-cache
+tests/botoy.json

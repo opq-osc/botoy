@@ -2,11 +2,14 @@
 import asyncio
 import copy
 import functools
-import traceback
+import inspect
+import random
+import time
 from collections.abc import Sequence
 from typing import Callable, List, Optional, Tuple, Union
 
 import socketio
+from socketio.exceptions import ConnectionError as SioConnectionError
 
 from .config import Config
 from .log import logger, logger_init
@@ -18,6 +21,7 @@ from .typing import (
     T_EventReceiver,
     T_FriendMsgMiddleware,
     T_FriendMsgReceiver,
+    T_GeneralReceiver,
     T_GroupMsgMiddleware,
     T_GroupMsgReceiver,
 )
@@ -208,6 +212,42 @@ class Botoy:
     ########################################################################
     # Add context receivers
     ########################################################################
+    def on(self, receiver: T_GeneralReceiver):
+        """添加通用接收函数"""
+        signature = inspect.signature(receiver)
+        parameters = list(signature.parameters.values())
+        ctx = parameters[0]
+        annotation = ctx.annotation
+
+        is_friend = False
+        is_group = False
+        is_event = False
+        # 1. 未指定类型，全部接收
+        if annotation == inspect._empty:
+            is_friend = is_group = is_event = True
+        # 2. 单个类型
+        elif annotation in ("FriendMsg", FriendMsg):
+            is_friend = True
+        elif annotation in ("GroupMsg", GroupMsg):
+            is_group = True
+        elif annotation in ("EventMsg", EventMsg):
+            is_event = True
+        # 3. 联合类型
+        else:
+            args = annotation.__args__
+            is_friend = FriendMsg in args
+            is_group = GroupMsg in args
+            is_event = EventMsg in args
+
+        if is_friend:
+            self._friend_msg_receivers.append(receiver)  # type: ignore
+        if is_group:
+            self._group_msg_receivers.append(receiver)  # type: ignore
+        if is_event:
+            self._event_receivers.append(receiver)  # type: ignore
+
+        return self
+
     def on_friend_msg(self, receiver: T_FriendMsgReceiver):
         """添加好友消息接收函数"""
         self._friend_msg_receivers.append(receiver)
@@ -304,28 +344,48 @@ class Botoy:
         """
         return self._event_handler(msg)
 
-    def run(self):
-        sio = socketio.Client()
+    def run(self, wait: bool = True, sio: socketio.Client = None):
+        """运行
+        :param wait: 是否阻塞
+        """
+        sio = sio or socketio.Client()
 
         sio.event(self.connect)
         sio.event(self.disconnect)
-        sio.on("OnGroupMsgs")(self._group_msg_handler)  # type: ignore
-        sio.on("OnFriendMsgs")(self._friend_msg_handler)  # type: ignore
-        sio.on("OnEvents")(self._event_handler)  # type: ignore
+        sio.on("OnGroupMsgs", self._group_msg_handler)
+        sio.on("OnFriendMsgs", self._friend_msg_handler)
+        sio.on("OnEvents", self._event_handler)
 
-        logger.info("Connecting to the server...")
+        delay = 1
+
         try:
-            sio.connect(self.config.address, transports=["websocket"])
-        except Exception:
-            logger.error(traceback.format_exc())
-            sio.disconnect()
-            self.pool.shutdown(wait=False)
-        else:
-            try:
+            while True:
+                try:
+                    logger.info(f"Connecting to the server[{self.config.address}]...")
+                    sio.connect(self.config.address, transports=["websocket"])
+                except (SioConnectionError, ValueError):
+                    current_delay = delay + (2 * random.random() - 1) / 2
+                    logger.error(
+                        f"连接失败，请检查ip端口是否配置正确，检查机器人是否启动，确保能够连接上! {current_delay:.1f} 后开始重试连接"
+                    )
+                    time.sleep(current_delay)
+                    delay *= 1.68
+                else:
+                    break
+
+            if wait:
                 sio.wait()
-            except KeyboardInterrupt:
-                pass
-            finally:
-                print("bye~")
-                sio.disconnect()
-                self.pool.shutdown(wait=False)
+
+        except BaseException as e:
+            sio.disconnect()
+            self.pool.shutdown(False)
+            if isinstance(e, KeyboardInterrupt):
+                print("\b\b\b\bbye~")
+            else:
+                raise
+
+        return sio
+
+    def run_no_wait(self, sio: socketio.Client = None):
+        """不阻塞运行"""
+        return self.run(False, sio)

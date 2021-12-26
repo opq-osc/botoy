@@ -1,10 +1,12 @@
 # pylint: disable = too-many-instance-attributes, W0212,W0236,E1133
 import asyncio
 import copy
+import random
 import traceback
 from typing import Union
 
 import socketio
+from socketio.exceptions import ConnectionError as SioConnectionError
 
 from botoy.client import Botoy
 from botoy.log import logger
@@ -39,28 +41,47 @@ class AsyncBotoy(Botoy):
         except Exception:
             logger.error(traceback.format_exc())
 
-    async def run(self):
-        sio = socketio.AsyncClient()
+    async def run(self, wait: bool = True, sio: socketio.AsyncClient = None):
+        """运行
+        :param wait: 是否阻塞
+        """
+        sio = sio or socketio.AsyncClient()
+
         sio.event(self.connect)
         sio.event(self.disconnect)
-        sio.on("OnGroupMsgs", handler=self._group_msg_handler)
-        sio.on("OnFriendMsgs", handler=self._friend_msg_handler)
-        sio.on("OnEvents", handler=self._event_handler)
-
-        logger.info("Connecting to the server...")
+        sio.on("OnGroupMsgs", self._group_msg_handler)
+        sio.on("OnFriendMsgs", self._friend_msg_handler)
+        sio.on("OnEvents", self._event_handler)
 
         try:
-            await sio.connect(self.config.address, transports=["websocket"])
-        except Exception:
-            logger.error(traceback.format_exc())
-            await sio.disconnect()
-            self.pool.shutdown(wait=False)
-        else:
-            try:
+            delay = 1
+            while True:
+                try:
+                    logger.info(f"Connecting to the server[{self.config.address}]...")
+                    await sio.connect(self.config.address, transports=["websocket"])
+                except (SioConnectionError, ValueError):
+                    current_delay = delay + (2 * random.random() - 1) / 2
+                    logger.error(
+                        f"连接失败，请检查ip端口是否配置正确，检查机器人是否启动，确保能够连接上! {current_delay:.1f} 后开始重试连接"
+                    )
+                    await asyncio.sleep(current_delay)
+                    delay *= 1.68
+                else:
+                    break
+
+            if wait:
                 await sio.wait()
-            except KeyboardInterrupt:
-                pass
-            finally:
-                print("bye~")
-                await sio.disconnect()
-                self.pool.shutdown(wait=False)
+
+        except BaseException as e:
+            await sio.disconnect()
+            self.pool.shutdown(False)
+            if isinstance(e, KeyboardInterrupt):
+                print("\b\b\b\bbye~")
+            else:
+                raise
+
+        return sio
+
+    async def run_no_wait(self, sio: socketio.AsyncClient = None):
+        """不阻塞运行"""
+        return await self.run(False, sio)

@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Any, List
 
 from .exceptions import InvalidConfigError
@@ -13,8 +14,8 @@ from .utils import check_schema
 # | webhook_post_url | webhook上报地址                    | 127.0.0.1:5000 |
 # | webhook_timeout  | webhook等待响应的延时              | 20             |
 
-DEFAULT_HOST = "http://127.0.0.1"
-DEFAULT_PORT = 8888
+DEFAULT_HOST = os.getenv("BOTOY_HOST") or "http://127.0.0.1"
+DEFAULT_PORT = int(os.getenv("BOTOY_PORT") or 8888)
 DEFAULT_GROUP_BLACKLIST: List[int] = []
 DEFAULT_FRIEND_BLACKLIST: List[int] = []
 DEFAULT_BLOCK_UESRS: List[int] = []
