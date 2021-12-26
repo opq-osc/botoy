@@ -285,7 +285,13 @@ class Session(SessionBase):
 
             what: str = self.want(str(uuid4()), prompt, pop=True, timeout=timeout)
             if what is None:
-
+                return
+            try:
+                idx = int(what) - 1
+                assert idx >= 0
+                return candidates[idx], idx
+            except Exception:
+                self.send_text("序号错误")
 
 
 class SessionController:
