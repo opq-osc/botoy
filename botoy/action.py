@@ -757,7 +757,7 @@ class Action:
             "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
         )
 
-    def uploadHeadPortrait(self, url: str):
+    def updateAvatar(self, url: str):
         """上传头像
         :param url: 图片链接
         """
