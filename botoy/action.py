@@ -16,7 +16,7 @@ from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 class Action:
     def __init__(
-            self, qq: int = None, port: int = None, host: str = None, timeout: int = 20
+        self, qq: int = None, port: int = None, host: str = None, timeout: int = 20
     ):
         self.config = Config(host=host, port=port)
 
@@ -32,7 +32,7 @@ class Action:
 
     @classmethod
     def from_ctx(
-            cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20
+        cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20
     ) -> "Action":
         return cls(
             ctx.CurrentQQ,
@@ -55,19 +55,21 @@ class Action:
         )
 
     def sendFriendPic(
-            self,
-            user: int,
-            *,
-            picUrl: str = "",
-            picBase64Buf: str = "",
-            picMd5s: Union[str, List[str]] = None,
-            content: str = "",
-            flashPic=False,
+        self,
+        user: int,
+        *,
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        picMd5s: Union[str, List[str]] = None,
+        content: str = "",
+        flashPic=False,
     ):
         """发送好友图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
         if isinstance(picMd5s, list):
-            picMd5s = [{"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s]
+            picMd5s = [
+                {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
+            ]
         elif isinstance(picMd5s, str):
             picMd5s = {"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}
         return self.post(
@@ -85,7 +87,7 @@ class Action:
         )
 
     def sendFriendVoice(
-            self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
+        self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ):
         """发送好友语音消息"""
         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
@@ -125,7 +127,7 @@ class Action:
         )
 
     def sendGroupText(
-            self, group: int, content: str, atUser: Union[int, List[int]] = 0
+        self, group: int, content: str, atUser: Union[int, List[int]] = 0
     ) -> dict:
         """发送群组文本消息"""
         if atUser != 0:
@@ -141,22 +143,24 @@ class Action:
         )
 
     def sendGroupPic(
-            self,
-            group: int,
-            *,
-            content: str = "",
-            picUrl: str = "",
-            picBase64Buf: str = "",
-            picMd5s: Union[str, List[str]] = None,
-            flashPic=False,
-            atUser: Union[int, List[int]] = 0,
+        self,
+        group: int,
+        *,
+        content: str = "",
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        picMd5s: Union[str, List[str]] = None,
+        flashPic=False,
+        atUser: Union[int, List[int]] = 0,
     ) -> dict:
         """发送群组图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s, picMd5s]), "缺少参数"
         if atUser != 0:
             content = macro.atUser(atUser) + "\n" + content
         if isinstance(picMd5s, list):
-            picMd5s = [{"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s]
+            picMd5s = [
+                {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
+            ]
         elif isinstance(picMd5s, str):
             picMd5s = {"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}
         return self.post(
@@ -174,7 +178,7 @@ class Action:
         )
 
     def sendGroupVoice(
-            self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
+        self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
         """发送群组语音消息"""
         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
@@ -252,7 +256,7 @@ class Action:
         )
 
     def sendPrivateVoice(
-            self, user: int, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
+        self, user: int, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
         return self.post(
@@ -269,19 +273,21 @@ class Action:
         )
 
     def sendPrivatePic(
-            self,
-            user: int,
-            group: int,
-            content: str = "",
-            *,
-            picUrl: str = "",
-            picBase64Buf: str = "",
-            picMd5s: Union[str, List[str]] = None
+        self,
+        user: int,
+        group: int,
+        content: str = "",
+        *,
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        picMd5s: Union[str, List[str]] = None,
     ) -> dict:
         """发送私聊图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
         if isinstance(picMd5s, list):
-            picMd5s = [{"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s]
+            picMd5s = [
+                {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
+            ]
         elif isinstance(picMd5s, str):
             picMd5s = {"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}
         return self.post(
@@ -294,7 +300,7 @@ class Action:
                 "Content": content,
                 "PicUrl": picUrl,
                 "PicBase64Buf": picBase64Buf,
-                "PicMd5s": picMd5s
+                "PicMd5s": picMd5s,
             },
         )
 
@@ -306,13 +312,13 @@ class Action:
         )
 
     def replyGroupMsg(
-            self,
-            group: int,
-            content: str,
-            msgSeq: int,
-            msgTime: int = None,
-            user: int = 0,
-            rawContent: str = "",
+        self,
+        group: int,
+        content: str,
+        msgSeq: int,
+        msgTime: int = None,
+        user: int = 0,
+        rawContent: str = "",
     ):
         """发送回复消息, 回复群消息
         下面的原消息表示需要回复的消息
@@ -340,12 +346,12 @@ class Action:
         )
 
     def replyFriendMsg(
-            self,
-            user: int,
-            content: str,
-            msgSeq: int,
-            msgTime: int = None,
-            rawContent: str = "",
+        self,
+        user: int,
+        content: str,
+        msgSeq: int,
+        msgTime: int = None,
+        rawContent: str = "",
     ):
         """发送回复消息, 回复好友消息
         下面的原消息表示需要回复的消息
@@ -465,14 +471,14 @@ class Action:
         )
 
     def uploadGroupFile(
-            self,
-            group: int,
-            fileURL: str = "",
-            fileBase64: str = "",
-            filePath: str = "",
-            fileName: str = "",
-            fileType: str = "",
-            notify: bool = True,
+        self,
+        group: int,
+        fileURL: str = "",
+        fileBase64: str = "",
+        filePath: str = "",
+        fileName: str = "",
+        fileType: str = "",
+        notify: bool = True,
     ) -> dict:
         """上传群文件
         :param group: 群号
@@ -640,12 +646,12 @@ class Action:
         )
 
     def setGroupAnnounce(
-            self,
-            group: int,
-            text: str,
-            pinned: bool = False,
-            title: str = "",
-            typ: bool = True,
+        self,
+        group: int,
+        text: str,
+        pinned: bool = False,
+        title: str = "",
+        typ: bool = True,
     ):
         """设置群公告
         :param group: 群号
@@ -764,12 +770,12 @@ class Action:
 
     ############################################################################
     def baseRequest(
-            self,
-            method: str,
-            funcname: str,
-            path: str,
-            payload: dict = None,
-            params: dict = None,
+        self,
+        method: str,
+        funcname: str,
+        path: str,
+        payload: dict = None,
+        params: dict = None,
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
@@ -831,11 +837,11 @@ class Action:
         return data
 
     def post(
-            self,
-            funcname: str,
-            payload: dict,
-            params: dict = None,
-            path: str = "/v1/LuaApiCaller",
+        self,
+        funcname: str,
+        payload: dict,
+        params: dict = None,
+        path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装常用的post操作"""
         return self.baseRequest(
@@ -843,10 +849,10 @@ class Action:
         )
 
     def get(
-            self,
-            funcname: str,
-            params: dict = None,
-            path: str = "/v1/LuaApiCaller",
+        self,
+        funcname: str,
+        params: dict = None,
+        path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装get操作"""
         return self.baseRequest("GET", funcname=funcname, path=path, params=params)
