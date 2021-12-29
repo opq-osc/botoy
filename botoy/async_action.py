@@ -64,23 +64,28 @@ class AsyncAction:
         *,
         picUrl: str = "",
         picBase64Buf: str = "",
-        fileMd5: str = "",
+        picMd5s: Union[str, List[str]] = None,
         content: str = "",
         flashPic=False,
     ):
         """发送好友图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5]), "缺少参数"
-        return await self.post(
-            "SendMsg",
+        assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
+        return self.post(
+            "SendMsgV2",
             {
-                "toUser": user,
-                "sendToType": 1,
-                "sendMsgType": "PicMsg",
-                "content": content,
-                "picUrl": picUrl,
-                "picBase64Buf": picBase64Buf,
-                "fileMd5": fileMd5,
-                "flashPic": flashPic,
+                "ToUserUid": user,
+                "SendToType": 1,
+                "SendMsgType": "PicMsg",
+                "Content": content,
+                "PicUrl": picUrl,
+                "PicBase64Buf": picBase64Buf,
+                "PicMd5s": picMd5s,
+                "FlashPic": flashPic,
             },
         )
 
@@ -130,30 +135,35 @@ class AsyncAction:
 
     async def sendGroupPic(
         self,
-        user: int,
+        group: int,
         *,
         content: str = "",
         picUrl: str = "",
         picBase64Buf: str = "",
-        fileMd5: str = "",
+        picMd5s: Union[str, List[str]] = None,
         flashPic=False,
         atUser: Union[int, List[int]] = 0,
     ) -> dict:
         """发送群组图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5]), "缺少参数"
+        assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
         if atUser != 0:
             content = macro.atUser(atUser) + content
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
         return await self.post(
-            "SendMsg",
+            "SendMsgV2",
             {
-                "toUser": user,
-                "sendToType": 2,
-                "sendMsgType": "PicMsg",
-                "content": content,
-                "picUrl": picUrl,
-                "picBase64Buf": picBase64Buf,
-                "fileMd5": fileMd5,
-                "flashPic": flashPic,
+                "ToUserUid": group,
+                "SendToType": 2,
+                "SendMsgType": "PicMsg",
+                "Content": content,
+                "PicUrl": picUrl,
+                "PicBase64Buf": picBase64Buf,
+                "PicMd5s": picMd5s,
+                "FlashPic": flashPic,
             },
         )
 
@@ -248,21 +258,26 @@ class AsyncAction:
         *,
         picUrl: str = "",
         picBase64Buf: str = "",
-        fileMd5: str = "",
+        picMd5s: Union[str, List[str]] = None,
     ) -> dict:
         """发送私聊图片消息"""
-        assert any([picUrl, picBase64Buf, fileMd5]), "缺少参数"
+        assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
         return await self.post(
-            "SendMsg",
+            "SendMsgV2",
             {
-                "toUser": user,
-                "sendToType": 3,
-                "sendMsgType": "PicMsg",
-                "content": content,
-                "groupid": group,
-                "picUrl": picUrl,
-                "picBase64Buf": picBase64Buf,
-                "fileMd5": fileMd5,
+                "ToUserUid": user,
+                "GroupID": group,
+                "SendToType": 3,
+                "SendMsgType": "PicMsg",
+                "Content": content,
+                "PicUrl": picUrl,
+                "PicBase64Buf": picBase64Buf,
+                "PicMd5s": picMd5s,
             },
         )
 
