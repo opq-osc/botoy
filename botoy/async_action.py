@@ -174,7 +174,9 @@ class AsyncAction:
         text: str = "",
         atUser: Union[int, List[int]] = 0,
     ):
-        """发送群多图"""
+        """发送群多图
+        items 支持填写图片http地址和base64，会自动判断类型
+        """
         md5s = []
         for item in items:
             if item.startswith("http"):
