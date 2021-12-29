@@ -590,6 +590,7 @@ class AsyncAction:
         return await self.post(
             "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
         )
+
     async def baseRequest(
         self,
         method: str,
