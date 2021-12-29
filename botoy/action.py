@@ -71,7 +71,7 @@ class Action:
                 {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
             ]
         elif isinstance(picMd5s, str):
-            picMd5s = {"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}
+            picMd5s = [{"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}]
         return self.post(
             "SendMsgV2",
             {
@@ -162,7 +162,7 @@ class Action:
                 {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
             ]
         elif isinstance(picMd5s, str):
-            picMd5s = {"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}
+            picMd5s = [{"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}]
         return self.post(
             "SendMsgV2",
             {
@@ -289,7 +289,7 @@ class Action:
                 {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
             ]
         elif isinstance(picMd5s, str):
-            picMd5s = {"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}
+            picMd5s = [{"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}]
         return self.post(
             "SendMsgV2",
             {
