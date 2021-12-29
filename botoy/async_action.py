@@ -571,6 +571,25 @@ class AsyncAction:
             {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
         )
 
+    async def refreshKeys(self) -> dict:
+        """刷新key二次登陆"""
+        return await self.get("", path="/v1/RefreshKeys")
+
+    async def logout(self, flag=False) -> dict:
+        """退出指定QQ
+        :param flag: 是否删除设备信息文件
+        """
+        return await self.post("LogOut", {"Flag": flag})
+
+    async def getGroupPicInfo(self, url: str = "", base64: str = ""):
+        """上传群图片获取图片信息
+        :param url: 图片链接
+        :param base64: 图片base64
+        """
+        assert any([url, base64]), "缺少参数"
+        return await self.post(
+            "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
+        )
     async def baseRequest(
         self,
         method: str,
