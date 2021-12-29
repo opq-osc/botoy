@@ -167,6 +167,24 @@ class AsyncAction:
             },
         )
 
+    async def sendGroupMultiPic(
+        self,
+        group,
+        *items: str,
+        text: str = "",
+        atUser: Union[int, List[int]] = 0,
+    ):
+        """发送群多图"""
+        md5s = []
+        for item in items:
+            if item.startswith("http"):
+                info = await self.getGroupPicInfo(url=item)
+            else:
+                info = await self.getGroupPicInfo(base64=item)
+            md5s.append(info["PicInfo"]["PicMd5"])
+            time.sleep(0.5)
+        return await self.sendGroupPic(group, content=text, atUser=atUser, picMd5s=md5s)
+
     async def sendGroupVoice(
         self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
