@@ -66,12 +66,11 @@ class Action:
     ):
         """发送好友图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
-        if isinstance(picMd5s, list):
-            picMd5s = [
-                {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
-            ]
-        elif isinstance(picMd5s, str):
-            picMd5s = [{"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}]
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
         return self.post(
             "SendMsgV2",
             {
@@ -157,12 +156,11 @@ class Action:
         assert any([picUrl, picBase64Buf, picMd5s, picMd5s]), "缺少参数"
         if atUser != 0:
             content = macro.atUser(atUser) + "\n" + content
-        if isinstance(picMd5s, list):
-            picMd5s = [
-                {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
-            ]
-        elif isinstance(picMd5s, str):
-            picMd5s = [{"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}]
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
         return self.post(
             "SendMsgV2",
             {
@@ -284,12 +282,11 @@ class Action:
     ) -> dict:
         """发送私聊图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
-        if isinstance(picMd5s, list):
-            picMd5s = [
-                {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s
-            ]
-        elif isinstance(picMd5s, str):
-            picMd5s = [{"FileId": 1, "PicMd5": picMd5s, "PicSize": 1}]
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
         return self.post(
             "SendMsgV2",
             {
