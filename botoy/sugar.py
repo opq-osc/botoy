@@ -124,12 +124,12 @@ def Picture(pic_url="", pic_base64="", pic_path="", pic_md5="", text=""):
         elif pic_md5:
             if ctx.TempUin:
                 return action.sendPrivatePic(
-                    ctx.FromUin, ctx.TempUin, content=text, fileMd5=pic_md5
+                    ctx.FromUin, ctx.TempUin, content=text, picMd5s=pic_md5
                 )
             elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
                 return None
             else:
-                return action.sendFriendPic(ctx.FromUin, fileMd5=pic_md5, content=text)
+                return action.sendFriendPic(ctx.FromUin, picMd5s=pic_md5, content=text)
     return None
 
 
@@ -356,7 +356,7 @@ class _S:
                         ctx.FromUin,
                         ctx.TempUin,
                         content=text,
-                        fileMd5=data,  # type:ignore
+                        picMd5s=data,  # type:ignore
                     )
                 elif type == TYPE_PATH:
                     return action.sendPrivatePic(
@@ -368,7 +368,7 @@ class _S:
                 elif type == TYPE_BASE64:
                     return action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=data)  # type: ignore
                 elif type == TYPE_MD5:
-                    return action.sendFriendPic(ctx.FromUin, content=text, fileMd5=data)  # type: ignore
+                    return action.sendFriendPic(ctx.FromUin, content=text, picMd5s=data)  # type: ignore
                 elif type == TYPE_PATH:
                     return action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=file_to_base64(data))  # type: ignore
 
@@ -499,7 +499,7 @@ class _S:
                             ctx.FromUin,
                             ctx.TempUin,
                             content=text,
-                            fileMd5=data,  # type:ignore
+                            picMd5s=data,  # type:ignore
                         )
                     elif type == TYPE_PATH:
                         return await action.sendPrivatePic(
@@ -511,7 +511,7 @@ class _S:
                     elif type == TYPE_BASE64:
                         return await action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=data)  # type: ignore
                     elif type == TYPE_MD5:
-                        return await action.sendFriendPic(ctx.FromUin, content=text, fileMd5=data)  # type: ignore
+                        return await action.sendFriendPic(ctx.FromUin, content=text, picMd5s=data)  # type: ignore
                     elif type == TYPE_PATH:
                         return await action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=file_to_base64(data))  # type: ignore
 
