@@ -187,7 +187,9 @@ class Session(SessionBase):
             return self.action.sendFriendText(self.ctx.FromUin, text)
         return self.action.sendGroupText(self.ctx.FromGroupId, text)
 
-    def send_pic(self, url: str = "", base64: str = "", md5s: List[str] = [], text: str = ""):
+    def send_pic(
+        self, url: str = "", base64: str = "", md5s: List[str] = [], text: str = ""
+    ):
         """发送session图片消息
         :param url: 图片URL
         :param base64: 图片base64
