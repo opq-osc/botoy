@@ -187,11 +187,11 @@ class Session(SessionBase):
             return self.action.sendFriendText(self.ctx.FromUin, text)
         return self.action.sendGroupText(self.ctx.FromGroupId, text)
 
-    def send_pic(self, url: str = "", base64: str = "", md5: str = "", text: str = ""):
+    def send_pic(self, url: str = "", base64: str = "", md5s: List[str] = [], text: str = ""):
         """发送session图片消息
         :param url: 图片URL
         :param base64: 图片base64
-        :param md5: 图片MD5
+        :param md5s: 图片MD5
         :param text: 图片附带文字
         """
         if isinstance(self.ctx, FriendMsg):
@@ -199,14 +199,14 @@ class Session(SessionBase):
                 self.ctx.FromUin,
                 picUrl=url,
                 picBase64Buf=base64,
-                fileMd5=md5,
+                picMd5s=md5s,
                 content=text,
             )
         return self.action.sendGroupPic(
             self.ctx.FromGroupId,
             picUrl=url,
             picBase64Buf=base64,
-            fileMd5=md5,
+            picMd5s=md5s,
             content=text,
         )
 
