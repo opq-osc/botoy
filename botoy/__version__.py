@@ -1,6 +1,6 @@
 # pylint: disable=C0415,C0413
 # type: ignore
-__version__ = "7.12"
+__version__ = "7.13"
 
 
 def check_version():
