@@ -81,6 +81,9 @@ class Botoy:
         # 日志
         logger_init(log, log_file)
 
+        # 调用close方法需要调用的函数，每个接收一个参数 wait
+        self._close_callbacks = []
+
         # 消息接收函数列表
         # 这里只储存主体文件中通过装饰器或函数添加的接收函数
         self._friend_msg_receivers: List[T_FriendMsgReceiver] = []
@@ -120,6 +123,7 @@ class Botoy:
         # 线程池 TODO: 开放该参数
         thread_works = 50
         self.pool = WorkerPool(thread_works)
+        self._close_callbacks.append(self.pool.shutdown)
 
         # 初始化消息包接收函数
         self._friend_msg_handler = self._msg_handler_factory(FriendMsg)
@@ -373,6 +377,8 @@ class Botoy:
                 else:
                     break
 
+            self._close_callbacks.append(lambda _: sio.disconnect())
+
             if wait:
                 sio.wait()
 
@@ -389,3 +395,7 @@ class Botoy:
     def run_no_wait(self, sio: socketio.Client = None):
         """不阻塞运行"""
         return self.run(False, sio)
+
+    def close(self, wait=True):
+        for callback in self._close_callbacks:
+            callback(wait)

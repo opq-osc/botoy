@@ -69,6 +69,11 @@ class AsyncBotoy(Botoy):
                 else:
                     break
 
+            async def disconnect(_):
+                await sio.disconnect()
+
+            self._close_callbacks.append(disconnect)
+
             if wait:
                 await sio.wait()
 
@@ -85,3 +90,10 @@ class AsyncBotoy(Botoy):
     async def run_no_wait(self, sio: socketio.AsyncClient = None):
         """不阻塞运行"""
         return await self.run(False, sio)
+
+    async def close(self, wait=True):
+        for callback in self._close_callbacks:
+            if asyncio.iscoroutinefunction(callback):
+                await callback(wait)
+            else:
+                callback(wait)
