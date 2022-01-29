@@ -67,7 +67,7 @@ def get_cache_dir(dir_name: str) -> Path:
     this_cache_dir = cache_dir / dir_name
     if not this_cache_dir.exists():
         os.makedirs(this_cache_dir)
-    return this_cache_dir
+    return this_cache_dir.absolute()
 
 
 class RateLimit:
