@@ -9,6 +9,7 @@ from .collection import Emoticons, EventNames, MsgTypes
 from .config import jconfig
 from .log import logger
 from .model import EventMsg, FriendMsg, GroupMsg
+from .runner import run
 from .sugar import Picture, S, Text, Voice
 
 check_version()
@@ -31,4 +32,5 @@ __all__ = [
     "Text",
     "Voice",
     "S",
+    "run",
 ]

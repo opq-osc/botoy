@@ -45,6 +45,9 @@ class AsyncBotoy(Botoy):
         """运行
         :param wait: 是否阻塞
         """
+
+        self.plugMgr
+
         sio = sio or socketio.AsyncClient()
 
         sio.event(self.connect)

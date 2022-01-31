@@ -52,6 +52,22 @@ class Botoy:
     :param log_file: 该参数控制日志文件开与关,为True输出INFO等级日志的文件,为False关闭输出日志文件
     """
 
+    # 主要为了重载功能，因为重载不需要用到bot的功能
+    # 如果在初始化实例时就导入插件, 导入插件会多执行一次插件,
+    # 在初次访问时初始化更符合常理，也防止了部分潜在bug
+    class LazyPluginManager:
+        def __init__(self, mgr):
+            self.mgr = mgr
+
+        def __get__(self, obj, _):
+            if obj.use_plugins:
+                self.mgr.load_plugins()
+                print(self.mgr.info)
+            value = obj.__dict__["plugMgr"] = self.mgr
+            return value
+
+    plugMgr: PluginManager = LazyPluginManager(PluginManager())  # type: ignore
+
     def __init__(
         self,
         *,
@@ -109,10 +125,7 @@ class Botoy:
 
         # 插件管理
         # 管理插件提供的接收函数
-        self.plugMgr = PluginManager()
-        if use_plugins:
-            self.plugMgr.load_plugins()
-            print(self.plugMgr.info)
+        self.use_plugins = use_plugins
 
         # 当连接上或断开连接运行的函数
         # 如果通过装饰器注册了, 这两个字段设置成(func, every_time)
@@ -334,24 +347,33 @@ class Botoy:
         """群消息入口函数
         :param msg: 完整的消息数据
         """
+        # 此时plugMgr未初始化，将会出现先打印出消息日志，然后加载插件，打印插件信息
+        # 虽然只会在第一条消息时出现这个现象，但这是不符合常理的
+        self.plugMgr
         return self._group_msg_handler(msg)
 
     def friend_msg_handler(self, msg: dict):
         """好友消息入口函数
         :param msg: 完整的消息数据
         """
+        self.plugMgr
         return self._friend_msg_handler(msg)
 
     def event_handler(self, msg: dict):
         """事件入口函数
         :param msg: 完整的消息数据
         """
+        self.plugMgr
         return self._event_handler(msg)
 
     def run(self, wait: bool = True, sio: socketio.Client = None):
         """运行
         :param wait: 是否阻塞
         """
+
+        # 调用运行方法了，插件的逻辑是肯定需要的，确保插件逻辑已加载, 这里显式初始化
+        self.plugMgr
+
         sio = sio or socketio.Client()
 
         sio.event(self.connect)

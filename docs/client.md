@@ -122,6 +122,22 @@ def _():
 
 sockeio 事件或信息`connect`, `disconnect`, `OnGroupMsgs`, `OnFriendMsgs`, `OnEvents` 由框架保留，请勿自己绑定`handler`
 
+### 自动重载
+
+避免开发时频繁的修改和启动, 可以通过模块提供的`run`函数来启动，该函数主要用于自动重载，所以只支持botoy为主程序的情况，
+也就是使用的会阻塞的`run`方法, 大部分需求也是如此
+
+使用十分简单
+
+```python
+from botoy import Botoy, run
+
+bot = Botoy()
+
+
+run(bot, auto_reload=True)
+```
+
 ## 消息上下文对象
 
 对三类消息及其字段的简要说明
