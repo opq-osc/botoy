@@ -42,6 +42,6 @@ def _(ctx: GroupMsg):
 
     其他保留属性:
 
-    - <code>_pattern_result</code> 由装饰器`pattern_with`自动添加
+    - <code>_match</code> 由装饰器`on_regexp` 和 `re_match`自动添加
 
-    - <code>_match</code> 由装饰器`on_regexp`自动添加
+    - <code>_findall</code> 由装饰器`re_findall`自动添加

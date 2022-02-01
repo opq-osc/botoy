@@ -122,3 +122,25 @@ def need_action(func=None):
     """自动创建action并作为接收函数第2个参数传入
     你需要修改接收函数, 并且该装饰器只能放在最后（下）面!
     """
+
+
+def re_match(pattern: Union[str, re.Pattern]):
+    """正则匹配Content字段 GroupMsg, FriendMsg
+    因为使用这种功能一般匹配的内容都比较特殊,像图片，视频之类的消息基本是不会符合匹配条件的,
+    所以不会解析特殊的消息, 均采用最原始的Content字段进行匹配,
+
+    匹配使用的是`re.match`方法，匹配结果可通过`ctx._match`属性调用
+
+    :param pattern: 正则表达式
+    """
+
+
+def re_findall(pattern: Union[str, re.Pattern]):
+    """正则匹配Content字段 GroupMsg, FriendMsg
+    因为使用这种功能一般匹配的内容都比较特殊,像图片，视频之类的消息基本是不会符合匹配条件的,
+    所以不会解析特殊的消息, 均采用最原始的Content字段进行匹配,
+
+    匹配使用的是`re.findall`方法，匹配结果可通过`ctx._findall`属性调用
+
+    :param pattern: 正则表达式
+    """

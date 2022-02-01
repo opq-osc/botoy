@@ -16,6 +16,8 @@ from ._in_content import in_content
 from ._need_action import need_action
 from ._on_regexp import on_regexp
 from ._queued_up import queued_up
+from ._re_findall import re_findall
+from ._re_match import re_match
 from ._startswith import startswith
 from ._these_msgtypes import these_msgtypes
 from ._with_pattern import with_pattern
@@ -41,4 +43,6 @@ __all__ = [
     "with_pattern",
     "common_text",
     "need_action",
+    "re_findall",
+    "re_match",
 ]

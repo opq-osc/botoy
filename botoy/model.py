@@ -24,6 +24,7 @@ class GroupMsg:
     _host: str
     _port: int
     _match: Match
+    _findall: list
 
     def __init__(self, message: dict):
         data = message["CurrentPacket"]["Data"]
@@ -95,6 +96,7 @@ class FriendMsg:
     _host: str
     _port: int
     _match: Match
+    _findall: list
 
     def __init__(self, message: dict):
         data = message["CurrentPacket"]["Data"]
