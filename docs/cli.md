@@ -20,6 +20,12 @@ botoy add
 botoy run
 ```
 
+## 启动机器人并开启自动重载 hot
+
+```shell
+botoy hot
+```
+
 要求机器人主文件命名为 bot.py
 
 ## 测试连接

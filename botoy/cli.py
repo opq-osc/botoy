@@ -11,6 +11,7 @@ import click
 from .__version__ import __version__
 from .async_client import AsyncBotoy
 from .client import Botoy
+from .runner import run as run_with_reload
 from .utils import check_schema
 
 echo = click.echo
@@ -251,6 +252,28 @@ def run():
             asyncio.run(client.run())
         else:
             client.run()
+
+
+@cli.command()
+def hot():
+    """启动机器人, 同时开启自动重载
+    要求入口文件名为bot.py
+    """
+    # look for bot.py
+    if not pathlib.Path("bot.py").exists():
+        sys.exit("该命令只接受入口文件命名为bot.py")
+    # look for Botoy client
+    sys.path.append(str(pathlib.Path(".").absolute()))
+    module = importlib.import_module("bot")
+    client = None
+    for item in module.__dict__.values():
+        if isinstance(item, (Botoy, AsyncBotoy)):
+            client = item
+            break
+    else:
+        sys.exit("无法找到(Async)Botoy对象")
+    if client is not None:
+        run_with_reload(client, True)
 
 
 @cli.command()
