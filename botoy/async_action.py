@@ -611,6 +611,13 @@ class AsyncAction:
             "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
         )
 
+    async def openRedBag(self, redBagInfo: dict):
+        """打开红包
+
+        :param redBagInfo: 红包信息, ctx.RedBaginfo
+        """
+        return await self.post("OpenRedBag", redBagInfo)
+
     async def baseRequest(
         self,
         method: str,

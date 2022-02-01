@@ -541,6 +541,13 @@ class Action:
             raise Exception("fileURL, fileBase64, filePath 必须给定其中一个")
         return self.post("SendMsgV2", payload)
 
+    def openRedBag(self, redBagInfo: dict):
+        """打开红包
+
+        :param redBagInfo: 红包信息, ctx.RedBaginfo
+        """
+        return self.post("OpenRedBag", redBagInfo)
+
     ############获取############
     def getCookies(self) -> dict:
         """获取QQ相关cookie"""
