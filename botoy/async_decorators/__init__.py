@@ -13,6 +13,8 @@ from ._ignore_these_users import ignore_these_users
 from ._in_content import in_content
 from ._need_action import need_action
 from ._on_regexp import on_regexp
+from ._re_findall import re_findall
+from ._re_match import re_match
 from ._startswith import startswith
 from ._these_msgtypes import these_msgtypes
 
@@ -33,4 +35,6 @@ __all__ = [
     "these_msgtypes",
     "common_text",
     "need_action",
+    "re_findall",
+    "re_match",
 ]
