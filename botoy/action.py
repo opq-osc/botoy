@@ -431,7 +431,7 @@ class Action:
         )
 
     def getGroupFileURL(self, group: int, fileID: str) -> dict:
-        """获取好友文件链接
+        """获取群文件链接
         :param group: 群号
         :param fileID: 文件 ID，可由上报的消息中获得
         """
