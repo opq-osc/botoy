@@ -15,7 +15,7 @@ from .async_client import AsyncBotoy
 from .client import Botoy
 
 
-@lru_cache
+@lru_cache(maxsize = 2333)
 def _get_running_args():
     main = sys.modules["__main__"]
     spec = getattr(main, "__spec__", None)
