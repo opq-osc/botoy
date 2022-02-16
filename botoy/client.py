@@ -135,8 +135,8 @@ class Botoy:
 
         # 线程池 TODO: 开放该参数
         thread_works = 50
-        self.pool = WorkerPool(thread_works)
-        self._close_callbacks.append(self.pool.shutdown)
+        self._pool = WorkerPool(thread_works)
+        self._close_callbacks.append(self._pool.shutdown)
 
         # 初始化消息包接收函数
         self._friend_msg_handler = self._msg_handler_factory(FriendMsg)
@@ -155,7 +155,7 @@ class Botoy:
     def _context_handler(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
         passed_context = self._context_checker(context)
         if passed_context:
-            return self.pool.submit(self._context_distributor, context)
+            return self._pool.submit(self._context_distributor, context)
         return
 
     def _context_checker(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
@@ -202,9 +202,9 @@ class Botoy:
         for receiver in self._get_context_receivers(context):
             new_context = copy.deepcopy(context)
             if asyncio.iscoroutinefunction(receiver):
-                self.pool.submit(sync_run, receiver(new_context))  # type: ignore
+                self._pool.submit(sync_run, receiver(new_context))  # type: ignore
             else:
-                self.pool.submit(receiver, new_context)
+                self._pool.submit(receiver, new_context)
 
     def _get_context_receivers(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
 
@@ -316,7 +316,7 @@ class Botoy:
     ########################################################################
     # about socketio
     ########################################################################
-    def connect(self):
+    def _connect(self):
         logger.success("Connected to the server successfully!")
 
         # 连接成功执行用户定义的函数，如果有
@@ -327,9 +327,9 @@ class Botoy:
                 self._when_connected_do = None
 
         for func in self.plugMgr.when_connected_funcs:
-            self.pool.submit(func, self.qq, self.config.host, self.config.port)
+            self._pool.submit(func, self.qq, self.config.host, self.config.port)
 
-    def disconnect(self):
+    def _disconnect(self):
         logger.warning("Disconnected to the server!")
         # 断开连接后执行用户定义的函数，如果有
         if self._when_disconnected_do is not None:
@@ -338,7 +338,7 @@ class Botoy:
                 self._when_disconnected_do = None
 
         for func in self.plugMgr.when_disconnected_funcs:
-            self.pool.submit(func, self.qq, self.config.host, self.config.port)
+            self._pool.submit(func, self.qq, self.config.host, self.config.port)
 
     ########################################################################
     # 开放出来的用于多种连接方式的入口函数
@@ -376,8 +376,8 @@ class Botoy:
 
         sio = sio or socketio.Client()
 
-        sio.event(self.connect)
-        sio.event(self.disconnect)
+        sio.event(self._connect)
+        sio.event(self._disconnect)
         sio.on("OnGroupMsgs", self._group_msg_handler)
         sio.on("OnFriendMsgs", self._friend_msg_handler)
         sio.on("OnEvents", self._event_handler)
@@ -406,7 +406,7 @@ class Botoy:
 
         except BaseException as e:
             sio.disconnect()
-            self.pool.shutdown(False)
+            self._pool.shutdown(False)
             if isinstance(e, KeyboardInterrupt):
                 print("\b\b\b\bbye~")
             else:

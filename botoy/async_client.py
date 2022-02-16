@@ -34,7 +34,7 @@ class AsyncBotoy(Botoy):
             if asyncio.iscoroutinefunction(receiver):
                 coros.append(receiver(new_context))  # type: ignore
             else:
-                self.pool.submit(receiver, new_context)
+                self._pool.submit(receiver, new_context)
 
         try:
             await asyncio.gather(*coros)
@@ -50,8 +50,8 @@ class AsyncBotoy(Botoy):
 
         sio = sio or socketio.AsyncClient()
 
-        sio.event(self.connect)
-        sio.event(self.disconnect)
+        sio.event(self._connect)
+        sio.event(self._disconnect)
         sio.on("OnGroupMsgs", self._group_msg_handler)
         sio.on("OnFriendMsgs", self._friend_msg_handler)
         sio.on("OnEvents", self._event_handler)
@@ -82,7 +82,7 @@ class AsyncBotoy(Botoy):
 
         except BaseException as e:
             await sio.disconnect()
-            self.pool.shutdown(False)
+            self._pool.shutdown(False)
             if isinstance(e, KeyboardInterrupt):
                 print("\b\b\b\bbye~")
             else:
