@@ -3,7 +3,7 @@
 __version__ = "7.16"
 
 
-def check_version():
+def check_version(daemon=True):
     def _check_version():
         from distutils.version import LooseVersion as V
         from xml.etree import ElementTree
@@ -64,5 +64,5 @@ def check_version():
     from threading import Thread
 
     t = Thread(target=_check_version)
-    t.setDaemon(True)
+    t.setDaemon(daemon)
     t.start()

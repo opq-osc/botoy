@@ -8,7 +8,7 @@ import textwrap
 
 import click
 
-from .__version__ import __version__
+from .__version__ import __version__, check_version
 from .async_client import AsyncBotoy
 from .client import Botoy
 from .runner import run as run_with_reload
@@ -55,6 +55,7 @@ def cli():
 def version():
     """版本号"""
     echo(__version__)
+    check_version(False)
 
 
 @cli.command()
