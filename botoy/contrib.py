@@ -18,6 +18,8 @@ from typing import Any, Awaitable, Callable, Dict, Union
 
 import httpx
 
+from .typing import T_EventReceiver, T_FriendMsgReceiver, T_GroupMsgReceiver
+
 __all__ = [
     "file_to_base64",
     "get_cache_dir",
@@ -283,3 +285,104 @@ def sync_run(func):
         return loop.run_until_complete(coro)
     finally:
         loop.close()
+
+
+class _PluginReceiver:
+    """插件接收器助手"""
+
+    def __init__(self, stack=2):
+        self.__group = []
+        self.__friend = []
+        self.__event = []
+
+        self.__stack = stack
+
+    def __set_globals(self, name, value):
+        f = inspect.currentframe()
+        for _ in range(self.__stack):
+            f = f.f_back  # type: ignore
+        f.f_globals[name] = value  # type: ignore
+
+    def __sync_group(self, ctx):
+        for func in self.__group:
+            func(ctx)
+
+    async def __async_group(self, ctx):
+        for func in self.__group:
+            if asyncio.iscoroutinefunction(func):
+                await func(ctx)
+            else:
+                func(ctx)
+
+    def __sync_friend(self, ctx):
+        for func in self.__friend:
+            func(ctx)
+
+    async def __async_friend(self, ctx):
+        for func in self.__friend:
+            if asyncio.iscoroutinefunction(func):
+                await func(ctx)
+            else:
+                func(ctx)
+
+    def __sync_event(self, ctx):
+        for func in self.__event:
+            func(ctx)
+
+    async def __async_event(self, ctx):
+        for func in self.__event:
+            if asyncio.iscoroutinefunction(func):
+                await func(ctx)
+            else:
+                func(ctx)
+
+    def group(self, func):
+        # 因为异步接收器可能不是第一个添加，所以每次添加异步接收器时
+        # 都设置插件的接收函数为异步
+        # 默认是同步, 当第一次添加时设置一次足够了
+        if asyncio.iscoroutinefunction(func):
+            self.__set_globals("receive_group_msg", self.__async_group)
+        elif len(self.__group) == 0:
+            self.__set_globals("receive_group_msg", self.__sync_group)
+        self.__group.append(func)
+
+    def friend(self, func):
+        if asyncio.iscoroutinefunction(func):
+            self.__set_globals("receive_friend_msg", self.__async_friend)
+        elif len(self.__friend) == 0:
+            self.__set_globals("receive_friend_msg", self.__sync_friend)
+        self.__friend.append(func)
+
+    def event(self, func):
+        if asyncio.iscoroutinefunction(func):
+            self.__set_globals("receive_events", self.__async_event)
+        elif len(self.__event) == 0:
+            self.__set_globals("receive_events", self.__sync_event)
+        self.__event.append(func)
+
+
+# 进一步封装PluginReceiver, 省去单独定义对象的步骤
+class plugin_receiver:
+    @classmethod
+    def __get_instance(cls):
+        f_globals = inspect.currentframe().f_back.f_back.f_globals  # type: ignore
+        instance = f_globals.get("__plugin_receiver__")
+        if instance is None:
+            instance = _PluginReceiver(3)
+            f_globals["__plugin_receiver__"] = instance
+        return instance
+
+    @classmethod
+    def group(cls, func: T_GroupMsgReceiver):
+        """添加群消息接收器到该插件的运行队列里"""
+        return cls.__get_instance().group(func)
+
+    @classmethod
+    def friend(cls, func: T_FriendMsgReceiver):
+        """添加好友消息接收器到该插件的运行队列里"""
+        return cls.__get_instance().friend(func)
+
+    @classmethod
+    def event(cls, func: T_EventReceiver):
+        """添加事件消息接收器到该插件的运行队列里"""
+        return cls.__get_instance().event(func)
