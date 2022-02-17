@@ -130,7 +130,7 @@ def receive_group_msg(ctx):
   group_2(ctx)
 ```
 
-这个助手就来简化这一操作, 实现上面的示例只需要
+这个助手就来简化这一操作, 实现上面的示例只需要，附加功能，不需要记住三种接收函数的名字了
 
 ```python
 from botoy.contrib import plugin_receiver
