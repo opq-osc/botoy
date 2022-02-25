@@ -146,6 +146,19 @@ def group_2(ctx):
 
 好友消息和事件同理
 
+另外这三个装饰器只做添加操作，返回值是原函数，所以可以装饰同一个函数用来接收多种类型的消息
+
+```python
+@plugin_receiver.group
+@equal_content('test')
+@plugin_receiver.friend
+def receiver(ctx):
+    print(type(ctx), 'ok')
+```
+
+上面的示例，函数可以接收群消息和好友消息，其中只要收到好友消息就会执行打印，而群消息需要内容为
+test 才会执行打印
+
 注意
 
       1. 使用了`plugin_receiver` 就不要自己定义`receive_group_msg`, `receive_friend_msg`, `receive_events` 了

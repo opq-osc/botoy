@@ -18,7 +18,7 @@ from typing import Any, Awaitable, Callable, Dict, Union
 
 import httpx
 
-from .typing import T_EventReceiver, T_FriendMsgReceiver, T_GroupMsgReceiver
+from .typing import T_GeneralReceiver
 
 __all__ = [
     "file_to_base64",
@@ -344,21 +344,27 @@ class _PluginReceiver:
             self.__set_globals("receive_group_msg", self.__async_group)
         elif len(self.__group) == 0:
             self.__set_globals("receive_group_msg", self.__sync_group)
+        assert func not in self.__group, "重复添加不合常理, 直接报错"
         self.__group.append(func)
+        return func
 
     def friend(self, func):
         if asyncio.iscoroutinefunction(func):
             self.__set_globals("receive_friend_msg", self.__async_friend)
         elif len(self.__friend) == 0:
             self.__set_globals("receive_friend_msg", self.__sync_friend)
+        assert func not in self.__friend, "重复添加不合常理, 直接报错"
         self.__friend.append(func)
+        return func
 
     def event(self, func):
         if asyncio.iscoroutinefunction(func):
             self.__set_globals("receive_events", self.__async_event)
         elif len(self.__event) == 0:
             self.__set_globals("receive_events", self.__sync_event)
+        assert func not in self.__event, "重复添加不合常理, 直接报错"
         self.__event.append(func)
+        return func
 
 
 # 进一步封装PluginReceiver, 省去单独定义对象的步骤
@@ -373,16 +379,16 @@ class plugin_receiver:
         return instance
 
     @classmethod
-    def group(cls, func: T_GroupMsgReceiver):
+    def group(cls, func: T_GeneralReceiver) -> T_GeneralReceiver:
         """添加群消息接收器到该插件的运行队列里"""
         return cls.__get_instance().group(func)
 
     @classmethod
-    def friend(cls, func: T_FriendMsgReceiver):
+    def friend(cls, func: T_GeneralReceiver) -> T_GeneralReceiver:
         """添加好友消息接收器到该插件的运行队列里"""
         return cls.__get_instance().friend(func)
 
     @classmethod
-    def event(cls, func: T_EventReceiver):
+    def event(cls, func: T_GeneralReceiver) -> T_GeneralReceiver:
         """添加事件消息接收器到该插件的运行队列里"""
         return cls.__get_instance().event(func)
