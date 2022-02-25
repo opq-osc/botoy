@@ -56,17 +56,15 @@ class Botoy:
     # 如果在初始化实例时就导入插件, 导入插件会多执行一次插件,
     # 在初次访问时初始化更符合常理，也防止了部分潜在bug
     class LazyPluginManager:
-        def __init__(self, mgr):
-            self.mgr = mgr
-
         def __get__(self, obj, _):
+            mgr = PluginManager()
             if obj.use_plugins:
-                self.mgr.load_plugins()
-                print(self.mgr.info)
-            value = obj.__dict__["plugMgr"] = self.mgr
+                mgr.load_plugins()
+                print(mgr.info)
+            value = obj.__dict__["plugMgr"] = mgr
             return value
 
-    plugMgr: PluginManager = LazyPluginManager(PluginManager())  # type: ignore
+    plugMgr: PluginManager = LazyPluginManager()  # type: ignore
 
     def __init__(
         self,
