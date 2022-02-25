@@ -44,6 +44,8 @@ Botoy().on_group_msg(test).on_friend_msg(test).run()
 
 # [简单例子](https://github.com/opq-osc/botoy-plugins)
 
+# [插件模板](https://github.com/opq-osc/botoy-plugin-template)
+
 # 感谢
 
 [yuban10703](https://github.com/yuban10703)
