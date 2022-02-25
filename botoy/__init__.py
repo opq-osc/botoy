@@ -1,4 +1,7 @@
-"""See https://github.com/xiyaowong/botoy
+"""
+============================================
+= Github: https://github.com/opq-osc/botoy =
+============================================
 """
 from .__version__ import check_version
 from .action import Action
