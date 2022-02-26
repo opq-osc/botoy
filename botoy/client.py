@@ -69,13 +69,13 @@ class Botoy:
     def __init__(
         self,
         *,
-        qq: Union[int, List[int]] = None,
-        use_plugins: bool = False,
-        port: int = None,
-        host: str = None,
-        group_blacklist: List[int] = None,
-        friend_blacklist: List[int] = None,
-        blocked_users: List[int] = None,
+        qq: Optional[Union[int, List[int]]] = None,
+        use_plugins: Optional[bool] = False,
+        port: Optional[int] = None,
+        host: Optional[str] = None,
+        group_blacklist: Optional[List[int]] = None,
+        friend_blacklist: Optional[List[int]] = None,
+        blocked_users: Optional[List[int]] = None,
         log: bool = True,
         log_file: bool = False,
     ):
@@ -299,13 +299,13 @@ class Botoy:
     ##########################################################################
     # decorators for registering hook function when connected or disconnected
     ##########################################################################
-    def when_connected(self, func: Callable = None, *, every_time=False):
+    def when_connected(self, func: Optional[Callable] = None, *, every_time=False):
         if func is None:
             return functools.partial(self.when_connected, every_time=every_time)
         self._when_connected_do = (func, every_time)
         return None
 
-    def when_disconnected(self, func: Callable = None, *, every_time=False):
+    def when_disconnected(self, func: Optional[Callable] = None, *, every_time=False):
         if func is None:
             return functools.partial(self.when_disconnected, every_time=every_time)
         self._when_disconnected_do = (func, every_time)
@@ -364,7 +364,7 @@ class Botoy:
         self.plugMgr
         return self._event_handler(msg)
 
-    def run(self, wait: bool = True, sio: socketio.Client = None):
+    def run(self, wait: bool = True, sio: Optional[socketio.Client] = None):
         """运行
         :param wait: 是否阻塞
         """
@@ -412,7 +412,7 @@ class Botoy:
 
         return sio
 
-    def run_no_wait(self, sio: socketio.Client = None):
+    def run_no_wait(self, sio: Optional[socketio.Client] = None):
         """不阻塞运行"""
         return self.run(False, sio)
 

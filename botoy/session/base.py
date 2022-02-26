@@ -20,7 +20,7 @@ class SessionBase:
     :param expiration: 持续无任何操作自动过期关闭时间
     """
 
-    def __init__(self, expiration: int = None):
+    def __init__(self, expiration: Optional[int] = None):
         self._state: Dict[str, Any] = {}
         self._mutex = threading.Lock()
         self._not_empty = threading.Condition(self._mutex)
@@ -29,7 +29,7 @@ class SessionBase:
         self._expiration = expiration or DEFAULT_EXPIRATION
 
     def get(
-        self, key: str, wait: bool = True, timeout: int = None, default=None
+        self, key: str, wait: bool = True, timeout: Optional[int] = None, default=None
     ) -> Any:
         """获取数据, 该函数会等待至取到数据或超时，返回默认值
         :param key: 数据键名
@@ -56,7 +56,7 @@ class SessionBase:
             return self._state.get(key, default)
 
     def pop(
-        self, key: str, wait: bool = True, timeout: int = None, default=None
+        self, key: str, wait: bool = True, timeout: Optional[int] = None, default=None
     ) -> Any:
         """获取数据,然后删除, 该函数会等待至取到数据或超时，返回默认值
         :param key: 数据键名
@@ -212,7 +212,9 @@ class Session(SessionBase):
             content=text,
         )
 
-    def resolve_prompt(self, prompt: Union[str, Prompt, Callable] = None, **kwargs):
+    def resolve_prompt(
+        self, prompt: Optional[Union[str, Prompt, Callable]] = None, **kwargs
+    ):
         """用于统一处理prompt参数
         :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
                         如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
@@ -233,9 +235,9 @@ class Session(SessionBase):
     def want(
         self,
         key,
-        prompt: Union[str, Prompt, Callable] = None,
+        prompt: Optional[Union[str, Prompt, Callable]] = None,
         pop: bool = False,
-        timeout: int = None,
+        timeout: Optional[int] = None,
         default: Any = None,
         **kwargs,
     ) -> Any:
@@ -257,7 +259,7 @@ class Session(SessionBase):
         self,
         candidates: List[T],
         retry_times: int = 1,
-        key: Callable[[T], Any] = None,
+        key: Optional[Callable[[T], Any]] = None,
         always_prompt: bool = True,
         timeout: int = 30,
     ) -> Optional[Tuple[T, int]]:
@@ -297,7 +299,7 @@ class Session(SessionBase):
 
 
 class SessionController:
-    def __init__(self, session_expiration: int = None):
+    def __init__(self, session_expiration: Optional[int] = None):
         self._session_expiration = session_expiration
         self._session_storage: Dict[str, Session] = {}
 

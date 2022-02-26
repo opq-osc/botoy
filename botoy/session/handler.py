@@ -1,7 +1,7 @@
 # pylint: disable=R0915
 import inspect
 import traceback
-from typing import Callable, List, NoReturn, Union
+from typing import Callable, List, NoReturn, Optional, Union
 
 from ..log import logger
 from ..model import FriendMsg, GroupMsg
@@ -34,7 +34,7 @@ class ConditionHandler:
 
 
 class SessionHandler:
-    def __init__(self, *filters, single_user=True, expiration: int = None):
+    def __init__(self, *filters, single_user=True, expiration: Optional[int] = None):
         self.filters = list(filters)
         self.single_user = single_user
         self.sc = SessionController(expiration)
@@ -173,7 +173,9 @@ class SessionHandler:
             except (RejectException, FinishException):
                 session.close()
 
-    def reject(self, prompt: Union[str, Prompt, Callable] = None, **kwargs) -> NoReturn:
+    def reject(
+        self, prompt: Optional[Union[str, Prompt, Callable]] = None, **kwargs
+    ) -> NoReturn:
         """该方法调用对应session的resolve_prompt方法
         :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
                         如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数
@@ -186,7 +188,9 @@ class SessionHandler:
         finally:
             raise RejectException
 
-    def finish(self, prompt: Union[str, Prompt, Callable] = None, **kwargs) -> NoReturn:
+    def finish(
+        self, prompt: Optional[Union[str, Prompt, Callable]] = None, **kwargs
+    ) -> NoReturn:
         """该方法调用对应session的resolve_prompt方法
         :param prompt: 如果是字符串类型，则发送文字消息；如果是Prompt类型，则发送相应消息；
                         如果是函数(Callable), 则会直接调用，并将额外命名参数传入该函数

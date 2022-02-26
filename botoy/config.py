@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, List
+from typing import Any, List, Optional
 
 from .exceptions import InvalidConfigError
 from .utils import check_schema
@@ -37,15 +37,15 @@ except Exception as e:
 class Config:
     def __init__(
         self,
-        host: str = None,
-        port: int = None,
-        group_blacklist: List[int] = None,
-        friend_blacklist: List[int] = None,
-        blocked_users: List[int] = None,
-        webhook: bool = None,
-        webhook_post_url: str = None,
-        webhook_timeout: int = None,
-        config: dict = None,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        group_blacklist: Optional[List[int]] = None,
+        friend_blacklist: Optional[List[int]] = None,
+        blocked_users: Optional[List[int]] = None,
+        webhook: Optional[bool] = None,
+        webhook_post_url: Optional[str] = None,
+        webhook_timeout: Optional[int] = None,
+        config: Optional[dict] = None,
     ):
         self.config = config or botoy_json
 

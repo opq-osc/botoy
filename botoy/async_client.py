@@ -3,7 +3,7 @@ import asyncio
 import copy
 import random
 import traceback
-from typing import Union
+from typing import Optional, Union
 
 import socketio
 from socketio.exceptions import ConnectionError as SioConnectionError
@@ -41,7 +41,7 @@ class AsyncBotoy(Botoy):
         except Exception:
             logger.error(traceback.format_exc())
 
-    async def run(self, wait: bool = True, sio: socketio.AsyncClient = None):
+    async def run(self, wait: bool = True, sio: Optional[socketio.AsyncClient] = None):
         """运行
         :param wait: 是否阻塞
         """
@@ -90,7 +90,7 @@ class AsyncBotoy(Botoy):
 
         return sio
 
-    async def run_no_wait(self, sio: socketio.AsyncClient = None):
+    async def run_no_wait(self, sio: Optional[socketio.AsyncClient] = None):
         """不阻塞运行"""
         return await self.run(False, sio)
 

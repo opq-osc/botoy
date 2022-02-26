@@ -14,7 +14,7 @@ from asyncio import events
 from functools import partial, wraps
 from pathlib import Path
 from time import monotonic as clock
-from typing import Any, Awaitable, Callable, Dict, Union
+from typing import Any, Awaitable, Callable, Dict, Optional, Union
 
 import httpx
 
@@ -185,7 +185,7 @@ class SwitcherManager:
         self.name = name
         self.init_enabled = init_enabled
 
-    def of(self, id: Union[int, str] = None) -> Switcher:
+    def of(self, id: Optional[Union[int, str]] = None) -> Switcher:
         """获取开关
         :param id: 开关的标识符, 未指定则返回默认的开关
         """

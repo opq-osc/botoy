@@ -1,5 +1,5 @@
 import re
-from typing import List, Union
+from typing import List, Optional, Union
 
 from ..collection import MsgTypes
 from ..model import FriendMsg, GroupMsg
@@ -7,14 +7,14 @@ from ..model import FriendMsg, GroupMsg
 
 def common_text(
     func=None,
-    equal: str = None,
-    in_: str = None,
-    starts: str = None,
-    ends: str = None,
-    user: Union[int, List[int]] = None,
-    group: Union[int, List[int]] = None,
-    ignore_user: Union[int, List[int]] = None,
-    ignore_group: Union[int, List[int]] = None,
+    equal: Optional[str] = None,
+    in_: Optional[str] = None,
+    starts: Optional[str] = None,
+    ends: Optional[str] = None,
+    user: Optional[Union[int, List[int]]] = None,
+    group: Optional[Union[int, List[int]]] = None,
+    ignore_user: Optional[Union[int, List[int]]] = None,
+    ignore_group: Optional[Union[int, List[int]]] = None,
     ignore_bot=True,
 ):
     """常见对文字消息的处理(不考虑私聊消息) GroupMsg,FriendMsg

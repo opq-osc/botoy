@@ -11,6 +11,7 @@ import threading
 import traceback
 import weakref
 from concurrent import futures
+from typing import Optional
 
 from .log import logger
 
@@ -83,7 +84,7 @@ class WorkerThread(threading.Thread):
 
 
 class WorkerExecutor(futures.Executor):
-    def __init__(self, max_workers: int = None):
+    def __init__(self, max_workers: Optional[int] = None):
         max_workers = max_workers or min(32, (os.cpu_count() or 1) + 4)
         if max_workers <= 0:
             raise ValueError("max_workers must be greater than 0")

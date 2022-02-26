@@ -5,7 +5,7 @@ import inspect
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, List, Tuple, Union
+from typing import BinaryIO, List, Optional, Tuple, Union
 
 from . import macro
 from .action import Action
@@ -273,7 +273,7 @@ class _S:
     TYPE_MD5 = TYPE_MD5
     TYPE_PATH = TYPE_PATH
 
-    def __init__(self, ctx: Union[FriendMsg, GroupMsg] = None):
+    def __init__(self, ctx: Optional[Union[FriendMsg, GroupMsg]] = None):
         self._ctx = ctx
 
     def bind(self, ctx: Union[FriendMsg, GroupMsg]) -> "_S":

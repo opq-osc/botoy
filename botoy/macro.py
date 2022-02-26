@@ -1,7 +1,7 @@
 """辅助构建发送消息宏"""
 import random
 from collections.abc import Sequence
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 def atUser(users: Union[List[int], int]) -> str:
@@ -23,7 +23,7 @@ def picFlag() -> str:
     return "[PICFLAG]"
 
 
-def showPic(code: int = None) -> str:
+def showPic(code: Optional[int] = None) -> str:
     """秀图宏
     :param code: 秀图样式编号 40000-40006, 如不传则随机选取一个
             40000 秀图  40001 幻影  40002 抖动

@@ -4,7 +4,7 @@ import threading
 import time
 import traceback
 import uuid
-from typing import List, Union
+from typing import List, Optional, Union
 
 import httpx
 
@@ -16,7 +16,11 @@ from botoy.model import EventMsg, FriendMsg, GroupMsg
 
 class Action:
     def __init__(
-        self, qq: int = None, port: int = None, host: str = None, timeout: int = 20
+        self,
+        qq: Optional[int] = None,
+        port: Optional[int] = None,
+        host: Optional[str] = None,
+        timeout: int = 20,
     ):
         self.config = Config(host=host, port=port)
 
@@ -60,7 +64,7 @@ class Action:
         *,
         picUrl: str = "",
         picBase64Buf: str = "",
-        picMd5s: Union[str, List[str]] = None,
+        picMd5s: Optional[Union[str, List[str]]] = None,
         content: str = "",
         flashPic=False,
     ):
@@ -148,7 +152,7 @@ class Action:
         content: str = "",
         picUrl: str = "",
         picBase64Buf: str = "",
-        picMd5s: Union[str, List[str]] = None,
+        picMd5s: Optional[Union[str, List[str]]] = None,
         flashPic=False,
         atUser: Union[int, List[int]] = 0,
     ) -> dict:
@@ -298,7 +302,7 @@ class Action:
         *,
         picUrl: str = "",
         picBase64Buf: str = "",
-        picMd5s: Union[str, List[str]] = None,
+        picMd5s: Optional[Union[str, List[str]]] = None,
     ) -> dict:
         """发送私聊图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
@@ -333,7 +337,7 @@ class Action:
         group: int,
         content: str,
         msgSeq: int,
-        msgTime: int = None,
+        msgTime: Optional[int] = None,
         user: int = 0,
         rawContent: str = "",
     ):
@@ -367,7 +371,7 @@ class Action:
         user: int,
         content: str,
         msgSeq: int,
-        msgTime: int = None,
+        msgTime: Optional[int] = None,
         rawContent: str = "",
     ):
         """发送回复消息, 回复好友消息
@@ -798,8 +802,8 @@ class Action:
         method: str,
         funcname: str,
         path: str,
-        payload: dict = None,
-        params: dict = None,
+        payload: Optional[dict] = None,
+        params: Optional[dict] = None,
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
@@ -864,7 +868,7 @@ class Action:
         self,
         funcname: str,
         payload: dict,
-        params: dict = None,
+        params: Optional[dict] = None,
         path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装常用的post操作"""
@@ -875,7 +879,7 @@ class Action:
     def get(
         self,
         funcname: str,
-        params: dict = None,
+        params: Optional[dict] = None,
         path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装get操作"""
