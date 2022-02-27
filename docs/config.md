@@ -60,7 +60,7 @@ API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原�
 format 表示推送格式，includeUrl 表示是否包括该项的网页地址
 
 ```python
-{!../docs_src/jconfig.py}
+{!../docs_src/jconfig.py!}
 ```
 
 运行上面示例, botoy.json 内容变为
