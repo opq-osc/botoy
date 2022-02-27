@@ -1,12 +1,11 @@
 from botoy import jconfig
 
-
 """直接获取数据
 
 json数据就是字典，jconfig支持运算符[]，属性，get方法获取数据
 """
 
-assert jconfig.host == jconfig['host'] == jconfig.get('host') == 'http://127.0.0.1'
+assert jconfig.host == jconfig["host"] == jconfig.get("host") == "http://127.0.0.1"
 
 """
 上面三种方式获取的结果基本相同，和原生字典不同的是如果配置不存在时都不会报错，而是返回 None
@@ -19,29 +18,29 @@ assert jconfig.host == jconfig['host'] == jconfig.get('host') == 'http://127.0.0
 对所有数据都用第一种直接获取的方式，当然可以
 """
 
-token = jconfig['github.token']  # github token
-username = jconfig['github.username']  # github username
-issue_format = jconfig['github.issue.format']  # github issue format
-issue_includeUrl = jconfig['github.issue.includeUrl']  # False
-pr_format = jconfig['github.pr.format']  # github pr format
-pr_includeUrl = jconfig['github.pr.includeUrl']  # True
+token = jconfig["github.token"]  # github token
+username = jconfig["github.username"]  # github username
+issue_format = jconfig["github.issue.format"]  # github issue format
+issue_includeUrl = jconfig["github.issue.includeUrl"]  # False
+pr_format = jconfig["github.pr.format"]  # github pr format
+pr_includeUrl = jconfig["github.pr.includeUrl"]  # True
 
 """
 这样明显过于冗长，如果配置更多点，就更加麻烦了，
 我们可以用类似命名空间的方式分成几个配置块(Configuration)
 """
 
-github = jconfig.get_configuration('github')
+github = jconfig.get_configuration("github")
 
-token = github.get('token')  # github token
-username = github[str].get('username')  # github token
-issue_format = github.get('issue.format')  # github issue format
-pr_includeUrl = github.get('pr.includeUrl')  # True
+token = github.get("token")  # github token
+username = github[str].get("username")  # github token
+issue_format = github.get("issue.format")  # github issue format
+pr_includeUrl = github.get("pr.includeUrl")  # True
 
 """当然也可以这样"""
-issue = jconfig.get_configuration('github.issue')
-issue_format = issue.get('format')  # github issue format
-issue_includeUrl = issue[bool].get('includeUrl')  # False
+issue = jconfig.get_configuration("github.issue")
+issue_format = issue.get("format")  # github issue format
+issue_includeUrl = issue[bool].get("includeUrl")  # False
 """"""
 
 """
@@ -58,21 +57,21 @@ jconfig.get_configuration方法 和其返回的Configuration的get方法，第�
 下面来介绍Configuration的其他方法
 """
 
-issue = jconfig.get_configuration('github.issue')
+issue = jconfig.get_configuration("github.issue")
 
 """has 判断是否存在配置
 """
 
 # 是否存在github.issue.format
-print(issue.has('format'))
+print(issue.has("format"))
 
 """update 更新(修改)配置
 """
 
 # 修改github.issue.includeUrl
-issue.update('includeUrl', True)
+issue.update("includeUrl", True)
 # 删除github.issue.format
-issue.update('format', ...)  # https://docs.python.org/3/library/constants.html#Ellipsis
+issue.update("format", ...)  # https://docs.python.org/3/library/constants.html#Ellipsis
 
 """
 update方法会修改botoy.json的数据。需要注意的是，此时Configuration的数据并没有更新
@@ -86,5 +85,5 @@ jconfig.get_configuration 的参数可以None，不传则表示全局配置块
 """
 
 config = jconfig.get_configuration()
-config.update('host', 'new host')
-config.update('github.pr.format', 'new github pr format')
+config.update("host", "new host")
+config.update("github.pr.format", "new github pr format")
