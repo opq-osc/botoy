@@ -11,7 +11,7 @@ from typing import Callable, List, Optional, Tuple, Union
 import socketio
 from socketio.exceptions import ConnectionError as SioConnectionError
 
-from .config import Config
+from .config import jconfig
 from .log import logger, logger_init
 from .model import EventMsg, FriendMsg, GroupMsg
 from .plugin import PluginManager
@@ -25,7 +25,7 @@ from .typing import (
     T_GroupMsgMiddleware,
     T_GroupMsgReceiver,
 )
-from .utils import sync_run
+from .utils import check_schema, sync_run, to_address
 
 #######################
 #     socketio
@@ -88,9 +88,13 @@ class Botoy:
             self.qq = []
         self.qq: List[int] = [int(qq) for qq in self.qq if int(qq) != 0]
 
-        self.config = Config(
-            host, port, group_blacklist, friend_blacklist, blocked_users
-        )
+        self.host = check_schema(host or jconfig.host)
+        self.port = int(port or jconfig.port)
+        self.address = to_address(self.host, self.port)
+        self.group_blacklist = group_blacklist or jconfig.group_blacklist
+        self.friend_blacklist = friend_blacklist or jconfig.friend_blacklist
+        self.blocked_users = blocked_users or jconfig.blocked_users
+        self.webhook = jconfig.webhook
 
         # 日志
         logger_init(log, log_file)
@@ -112,7 +116,7 @@ class Botoy:
         self._event_context_middlewares: List[T_EventMiddleware] = []
 
         # webhook
-        if self.config.webhook:
+        if self.webhook:
             from . import webhook  # pylint: disable=C0415
 
             flag = self.__class__.__name__.startswith("Async") and "async_" or ""
@@ -164,16 +168,16 @@ class Botoy:
 
         if isinstance(context, FriendMsg):
             if context.FromUin in (
-                *self.config.friend_blacklist,
-                *self.config.blocked_users,
+                *self.friend_blacklist,
+                *self.blocked_users,
             ):
                 return
             middlewares = self._friend_context_middlewares
 
         elif isinstance(context, GroupMsg):
             if (
-                context.FromGroupId in self.config.group_blacklist
-                or context.FromUserId in self.config.blocked_users
+                context.FromGroupId in self.group_blacklist
+                or context.FromUserId in self.blocked_users
             ):
                 return
             middlewares = self._group_context_middlewares
@@ -188,8 +192,8 @@ class Botoy:
                 return
             context = new_context
 
-        setattr(context, "_host", self.config.host)
-        setattr(context, "_port", self.config.port)
+        setattr(context, "_host", self.host)
+        setattr(context, "_port", self.port)
 
         return context
 
@@ -325,7 +329,7 @@ class Botoy:
                 self._when_connected_do = None
 
         for func in self.plugMgr.when_connected_funcs:
-            self._pool.submit(func, self.qq, self.config.host, self.config.port)
+            self._pool.submit(func, self.qq, self.host, self.port)
 
     def _disconnect(self):
         logger.warning("Disconnected to the server!")
@@ -336,7 +340,7 @@ class Botoy:
                 self._when_disconnected_do = None
 
         for func in self.plugMgr.when_disconnected_funcs:
-            self._pool.submit(func, self.qq, self.config.host, self.config.port)
+            self._pool.submit(func, self.qq, self.host, self.port)
 
     ########################################################################
     # 开放出来的用于多种连接方式的入口函数
@@ -385,8 +389,8 @@ class Botoy:
         try:
             while True:
                 try:
-                    logger.info(f"Connecting to the server[{self.config.address}]...")
-                    sio.connect(self.config.address, transports=["websocket"])
+                    logger.info(f"Connecting to the server[{self.address}]...")
+                    sio.connect(self.address, transports=["websocket"])
                 except (SioConnectionError, ValueError):
                     current_delay = delay + (2 * random.random() - 1) / 2
                     logger.error(

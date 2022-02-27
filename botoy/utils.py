@@ -4,6 +4,12 @@ import base64
 import re
 
 
+def to_address(host, port) -> str:
+    if port in (0, 80):
+        return host
+    return f"{host}:{port}"
+
+
 def check_schema(url: str) -> str:
     url = url.strip("/")
     if not re.findall(r"(http://|https://)", url):

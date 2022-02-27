@@ -9,9 +9,11 @@ from typing import List, Optional, Union
 import httpx
 
 from botoy import macro
-from botoy.config import Config
+from botoy.config import jconfig
 from botoy.log import logger
 from botoy.model import EventMsg, FriendMsg, GroupMsg
+
+from . import utils
 
 
 class Action:
@@ -22,14 +24,16 @@ class Action:
         host: Optional[str] = None,
         timeout: int = 20,
     ):
-        self.config = Config(host=host, port=port)
+        self.host = utils.check_schema(host or jconfig.host)
+        self.port = port or jconfig.port
+        self.address = utils.to_address(self.host, self.port)
 
-        self.qq = int(qq or self.config.qq)
+        self.qq = int(qq or jconfig.qq)  # type: ignore
 
         self.c = httpx.Client(
             headers={"Content-Type": "application/json"},
             timeout=timeout + 5,
-            base_url=self.config.address,
+            base_url=self.address,
             params={"qq": self.qq, "timeout": timeout},
         )
         self.lock = threading.Lock()

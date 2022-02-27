@@ -7,27 +7,27 @@ from botoy.log import logger
 # 因为webhook功能只能通过配置文件开启，所以直接新建Config, 读取配置文件即可
 # TODO: 处理响应，并进行简单的操作
 
-address = jconfig.address
+url = jconfig.webhook_post_url
 timeout = jconfig.webhook_timeout
 
 
 def friend(ctx: FriendMsg):
     try:
-        httpx.post(address, json=ctx.message, timeout=timeout)
+        httpx.post(url, json=ctx.message, timeout=timeout)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
 
 def group(ctx: GroupMsg):
     try:
-        httpx.post(address, json=ctx.message, timeout=timeout)
+        httpx.post(url, json=ctx.message, timeout=timeout)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
 
 def event(ctx: EventMsg):
     try:
-        httpx.post(address, json=ctx.message, timeout=timeout)
+        httpx.post(url, json=ctx.message, timeout=timeout)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
@@ -35,7 +35,7 @@ def event(ctx: EventMsg):
 async def async_friend(ctx: FriendMsg):
     try:
         async with httpx.AsyncClient(timeout=timeout) as cilent:
-            await cilent.post(ctx.address, json=ctx.message)
+            await cilent.post(url, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
@@ -43,7 +43,7 @@ async def async_friend(ctx: FriendMsg):
 async def async_group(ctx: GroupMsg):
     try:
         async with httpx.AsyncClient(timeout=timeout) as cilent:
-            await cilent.post(ctx.address, json=ctx.message)
+            await cilent.post(url, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
@@ -51,6 +51,6 @@ async def async_group(ctx: GroupMsg):
 async def async_event(ctx: EventMsg):
     try:
         async with httpx.AsyncClient(timeout=timeout) as cilent:
-            await cilent.post(ctx.address, json=ctx.message)
+            await cilent.post(url, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)

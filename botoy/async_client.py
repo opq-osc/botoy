@@ -60,8 +60,8 @@ class AsyncBotoy(Botoy):
             delay = 1
             while True:
                 try:
-                    logger.info(f"Connecting to the server[{self.config.address}]...")
-                    await sio.connect(self.config.address, transports=["websocket"])
+                    logger.info(f"Connecting to the server[{self.address}]...")
+                    await sio.connect(self.address, transports=["websocket"])
                 except (SioConnectionError, ValueError):
                     current_delay = delay + (2 * random.random() - 1) / 2
                     logger.error(
