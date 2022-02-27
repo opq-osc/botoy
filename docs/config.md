@@ -26,66 +26,79 @@ API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原�
 
 **强烈建议使用配置文件**, 并且建议将`botoy.json`作为统一的配置文件用于其他功能的配置
 
-# jconfig(Config())
+# jconfig
 
-`jconfig`是预先实例化的`Config`对象,
+不仅框架自身配置使用 botoy.json,
+同时推荐插件也使用 botoy.json 作为配置文件。使用 jconfig 可以很好的对配置进行操作
 
-该对象可以便捷地访问**配置文件**`botoy.json`内设置的各项数据
-
-```python
-from botoy import jconfig
-# from botoy.config import jconfig
-```
-
-- 方法`get_jconfig`, 获取配置项，未设置则为 `None`
-- 通过`.`获取配置项，如`jconfig.host`, `jconfig.port`, 未设置则为 `None`
-
-可以把 config 当作一个字典，这两种获取数据的方式就是字典的 get 方法
-
-## get_section
-
-前面的两种方式获取的数据都是基本类型，后续的操作都与 Config 无关，当配置多起来时，每个插件还可能有
-相同的数据，此时配置会很乱，获取也会麻烦很多。`get_section`用来减轻这一问题
-
-获取该字段所对应的数据
-
-- 如果数据是字典类型，则返回一个新的 Config 对象，新的 Config 的方法对该数据进行处理
-- 如果是其他类型数据，将直接返回
-- 不存在则返回 None
-
-例如 botoy.json 为
+假设 botoy.json 内容如下：
 
 ```json
 {
-    "A": {
-        "B": "value of B"
-        "C": ["item1", "item2"]
-    }
+  "host": "http://127.0.0.1",
+  "port": 8888,
+  "group_blacklist": [],
+  "friend_blacklist": [],
+  "blocked_users": [],
+  "webhook": false,
+  "webhook_post_url": "http://127.0.0.1:5000",
+  "webhook_timeout": 20,
+
+  "github.token": "github token",
+  "github.username": "github username",
+  "github.email": "github email",
+  "github.issue.format": " gitub issue format",
+  "github.issue.includeUrl": false,
+  "github.pr.format": "github pr format",
+  "github.pr.includeUrl": true
 }
 ```
 
-那么
+其中上面部分是框架专属配置，不需要说明。下面是假定的一个插件的配置，这里说明一下，该插件配置项的各项含义:
+
+这是一个 GitHub 推送插件，有两个功能分别对应 issue 和 pr，token，username，eamil 是基础信息配置，issue 和 pr 有自己单独的配置项
+format 表示推送格式，includeUrl 表示是否包括该项的网页地址
 
 ```python
-config = Config()
-
-assert config.A == {"B":"value of B", "C": ["item1", "item2"]}
-assert config.A["B"] == "value of B"
-
-section_a = config.get_section("A")
-assert section_a.B == "value of B"
-
-section_a_b = section_a.get_("B")
-assert section_a_b == "value of B"
-
-section_a_c = section_a.get_("C")
-assert section_a_c == ["item1", "item2"]
+{!../docs_src/jconfig.py}
 ```
 
-!!!tip
+运行上面示例, botoy.json 内容变为
 
-    `Config`的`config`属性是该对象的数据源，是一个字典
+```json
+{
+  "host": "new host",
+  "port": 8888,
+  "group_blacklist": [],
+  "friend_blacklist": [],
+  "blocked_users": [],
+  "webhook": false,
+  "webhook_post_url": "http://127.0.0.1:5000",
+  "webhook_timeout": 20,
+  "github.token": "github token",
+  "github.username": "github username",
+  "github.email": "github email",
+  "github.issue.includeUrl": true,
+  "github.pr.format": "new github pr format",
+  "github.pr.includeUrl": true
+}
+```
 
----
+!!!提示
 
-关于`Config`的细节可以查看源码了解。需要注意的是，**程序运行期间，只会读取一次**`botoy.json`
+    如果你是vscode用户，那么，这种配置方式应该很熟悉了(settings.json)
+
+# 配置注释问题
+
+因为收益低于成本，所以抛弃了使用 jsonc 等等其他配置文件方案，注释通过字段设置
+
+如
+
+```json
+{
+  "host": "127.0.0.1",
+  "host_comment": "机器人主机地址"
+}
+```
+
+具体方式很多样，自己选择
