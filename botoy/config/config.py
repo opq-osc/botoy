@@ -1,4 +1,5 @@
 import json
+import threading
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
 from .constans import (
@@ -17,6 +18,8 @@ from .util import dict2tree, lookup
 V = TypeVar("V")
 T = TypeVar("T")
 
+lock = threading.RLock()
+
 botoy_config = {
     "host": DEFAULT_HOST,
     "port": DEFAULT_PORT,
@@ -33,37 +36,40 @@ botoy_config_tree = dict2tree(botoy_config)
 def read_botoy_config():
     global botoy_config, botoy_config_tree
 
-    try:
-        botoy_config.update(json.loads(CONFIG_FILE_PATH.read_text()))
-    except FileNotFoundError:
-        pass
+    with lock:
+        try:
+            botoy_config.update(json.loads(CONFIG_FILE_PATH.read_text()))
+        except FileNotFoundError:
+            pass
 
-    botoy_config_tree = dict2tree(botoy_config)
+        botoy_config_tree = dict2tree(botoy_config)
 
 
 read_botoy_config()
 
 
 def write_botoy_config():
-    CONFIG_FILE_PATH.write_text(
-        json.dumps(botoy_config, ensure_ascii=False, indent=2), "utf8"
-    )
+    with lock:
+        CONFIG_FILE_PATH.write_text(
+            json.dumps(botoy_config, ensure_ascii=False, indent=2), "utf8"
+        )
 
 
 def update_botoy_config(key, value):
     global botoy_config, botoy_config_tree
 
-    if isinstance(value, type(...)):
-        try:
-            del botoy_config[key]
-        except Exception:
-            pass
-    else:
-        botoy_config[key] = value
+    with lock:
+        if isinstance(value, type(...)):
+            try:
+                del botoy_config[key]
+            except Exception:
+                pass
+        else:
+            botoy_config[key] = value
 
-    botoy_config_tree = dict2tree(botoy_config)
+        botoy_config_tree = dict2tree(botoy_config)
 
-    write_botoy_config()
+        write_botoy_config()
 
 
 class Configuration(Generic[V]):
