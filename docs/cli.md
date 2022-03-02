@@ -34,6 +34,12 @@ botoy hot
 botoy test
 ```
 
+## 插件管理
+
+```shell
+botoy plugin
+```
+
 ## 帮助
 
 ```shell
@@ -42,6 +48,10 @@ botoy --help
 botoy init --help
 botoy add --help
 botoy test --help
+botoy plugin --help
+botoy plugin install --help
+botoy plugin remove --help
+botoy plugin list --help
 ```
 
 !!!tip

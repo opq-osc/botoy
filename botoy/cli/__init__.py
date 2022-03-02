@@ -8,11 +8,12 @@ import textwrap
 
 import click
 
-from .__version__ import __version__, check_version
-from .async_client import AsyncBotoy
-from .client import Botoy
-from .runner import run as run_with_reload
-from .utils import check_schema
+from ..__version__ import __version__, check_version
+from ..async_client import AsyncBotoy
+from ..client import Botoy
+from ..runner import run as run_with_reload
+from ..utils import check_schema
+from .plugin import plugin
 
 echo = click.echo
 
@@ -298,6 +299,9 @@ def test(address: str):
         host, port = address, 80
 
     Botoy(host=host, port=int(port)).run()
+
+
+cli.add_command(plugin)
 
 
 if __name__ == "__main__":
