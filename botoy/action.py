@@ -835,7 +835,7 @@ class Action:
             logger.error(f"请求出错: {traceback.format_exc()}")
             return {}
         finally:
-            self.release_lock()
+            threading.Timer(1, self.release_lock).start()
 
         # 处理数据
         try:
