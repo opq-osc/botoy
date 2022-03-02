@@ -226,6 +226,9 @@ def install(src: Optional[str] = None, name: Optional[str] = None):
 
     src和name都是可选的，当src未传时将安装plugins.json中未被安装的插件
     """
+    if not PLUGIN_DIR.exists():
+        echo("plugins 文件夹不存在！")
+        exit(1)
     try:
         plugin_data = json.loads(Path("plugins.json").read_text())
     except FileNotFoundError:
@@ -253,6 +256,12 @@ def remove(names: Optional[List[str]] = None):
     if not PLUGIN_DIR.exists():
         echo("plugins 文件夹不存在！")
         exit(1)
+
+    try:
+        plugin_data = json.loads(Path("plugins.json").read_text())
+    except FileNotFoundError:
+        plugin_data = {}
+
     names = names or shlex.split(input("请输入插件名空格分割："))
     names = [name.strip().strip(".py") for name in names]
     for name in names:
@@ -270,15 +279,25 @@ def remove(names: Optional[List[str]] = None):
                     os.remove(path)
                 else:
                     shutil.rmtree(path)
+                if name in plugin_data:
+                    del plugin_data[name]
             else:
                 echo(f"取消删除 [{path.absolute()}]")
         else:
             echo(f"插件[{name}]不存在！")
 
+    Path("plugins.json").write_text(
+        json.dumps(plugin_data, ensure_ascii=False, indent=2)
+    )
+
 
 @plugin.command()
 def list():
     """列出当前插件目录下所有的插件名"""
+    if not PLUGIN_DIR.exists():
+        echo("plugins 文件夹不存在！")
+        exit(1)
+
     names = []
     for item in PLUGIN_DIR.iterdir():
         name = item.name
