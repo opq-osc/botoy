@@ -226,6 +226,7 @@ def _resolve_data_type(data: _T_Data) -> Tuple[int, _T_Data]:
     # base64
     #   1. 前面都不符合剩余的情况就是base64
     #   2. bytes 一定是base64
+    #   3. base64:// 开头
 
     # Path, List[str]
 
@@ -247,6 +248,9 @@ def _resolve_data_type(data: _T_Data) -> Tuple[int, _T_Data]:
     # 处理 str
     elif data.startswith("http://") or data.startswith("https://"):
         type = TYPE_URL
+    elif data.startswith("base64://"):
+        type = TYPE_BASE64
+        data = data[9:]
     elif len(data) == 24 and data.endswith("=="):
         type = TYPE_MD5
     elif len(data) < 1000:
