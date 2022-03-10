@@ -1,6 +1,7 @@
 # botoy
 
-[![QQ群](https://img.shields.io/badge/QQ%E7%BE%A4-757360354-important?style=flat-square&logo=tencentqq)](https://jq.qq.com/?_wv=1027&k=fBx8LvmA)
+<!-- [![QQ群](https://img.shields.io/badge/QQ%E7%BE%A4-757360354-important?style=flat-square&logo=tencentqq)](https://jq.qq.com/?_wv=1027&k=fBx8LvmA) -->
+
 [![pypi](https://img.shields.io/pypi/v/botoy?style=flat-square 'pypi')](https://pypi.org/project/botoy/)
 [![python](https://img.shields.io/badge/python-3.7+-blue 'python')](https://pypi.org/project/botoy/)
 [![LICENSE](https://img.shields.io/github/license/opq-osc/botoy?style=flat-square)](https://github.com/opq-osc/botoy/blob/main/LICENSE)
