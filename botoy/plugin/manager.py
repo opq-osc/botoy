@@ -19,7 +19,7 @@ import colorama
 from prettytable import PrettyTable
 
 from ..typing import T_EventReceiver, T_FriendMsgReceiver, T_GroupMsgReceiver
-from .lua import LuaRuntime, init_vm
+from .lua import LuaRuntime
 
 
 def resolve_plugin_name(name: str) -> str:
@@ -131,7 +131,7 @@ class LuaPlugin(Plugin):
         return self.L is not None
 
     def load(self) -> "LuaPlugin":
-        self.L = init_vm(LuaRuntime(register_eval=False, register_builtins=False))
+        self.L = LuaRuntime(register_eval=False, register_builtins=False)
         self.L.require(self.modname)  # type: ignore
         return self
 
