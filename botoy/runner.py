@@ -82,9 +82,7 @@ def run(bot: Union[Botoy, AsyncBotoy], auto_reload: bool = False):
                         if isinstance(filename, str)
                         else str(filename.absolute())
                     )
-                    if "plugins/__pycache__" in filename or not os.path.isfile(
-                        filename
-                    ):
+                    if "__pycache__" in filename or not os.path.isfile(filename):
                         continue
                     mtime = os.stat(filename).st_mtime
                     old_mtime = mtimes.get(filename)
