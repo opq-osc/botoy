@@ -2,7 +2,7 @@ local opq = _G.opq
 
 require("opq.utils")
 
-local submodules = { json = true, inspect = true }
+local submodules = { json = true, inspect = true, log = true }
 
 setmetatable(opq, {
 	__index = function(t, k)
