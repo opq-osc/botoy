@@ -36,8 +36,8 @@ end
 ---@field ctx userdata: 消息对象
 
 ---注册一个群消息接收器
----@param receiver fun(data:GroupMsgData)
-function _G.register_group(receiver)
+---@vararg fun(data:GroupMsgData)
+function _G.register_group(...)
 	if not _G.receive_group_msg then
 		function _G.receive_group_msg(ctx)
 			for _, r in ipairs(state.group_receivers) do
@@ -47,12 +47,14 @@ function _G.register_group(receiver)
 			end
 		end
 	end
-	table.insert(state.group_receivers, receiver)
+	for _, receiver in ipairs({ ... }) do
+		table.insert(state.group_receivers, receiver)
+	end
 end
 
 ---注册一个好友消息接收器
----@param receiver fun(data:FriendMsgData)
-function _G.register_friend(receiver)
+---@vararg fun(data:FriendMsgData)
+function _G.register_friend(...)
 	if not _G.receive_friend_msg then
 		function _G.receive_friend_msg(ctx)
 			for _, r in ipairs(state.friend_receivers) do
@@ -62,12 +64,14 @@ function _G.register_friend(receiver)
 			end
 		end
 	end
-	table.insert(state.friend_receivers, receiver)
+	for _, receiver in ipairs({ ... }) do
+		table.insert(state.friend_receivers, receiver)
+	end
 end
 
 ---注册一个事件接收器
----@param receiver fun(data:EventData)
-function _G.register_event(receiver)
+---@vararg fun(data:EventData)
+function _G.register_event(...)
 	if not _G.receive_events then
 		function _G.receive_events(ctx)
 			for _, r in ipairs(state.event_receivers) do
@@ -77,7 +81,9 @@ function _G.register_event(receiver)
 			end
 		end
 	end
-	table.insert(state.event_receivers, receiver)
+	for _, receiver in ipairs({ ... }) do
+		table.insert(state.event_receivers, receiver)
+	end
 end
 
 return sdk
