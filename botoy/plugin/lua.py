@@ -1,6 +1,6 @@
 import importlib
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Dict, Iterable
 
 try:
     from lupa import LuaRuntime as BaseLuaRuntime  # type: ignore
@@ -24,7 +24,8 @@ class LuaRuntime:
     require: Callable
 
     def __getattr__(self, attr):
-        return getattr(self.L, attr)
+        value = self.__dict__[attr] = getattr(self.L, attr)
+        return value
 
     def __init__(self, *args, **kwargs) -> None:
         self.L = BaseLuaRuntime(*args, **kwargs)  # uninheritable
@@ -35,20 +36,30 @@ class LuaRuntime:
         g = self.g
         g.package.path = package_path + g.package.path
         g['import'] = self.to_lua_function(importlib.import_module)
+        g._to_lua_table = self.to_lua_table
         g.opq = self.table_from({})
         self.execute("opq.none = python.none")
         g.python = None
         self.require('_init_packages')
+
+    def to_lua_table(self, data):
+        # only convert dict and list
+        if isinstance(data, dict):
+            for key, value in data.items():
+                data[key] = self.to_lua_table(value)
+        elif isinstance(data, list):
+            for idx, item in enumerate(data):
+                data[idx] = self.to_lua_table(item)
+        else:
+            return data
+        return self.table_from(data)
 
     @property
     def receive_group_msg(self):
         receiver = self.g.receive_group_msg
         if receiver:
             return lambda ctx: receiver(
-                self.table(
-                    bot=ctx.CurrentQQ,
-                    data=self.table_from(ctx.data),
-                )
+                self.to_lua_table(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
 
     @property
@@ -56,10 +67,7 @@ class LuaRuntime:
         receiver = self.g.receive_friend_msg
         if receiver:
             return lambda ctx: receiver(
-                self.table(
-                    bot=ctx.CurrentQQ,
-                    data=self.table_from(ctx.data),
-                )
+                self.to_lua_table(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
 
     @property
@@ -67,8 +75,5 @@ class LuaRuntime:
         receiver = self.g.receive_events
         if receiver:
             return lambda ctx: receiver(
-                self.table(
-                    bot=ctx.CurrentQQ,
-                    data=self.table_from(ctx.data),
-                )
+                self.to_lua_table(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
