@@ -36,20 +36,20 @@ class LuaRuntime:
         g = self.g
         g.package.path = package_path + g.package.path
         g['import'] = self.to_lua_function(importlib.import_module)
-        g._to_lua_table = self.to_lua_table
+        g._to_lua_value = self.to_lua_value
         g.opq = self.table_from({})
         self.execute("opq.none = python.none")
         g.python = None
         self.require('_init_packages')
 
-    def to_lua_table(self, data):
-        # only convert dict and list
+    def to_lua_value(self, data):
+        # only convert dict and list to table
         if isinstance(data, dict):
             for key, value in data.items():
-                data[key] = self.to_lua_table(value)
+                data[key] = self.to_lua_value(value)
         elif isinstance(data, list):
             for idx, item in enumerate(data):
-                data[idx] = self.to_lua_table(item)
+                data[idx] = self.to_lua_value(item)
         else:
             return data
         return self.table_from(data)
@@ -59,7 +59,7 @@ class LuaRuntime:
         receiver = self.g.receive_group_msg
         if receiver:
             return lambda ctx: receiver(
-                self.to_lua_table(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+                self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
 
     @property
@@ -67,7 +67,7 @@ class LuaRuntime:
         receiver = self.g.receive_friend_msg
         if receiver:
             return lambda ctx: receiver(
-                self.to_lua_table(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+                self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
 
     @property
@@ -75,5 +75,5 @@ class LuaRuntime:
         receiver = self.g.receive_events
         if receiver:
             return lambda ctx: receiver(
-                self.to_lua_table(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+                self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )

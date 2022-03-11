@@ -14,7 +14,7 @@ local function gen_parsers(name)
 					ctx = ctx.ctx
 				end
 				local data = py_parser[k](ctx)
-				return data and _to_lua_table(data.dict()) or data
+				return data and _to_lua_value(data.dict()) or data
 			end
 
 			t[k] = func
