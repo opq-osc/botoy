@@ -12,3 +12,5 @@ setmetatable(opq, {
 		end
 	end,
 })
+
+opq.sdk = require("opq.sdk")
