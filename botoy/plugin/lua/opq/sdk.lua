@@ -95,7 +95,7 @@ end
 ---获取发送语法糖
 ---@param ctx table|userdata
 ---@return S
-function sdk.s(ctx)
+function sdk.create_s(ctx)
 	if type(ctx) == "table" then
 		ctx = ctx.ctx
 	end
