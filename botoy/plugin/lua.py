@@ -39,3 +39,36 @@ class LuaRuntime:
         self.execute("opq.none = python.none")
         g.python = None
         self.require('_init_packages')
+
+    @property
+    def receive_group_msg(self):
+        receiver = self.g.receive_group_msg
+        if receiver:
+            return lambda ctx: receiver(
+                self.table(
+                    bot=ctx.CurrentQQ,
+                    data=self.table_from(ctx.data),
+                )
+            )
+
+    @property
+    def receive_friend_msg(self):
+        receiver = self.g.receive_friend_msg
+        if receiver:
+            return lambda ctx: receiver(
+                self.table(
+                    bot=ctx.CurrentQQ,
+                    data=self.table_from(ctx.data),
+                )
+            )
+
+    @property
+    def receive_events(self):
+        receiver = self.g.receive_events
+        if receiver:
+            return lambda ctx: receiver(
+                self.table(
+                    bot=ctx.CurrentQQ,
+                    data=self.table_from(ctx.data),
+                )
+            )

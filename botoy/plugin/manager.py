@@ -154,19 +154,19 @@ class LuaPlugin(Plugin):
     @property
     def receive_group_msg(self) -> Optional[T_GroupMsgReceiver]:
         if self.L:
-            return self.L.globals()["receive_group_msg"]
+            return self.L.receive_group_msg
         return None
 
     @property
     def receive_friend_msg(self) -> Optional[T_FriendMsgReceiver]:
         if self.L:
-            return self.L.globals()["receive_friend_msg"]
+            return self.L.receive_friend_msg
         return None
 
     @property
     def receive_events(self) -> Optional[T_EventReceiver]:
         if self.L:
-            return self.L.globals()["receive_events"]
+            return self.L.receive_events
         return None
 
 
