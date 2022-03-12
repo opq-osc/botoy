@@ -11,7 +11,7 @@ except ImportError:
             __import__("lupa")
 
 
-lib_path = Path(__file__).absolute().parent / 'lua'
+lib_path = Path(__file__).absolute().parent / "lua"
 
 package_path = f"./plugins/?.lua;./plugins/?/init.lua;{lib_path / '?.lua'};{lib_path / '?' / 'init.lua'};"
 
@@ -35,12 +35,12 @@ class LuaRuntime:
         self.g = self.globals()
         g = self.g
         g.package.path = package_path + g.package.path
-        g['import'] = self.to_lua_function(importlib.import_module)
+        g["import"] = self.to_lua_function(importlib.import_module)
         g._to_lua_value = self.to_lua_value
         g.opq = self.table_from({})
         self.execute("opq.none = python.none")
         g.python = None
-        self.require('_init_packages')
+        self.require("_init_packages")
 
     def to_lua_value(self, data):
         # only convert dict and list to table
@@ -58,22 +58,29 @@ class LuaRuntime:
     def receive_group_msg(self):
         receiver = self.g.receive_group_msg
         if receiver:
-            return lambda ctx: receiver(
+            wrapped_receiver = self.__dict__[
+                "receive_group_msg"
+            ] = lambda ctx: receiver(
                 self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
+            return wrapped_receiver
 
     @property
     def receive_friend_msg(self):
         receiver = self.g.receive_friend_msg
         if receiver:
-            return lambda ctx: receiver(
+            wrapped_receiver = self.__dict__[
+                "receive_friend_msg"
+            ] = lambda ctx: receiver(
                 self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
+            return wrapped_receiver
 
     @property
     def receive_events(self):
         receiver = self.g.receive_events
         if receiver:
-            return lambda ctx: receiver(
+            wrapped_receiver = self.__dict__["receive_events"] = lambda ctx: receiver(
                 self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
             )
+            return wrapped_receiver
