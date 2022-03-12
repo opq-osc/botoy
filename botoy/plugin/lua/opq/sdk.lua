@@ -135,4 +135,35 @@ function sdk.create_s(ctx)
 	}
 end
 
+---新建Action
+---@param qq nil|number: bot qq号
+---@param port nil|number
+---@param host nil|string
+---@param timeout nil|number
+---@return table
+function sdk.create_action(qq, port, host, timeout, ctx)
+	return setmetatable({
+		_action = ctx and botoy.Action.from_ctx(ctx) or botoy.Action(qq, port, host, timeout or 20),
+	}, {
+		__index = function(t, k) -- 可能需要单独导出属性
+			---@param args table
+			local func = function(args)
+				return _to_lua_value(_unpacks_lua_table(t._action[k])(args))
+			end
+			t[k] = func
+			return func
+		end,
+	})
+end
+
+---从ctx创建Action
+---@param ctx any
+---@return table
+function sdk.create_action_from_ctx(ctx)
+	if type(ctx) == "table" then
+		ctx = ctx.ctx
+	end
+	return sdk.create_action(nil, nil, nil, nil, ctx)
+end
+
 return sdk

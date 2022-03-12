@@ -4,6 +4,7 @@ from typing import Callable, Dict, Iterable
 
 try:
     from lupa import LuaRuntime as BaseLuaRuntime  # type: ignore
+    from lupa import unpacks_lua_table as unpacks_lua_table  # type: ignore
 except ImportError:
 
     class BaseLuaRuntime:
@@ -22,6 +23,7 @@ class LuaRuntime:
     eval: Callable
     execute: Callable
     require: Callable
+    unpacks_lua_table: Callable
 
     def __getattr__(self, attr):
         value = self.__dict__[attr] = getattr(self.L, attr)
@@ -37,6 +39,7 @@ class LuaRuntime:
         g.package.path = package_path + g.package.path
         g["import"] = self.to_lua_function(importlib.import_module)
         g._to_lua_value = self.to_lua_value
+        g._unpacks_lua_table = unpacks_lua_table
         g.opq = self.table_from({})
         self.execute("opq.none = python.none")
         g.python = None
