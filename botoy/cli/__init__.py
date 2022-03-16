@@ -5,17 +5,29 @@ import os
 import pathlib
 import sys
 import textwrap
+from typing import List
 
 import click
 
 from ..__version__ import __version__, check_version
 from ..async_client import AsyncBotoy
 from ..client import Botoy
+from ..config import jconfig
 from ..runner import run as run_with_reload
 from ..utils import check_schema
 from .plugin import plugin
 
 echo = click.echo
+
+
+def getchar(msg: str = "", choices: List[str] = [], echo: bool = False):
+    if msg:
+        print(msg + " ", end="", flush=True)
+    while True:
+        char = click.getchar(echo)
+        if not choices or char in choices:
+            print("")
+            return char
 
 
 @click.group()
@@ -299,6 +311,53 @@ def test(address: str):
         host, port = address, 80
 
     Botoy(host=host, port=int(port)).run()
+
+
+@cli.command()
+def sweet():
+    """快速启动
+
+    该命令用于只需要插件功能的情况, 只会读取插件
+    """
+
+    def get_args():
+        host = jconfig.host
+        if getchar(f"需要更改host吗？当前为({host}) y/n", ["y", "n"]) == "y":
+            host = input("Host: ")
+
+        port = jconfig.port
+        if getchar(f"需要更改port吗？当前为({port}) y/n", ["y", "n"]) == "y":
+            port = int(input("Port: "))
+
+        qq = None
+        if getchar(f"需要设置机器人QQ号吗？(不建议设置，因为这里的qq只是筛选作用) y/n", ["y", "n"]) == "y":
+            qq = int(input("QQ: "))
+
+        is_async = getchar("使用异步吗?（建议使用）y/n", ["y", "n"]) == "y"
+
+        log = getchar("是否开启控制台日志 y/n") == "y"
+
+        if (
+            getchar(
+                f"当前设置为 Host: {host}, Port: {port}, QQ: {qq}, is_async: {is_async}, log: {log}, 是否需要重新设置？ y/n",
+                ["y", "n"],
+            )
+            == "y"
+        ):
+            return get_args()
+        return host, port, qq, is_async, log
+
+    host, port, qq, is_async, log = get_args()
+    if is_async:
+        c = AsyncBotoy
+    else:
+        c = Botoy
+
+    bot = c(qq=qq, host=host, port=port, use_plugins=True, log=log)
+    if isinstance(bot, AsyncBotoy):
+        asyncio.run(bot.run())
+    else:
+        bot.run()
 
 
 cli.add_command(plugin)
