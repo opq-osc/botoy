@@ -40,6 +40,14 @@ botoy test
 botoy plugin
 ```
 
+## 快速启动
+
+```shell
+botoy sweet
+```
+
+和 run 不同的是，该命令会自己创建机器人对象，只会读取插件
+
 ## 帮助
 
 ```shell
@@ -48,6 +56,7 @@ botoy --help
 botoy init --help
 botoy add --help
 botoy test --help
+botoy sweet --help
 botoy plugin --help
 botoy plugin install --help
 botoy plugin remove --help
