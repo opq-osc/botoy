@@ -81,7 +81,7 @@ class AsyncAction:
         picMd5s = [  # type: ignore
             {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
         ]
-        return self.post(
+        return await self.post(
             "SendMsgV2",
             {
                 "ToUserUid": user,
