@@ -473,11 +473,12 @@ class Action:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
 
-    def groupJoinAuth(self, seq: int, group: int, userid: int, cmd=None):
+    def groupJoinAuth(self, seq: int, group: int, userid: int, WhoName: str, Flag_7: int, Flag_8: int, cmd=None):
         """
         :param Seq:  GroupAdminsysnotify消息中的Seq
         :param group: QQ群号
         :param userid: 申请进群的QQ号
+        :param WhoName: 申请进群的QQ号的对应昵称
         :param cmd: True:同意进群,False:拒绝,None:忽略
         :return:
         """
@@ -485,9 +486,13 @@ class Action:
             "AnswerInviteGroup",
             {
                 "Seq": seq,
+                "Type":1,
+                "MsgTypeStr":"邀请加群",
                 "Who": userid,
-                "Flag_7": 3,  # 这2个flag不知道会不会变
-                "Flag_8": 21,
+                "WhoName": WhoName,
+                "MsgStatusStr":"",
+                "Flag_7": Flag_7,
+                "Flag_8": Flag_8,
                 "GroupId": group,
                 "Action": {True: 11, False: 12, None: 14}[
                     cmd
