@@ -473,25 +473,23 @@ class Action:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
 
-    def groupJoinAuth(self, seq: int, group: int, userid: int, Flag_7: int, Flag_8: int, cmd=None):
+    def groupJoinAuth(self,JoinGroupInfo:..., cmd=None):
         """
-        :param Seq:  GroupAdminsysnotify消息中的Seq
-        :param group: QQ群号
-        :param userid: 申请进群的QQ号
+        :param JoinGroupInfo: botoy.parser.event.group_adminsysnotify(ctx)
         :param cmd: True:同意进群,False:拒绝,None:忽略
         :return:
         """
         return self.post(
             "AnswerInviteGroup",
             {
-                "Seq": seq,
-                "Type":1,
-                "MsgTypeStr":"邀请加群",
-                "Who": userid,
-                "MsgStatusStr":"",
-                "Flag_7": Flag_7,
-                "Flag_8": Flag_8,
-                "GroupId": group,
+                "Seq": JoinGroupInfo.Seq,
+                "Type": 1,
+                "MsgTypeStr": "邀请加群",
+                "Who": JoinGroupInfo.Who,
+                "MsgStatusStr": "",
+                "Flag_7": JoinGroupInfo.Flag_7,
+                "Flag_8": JoinGroupInfo.Flag_8,
+                "GroupId": JoinGroupInfo.GroupId,
                 "Action": {True: 11, False: 12, None: 14}[
                     cmd
                 ],  # 11 agree , 14 忽略 , 12/21 disagree
