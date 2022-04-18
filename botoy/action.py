@@ -12,6 +12,7 @@ from botoy import macro
 from botoy.config import jconfig
 from botoy.log import logger
 from botoy.model import EventMsg, FriendMsg, GroupMsg
+from botoy.parser.event import GroupAdminsysnotify
 
 from . import utils
 
@@ -473,8 +474,8 @@ class Action:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
 
-    def groupJoinAuth(self,JoinGroupInfo:..., cmd=None):
-        """
+    def groupJoinAuth(self, JoinGroupInfo: GroupAdminsysnotify, cmd=None):
+        """需和botoy.parser.event.group_adminsysnotify配合使用
         :param JoinGroupInfo: botoy.parser.event.group_adminsysnotify(ctx)
         :param cmd: True:同意进群,False:拒绝,None:忽略
         :return:
@@ -483,10 +484,7 @@ class Action:
             "AnswerInviteGroup",
             {
                 "Seq": JoinGroupInfo.Seq,
-                "Type": 1,
-                "MsgTypeStr": "邀请加群",
                 "Who": JoinGroupInfo.Who,
-                "MsgStatusStr": "",
                 "Flag_7": JoinGroupInfo.Flag_7,
                 "Flag_8": JoinGroupInfo.Flag_8,
                 "GroupId": JoinGroupInfo.GroupId,
