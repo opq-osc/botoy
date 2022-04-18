@@ -12,7 +12,7 @@ from botoy import macro
 from botoy.config import jconfig
 from botoy.log import logger
 from botoy.model import EventMsg, FriendMsg, GroupMsg
-from botoy.parser.event import EventMsg as eventMsgParser
+from botoy.parser import event as eventParser
 
 from . import utils
 
@@ -480,7 +480,7 @@ class Action:
         :param cmd: True:同意进群,False:拒绝,None:忽略
         :return:
         """
-        join_group_info = eventMsgParser.group_adminsysnotify(ctx)
+        join_group_info = eventParser.group_adminsysnotify(ctx)
         if join_group_info:
             return self.post(
                     "AnswerInviteGroup",
