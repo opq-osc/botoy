@@ -12,6 +12,7 @@ from botoy import macro
 from botoy.config import jconfig
 from botoy.log import logger
 from botoy.model import EventMsg, FriendMsg, GroupMsg
+from botoy.parser.event import EventMsg as eventMsgParser
 
 from . import utils
 
@@ -474,24 +475,27 @@ class Action:
         return self.post("OidbSvc.0xed3_1", payload)
 
     def groupJoinAuth(self, ctx: EventMsg, cmd=None):
-        """需和botoy.parser.event.group_adminsysnotify配合使用
-        :param ctx: botoy.parser.event.group_adminsysnotify(ctx)
+        """
+        :param ctx: ctx
         :param cmd: True:同意进群,False:拒绝,None:忽略
         :return:
         """
-        return self.post(
-            "AnswerInviteGroup",
-            {
-                "Seq": ctx.Seq,
-                "Who": ctx.Who,
-                "Flag_7": ctx.Flag_7,
-                "Flag_8": ctx.Flag_8,
-                "GroupId": ctx.GroupId,
-                "Action": {True: 11, False: 12, None: 14}[
-                    cmd
-                ],  # 11 agree , 14 忽略 , 12/21 disagree
-            },
-        )
+        join_group_info = eventMsgParser.group_adminsysnotify(ctx)
+        if join_group_info:
+            return self.post(
+                    "AnswerInviteGroup",
+                    {
+                        "Seq": join_group_info.Seq,
+                        "Who": join_group_info.Who,
+                        "Flag_7": join_group_info.Flag_7,
+                        "Flag_8": join_group_info.Flag_8,
+                        "GroupId": join_group_info.GroupId,
+                        "Action": {True: 11, False: 12, None: 14}[
+                            cmd
+                        ],  # 11 agree , 14 忽略 , 12/21 disagree
+                    },
+                )
+        raise Exception("事件类型不匹配")
 
     def uploadGroupFile(
         self,
