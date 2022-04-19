@@ -476,26 +476,24 @@ class Action:
 
     def groupJoinAuth(self, ctx: EventMsg, cmd=None):
         """
-        :param ctx: ctx
+        :param ctx: 事件EventMsg, 类型不匹配将报错
         :param cmd: True:同意进群,False:拒绝,None:忽略
-        :return:
         """
         join_group_info = eventParser.group_adminsysnotify(ctx)
-        if join_group_info:
-            return self.post(
-                    "AnswerInviteGroup",
-                    {
-                        "Seq": join_group_info.Seq,
-                        "Who": join_group_info.Who,
-                        "Flag_7": join_group_info.Flag_7,
-                        "Flag_8": join_group_info.Flag_8,
-                        "GroupId": join_group_info.GroupId,
-                        "Action": {True: 11, False: 12, None: 14}[
-                            cmd
-                        ],  # 11 agree , 14 忽略 , 12/21 disagree
-                    },
-                )
-        raise Exception("事件类型不匹配")
+        assert join_group_info, '事件类型不匹配'
+        return self.post(
+            "AnswerInviteGroup",
+            {
+                "Seq": join_group_info.Seq,
+                "Who": join_group_info.Who,
+                "Flag_7": join_group_info.Flag_7,
+                "Flag_8": join_group_info.Flag_8,
+                "GroupId": join_group_info.GroupId,
+                "Action": {True: 11, False: 12, None: 14}[
+                    cmd
+                ],  # 11 agree , 14 忽略 , 12/21 disagree
+            },
+        )
 
     def uploadGroupFile(
         self,
