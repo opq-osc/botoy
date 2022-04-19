@@ -480,7 +480,7 @@ class Action:
         :param cmd: True:同意进群,False:拒绝,None:忽略
         """
         join_group_info = eventParser.group_adminsysnotify(ctx)
-        assert join_group_info, '事件类型不匹配'
+        assert join_group_info, "事件类型不匹配"
         return self.post(
             "AnswerInviteGroup",
             {
