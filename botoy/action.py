@@ -12,6 +12,7 @@ from botoy import macro
 from botoy.config import jconfig
 from botoy.log import logger
 from botoy.model import EventMsg, FriendMsg, GroupMsg
+from botoy.parser import event as eventParser
 
 from . import utils
 
@@ -473,22 +474,21 @@ class Action:
             payload["Type"] = 1
         return self.post("OidbSvc.0xed3_1", payload)
 
-    def groupJoinAuth(self, seq: int, group: int, userid: int, cmd=None):
+    def groupJoinAuth(self, ctx: EventMsg, cmd=None):
         """
-        :param Seq:  GroupAdminsysnotify消息中的Seq
-        :param group: QQ群号
-        :param userid: 申请进群的QQ号
+        :param ctx: 事件EventMsg, 类型不匹配将报错
         :param cmd: True:同意进群,False:拒绝,None:忽略
-        :return:
         """
+        join_group_info = eventParser.group_adminsysnotify(ctx)
+        assert join_group_info, "事件类型不匹配"
         return self.post(
             "AnswerInviteGroup",
             {
-                "Seq": seq,
-                "Who": userid,
-                "Flag_7": 3,  # 这2个flag不知道会不会变
-                "Flag_8": 21,
-                "GroupId": group,
+                "Seq": join_group_info.Seq,
+                "Who": join_group_info.Who,
+                "Flag_7": join_group_info.Flag_7,
+                "Flag_8": join_group_info.Flag_8,
+                "GroupId": join_group_info.GroupId,
                 "Action": {True: 11, False: 12, None: 14}[
                     cmd
                 ],  # 11 agree , 14 忽略 , 12/21 disagree

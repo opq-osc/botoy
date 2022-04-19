@@ -101,6 +101,8 @@ class GroupAdminsysnotify(BaseModel):
     ActionGroupCard: str  # 邀请人(处理人)群名片
     Action: str  # 加群理由 11 agree 14 忽略 12/21 disagree
     Content: str
+    Flag_7: int
+    Flag_8: int
 
 
 def group_adminsysnotify(ctx: EventMsg) -> Optional[GroupAdminsysnotify]:
