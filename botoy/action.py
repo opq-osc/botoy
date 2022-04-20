@@ -19,11 +19,11 @@ from . import utils
 
 class Action:
     def __init__(
-        self,
-        qq: Optional[int] = None,
-        port: Optional[int] = None,
-        host: Optional[str] = None,
-        timeout: int = 20,
+            self,
+            qq: Optional[int] = None,
+            port: Optional[int] = None,
+            host: Optional[str] = None,
+            timeout: int = 20,
     ):
         self.host = utils.check_schema(host or jconfig.host)
         self.port = port or jconfig.port
@@ -41,7 +41,7 @@ class Action:
 
     @classmethod
     def from_ctx(
-        cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20
+            cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20
     ) -> "Action":
         return cls(
             ctx.CurrentQQ,
@@ -64,14 +64,14 @@ class Action:
         )
 
     def sendFriendPic(
-        self,
-        user: int,
-        *,
-        picUrl: str = "",
-        picBase64Buf: str = "",
-        picMd5s: Optional[Union[str, List[str]]] = None,
-        content: str = "",
-        flashPic=False,
+            self,
+            user: int,
+            *,
+            picUrl: str = "",
+            picBase64Buf: str = "",
+            picMd5s: Optional[Union[str, List[str]]] = None,
+            content: str = "",
+            flashPic=False,
     ):
         """发送好友图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
@@ -95,7 +95,7 @@ class Action:
         )
 
     def sendFriendVoice(
-        self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
+            self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ):
         """发送好友语音消息"""
         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
@@ -135,7 +135,7 @@ class Action:
         )
 
     def sendGroupText(
-        self, group: int, content: str, atUser: Union[int, List[int]] = 0
+            self, group: int, content: str, atUser: Union[int, List[int]] = 0
     ) -> dict:
         """发送群组文本消息"""
         if atUser != 0:
@@ -151,15 +151,15 @@ class Action:
         )
 
     def sendGroupPic(
-        self,
-        group: int,
-        *,
-        content: str = "",
-        picUrl: str = "",
-        picBase64Buf: str = "",
-        picMd5s: Optional[Union[str, List[str]]] = None,
-        flashPic=False,
-        atUser: Union[int, List[int]] = 0,
+            self,
+            group: int,
+            *,
+            content: str = "",
+            picUrl: str = "",
+            picBase64Buf: str = "",
+            picMd5s: Optional[Union[str, List[str]]] = None,
+            flashPic=False,
+            atUser: Union[int, List[int]] = 0,
     ) -> dict:
         """发送群组图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s, picMd5s]), "缺少参数"
@@ -185,11 +185,11 @@ class Action:
         )
 
     def sendGroupMultiPic(
-        self,
-        group,
-        *items: str,
-        text: str = "",
-        atUser: Union[int, List[int]] = 0,
+            self,
+            group,
+            *items: str,
+            text: str = "",
+            atUser: Union[int, List[int]] = 0,
     ):
         """发送群多图
         items 支持填写图片http地址和base64，会自动判断类型
@@ -205,7 +205,7 @@ class Action:
         return self.sendGroupPic(group, content=text, atUser=atUser, picMd5s=md5s)
 
     def sendGroupVoice(
-        self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
+            self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
         """发送群组语音消息"""
         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
@@ -283,7 +283,7 @@ class Action:
         )
 
     def sendPrivateVoice(
-        self, user: int, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
+            self, user: int, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
     ) -> dict:
         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
         return self.post(
@@ -300,14 +300,14 @@ class Action:
         )
 
     def sendPrivatePic(
-        self,
-        user: int,
-        group: int,
-        content: str = "",
-        *,
-        picUrl: str = "",
-        picBase64Buf: str = "",
-        picMd5s: Optional[Union[str, List[str]]] = None,
+            self,
+            user: int,
+            group: int,
+            content: str = "",
+            *,
+            picUrl: str = "",
+            picBase64Buf: str = "",
+            picMd5s: Optional[Union[str, List[str]]] = None,
     ) -> dict:
         """发送私聊图片消息"""
         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
@@ -338,13 +338,13 @@ class Action:
         )
 
     def replyGroupMsg(
-        self,
-        group: int,
-        content: str,
-        msgSeq: int,
-        msgTime: Optional[int] = None,
-        user: int = 0,
-        rawContent: str = "",
+            self,
+            group: int,
+            content: str,
+            msgSeq: int,
+            msgTime: Optional[int] = None,
+            user: int = 0,
+            rawContent: str = "",
     ):
         """发送回复消息, 回复群消息
         下面的原消息表示需要回复的消息
@@ -372,12 +372,12 @@ class Action:
         )
 
     def replyFriendMsg(
-        self,
-        user: int,
-        content: str,
-        msgSeq: int,
-        msgTime: Optional[int] = None,
-        rawContent: str = "",
+            self,
+            user: int,
+            content: str,
+            msgSeq: int,
+            msgTime: Optional[int] = None,
+            rawContent: str = "",
     ):
         """发送回复消息, 回复好友消息
         下面的原消息表示需要回复的消息
@@ -496,14 +496,14 @@ class Action:
         )
 
     def uploadGroupFile(
-        self,
-        group: int,
-        fileURL: str = "",
-        fileBase64: str = "",
-        filePath: str = "",
-        fileName: str = "",
-        fileType: str = "",
-        notify: bool = True,
+            self,
+            group: int,
+            fileURL: str = "",
+            fileBase64: str = "",
+            filePath: str = "",
+            fileName: str = "",
+            fileType: str = "",
+            notify: bool = True,
     ) -> dict:
         """上传群文件
         :param group: 群号
@@ -678,12 +678,12 @@ class Action:
         )
 
     def setGroupAnnounce(
-        self,
-        group: int,
-        text: str,
-        pinned: bool = False,
-        title: str = "",
-        typ: bool = True,
+            self,
+            group: int,
+            text: str,
+            pinned: bool = False,
+            title: str = "",
+            typ: bool = True,
     ):
         """设置群公告
         :param group: 群号
@@ -778,6 +778,28 @@ class Action:
         """刷新key二次登陆"""
         return self.get("", path="/v1/RefreshKeys")
 
+    def dealFriend(self, ctx: EventMsg, cmd=None) -> dict:
+        """处理好友请求
+        :param ctx: 事件EventMsg, 类型不匹配将报错
+        :param cmd: True:同意,False:拒绝,None:忽略
+        """
+        friend_add_info = eventParser.friend_add(ctx)
+        assert friend_add_info, "事件类型不匹配"
+        return self.post(
+            "DealFriend",
+            {
+                "UserID": friend_add_info.UserID,
+                "FromType": friend_add_info.FromType,
+                "Type": friend_add_info.Type,
+                "Field_3": friend_add_info.Field_3,
+                "Field_8": friend_add_info.Field_8,
+                "Content": friend_add_info.Content,
+                "FromGroupId": friend_add_info.FromGroupId,
+                "FromGroupName": friend_add_info.FromGroupName,
+                "Action": {True: 2, False: 3, None: 1}[cmd]  # 1忽略2同意3拒绝
+            },
+        )
+
     def logout(self, flag=False) -> dict:
         """退出指定QQ
         :param flag: 是否删除设备信息文件
@@ -802,12 +824,12 @@ class Action:
 
     ############################################################################
     def baseRequest(
-        self,
-        method: str,
-        funcname: str,
-        path: str,
-        payload: Optional[dict] = None,
-        params: Optional[dict] = None,
+            self,
+            method: str,
+            funcname: str,
+            path: str,
+            payload: Optional[dict] = None,
+            params: Optional[dict] = None,
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         if params is not None:
@@ -869,11 +891,11 @@ class Action:
         return data
 
     def post(
-        self,
-        funcname: str,
-        payload: dict,
-        params: Optional[dict] = None,
-        path: str = "/v1/LuaApiCaller",
+            self,
+            funcname: str,
+            payload: dict,
+            params: Optional[dict] = None,
+            path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装常用的post操作"""
         return self.baseRequest(
@@ -881,10 +903,10 @@ class Action:
         )
 
     def get(
-        self,
-        funcname: str,
-        params: Optional[dict] = None,
-        path: str = "/v1/LuaApiCaller",
+            self,
+            funcname: str,
+            params: Optional[dict] = None,
+            path: str = "/v1/LuaApiCaller",
     ) -> dict:
         """封装get操作"""
         return self.baseRequest("GET", funcname=funcname, path=path, params=params)
