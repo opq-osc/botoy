@@ -41,13 +41,14 @@ from botoy.parser import event as ep # 事件(EevntMsg)相关解析
 
 ## 事件(EventMsg)
 
-|                      |            |
-| -------------------- | ---------- |
-| group_revoke         | 群撤回     |
-| group_exit           | 用户退群   |
+|                      |       |
+| -------------------- |-------|
+| group_revoke         | 群撤回   |
+| group_exit           | 用户退群  |
 | group_join           | 新用户加群 |
-| group_shut           | 禁言       |
+| group_shut           | 禁言    |
 | group_admin          | 群管理变更 |
-| group_adminsysnotify | 加群申请   |
-| friend_revoke        | 好友撤回   |
-| friend_delete        | 好友删除   |
+| group_adminsysnotify | 加群申请  |
+| friend_revoke        | 好友撤回  |
+| friend_delete        | 好友删除  |
+| friend_add        | 好友请求  |
