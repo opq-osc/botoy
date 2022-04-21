@@ -143,6 +143,7 @@ def friend_delete(ctx: EventMsg) -> Optional[FriendDelete]:
     except Exception:
         return None
 
+
 class FriendAdd(BaseModel):
     UserID: int
     UserNick: str
@@ -156,6 +157,7 @@ class FriendAdd(BaseModel):
     FromGroupId: int
     FromGroupName: str
     Action: int
+
 
 def friend_add(ctx: EventMsg) -> Optional[FriendAdd]:
     try:
