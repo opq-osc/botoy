@@ -527,7 +527,7 @@ class AsyncAction:
                 if fileURL:
                     try:
                         async with httpx.AsyncClient() as client:
-                            with client.stream("GET", fileURL, timeout=5) as resp:
+                            async with client.stream("GET", fileURL, timeout=5) as resp:
                                 content_type = resp.headers["content-type"]
                                 extension = mimetypes.guess_extension(content_type)
                                 if extension is not None:
