@@ -1,17 +1,17 @@
-import time
 import mimetypes
-import uuid
-
+import time
 import traceback
+import uuid
 from typing import List, Optional, Union
 
 import httpx
+
+from botoy.parser import event as eventParser
 
 from . import macro, utils
 from .config import jconfig
 from .log import logger
 from .model import EventMsg, FriendMsg, GroupMsg
-from botoy.parser import event as eventParser
 
 
 class AsyncAction:
