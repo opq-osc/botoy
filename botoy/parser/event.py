@@ -142,3 +142,26 @@ def friend_delete(ctx: EventMsg) -> Optional[FriendDelete]:
         return FriendDelete(**ctx.EventData)
     except Exception:
         return None
+
+
+class FriendAdd(BaseModel):
+    UserID: int
+    UserNick: str
+    FromType: int
+    Type: int
+    MsgTypeStr: str
+    Field_3: int
+    Field_8: int
+    Content: str
+    FromContent: str
+    FromGroupId: int
+    FromGroupName: str
+    Action: int
+
+
+def friend_add(ctx: EventMsg) -> Optional[FriendAdd]:
+    try:
+        assert ctx.EventName == EventNames.ON_EVENT_FRIEND_ADD
+        return FriendAdd(**ctx.EventData)
+    except Exception:
+        return None

@@ -778,6 +778,28 @@ class Action:
         """刷新key二次登陆"""
         return self.get("", path="/v1/RefreshKeys")
 
+    def dealFriend(self, ctx: EventMsg, cmd=None) -> dict:
+        """处理好友请求
+        :param ctx: 事件EventMsg, 类型不匹配将报错
+        :param cmd: True:同意,False:拒绝,None:忽略
+        """
+        friend_add_info = eventParser.friend_add(ctx)
+        assert friend_add_info, "事件类型不匹配"
+        return self.post(
+            "DealFriend",
+            {
+                "UserID": friend_add_info.UserID,
+                "FromType": friend_add_info.FromType,
+                "Type": friend_add_info.Type,
+                "Field_3": friend_add_info.Field_3,
+                "Field_8": friend_add_info.Field_8,
+                "Content": friend_add_info.Content,
+                "FromGroupId": friend_add_info.FromGroupId,
+                "FromGroupName": friend_add_info.FromGroupName,
+                "Action": {True: 2, False: 3, None: 1}[cmd],  # 1忽略2同意3拒绝
+            },
+        )
+
     def logout(self, flag=False) -> dict:
         """退出指定QQ
         :param flag: 是否删除设备信息文件

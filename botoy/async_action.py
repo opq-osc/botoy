@@ -1,4 +1,7 @@
 import time
+import mimetypes
+import uuid
+
 import traceback
 from typing import List, Optional, Union
 
@@ -8,6 +11,7 @@ from . import macro, utils
 from .config import jconfig
 from .log import logger
 from .model import EventMsg, FriendMsg, GroupMsg
+from botoy.parser import event as eventParser
 
 
 class AsyncAction:
@@ -123,6 +127,18 @@ class AsyncAction:
             },
         )
 
+    async def sendFriendTeXiaoText(self, user: int, text: str) -> dict:
+        """发送好友特效文本消息"""
+        return await self.post(
+            "SendMsgV2",
+            {
+                "ToUserUid": user,
+                "SendToType": 1,
+                "SendMsgType": "TeXiaoTextMsg",
+                "Content": text,
+            },
+        )
+
     async def sendGroupText(
         self, group: int, content: str, atUser: Union[int, List[int]] = 0
     ) -> dict:
@@ -230,6 +246,18 @@ class AsyncAction:
                 "SendToType": 2,
                 "SendMsgType": "JsonMsg",
                 "Content": content,
+            },
+        )
+
+    async def sendGroupTeXiaoText(self, group: int, text: str) -> dict:
+        """发送群组特效文本消息"""
+        return await self.post(
+            "SendMsgV2",
+            {
+                "ToUserUid": group,
+                "SendToType": 2,
+                "SendMsgType": "TeXiaoTextMsg",
+                "Content": text,
             },
         )
 
@@ -451,27 +479,174 @@ class AsyncAction:
             },
         )
 
-    async def groupJoinAuth(self, seq: int, group: int, userid: int, cmd=None):
+    async def groupJoinAuth(self, ctx: EventMsg, cmd=None):
         """
-        :param Seq:  GroupAdminsysnotify消息中的Seq
-        :param group: QQ群号
-        :param userid: 申请进群的QQ号
+        :param ctx: 事件EventMsg, 类型不匹配将报错
         :param cmd: True:同意进群,False:拒绝,None:忽略
-        :return:
         """
+        join_group_info = eventParser.group_adminsysnotify(ctx)
+        assert join_group_info, "事件类型不匹配"
         return await self.post(
             "AnswerInviteGroup",
             {
-                "Seq": seq,
-                "Who": userid,
-                "Flag_7": 3,  # 这2个flag不知道会不会变
-                "Flag_8": 21,
-                "GroupId": group,
+                "Seq": join_group_info.Seq,
+                "Who": join_group_info.Who,
+                "Flag_7": join_group_info.Flag_7,
+                "Flag_8": join_group_info.Flag_8,
+                "GroupId": join_group_info.GroupId,
                 "Action": {True: 11, False: 12, None: 14}[
                     cmd
                 ],  # 11 agree , 14 忽略 , 12/21 disagree
             },
         )
+
+    async def uploadGroupFile(
+        self,
+        group: int,
+        fileURL: str = "",
+        fileBase64: str = "",
+        filePath: str = "",
+        fileName: str = "",
+        fileType: str = "",
+        notify: bool = True,
+    ) -> dict:
+        """上传群文件
+        :param group: 群号
+        :param fileURL: 文件网络地址, 和fileBase64二选一
+        :param fileBase64: 文件base64编码, 和fileURL二选一
+        :param filePath: 文件路径，注意该路径要确保机器人服务端能够访问到，并且该项设置后，fileName和fileType参数将无效
+        :param fileName: 文件名(需包含拓展名)，如果不传则随机生成并且如果是使用URL上传则会尝试自动推测文件类型
+        :param fileType: 文件的后缀名，如果指定了，会自动加在文件名(fileName)后面, 如 .txt 或 txt
+        :param notify: 是否通知
+        """
+        # 将filePath作最高优先级，因为通过路径上传，fileName字段无效
+        if not filePath:
+            if not fileName:
+                fileName = str(uuid.uuid4())
+                # guess extension by url
+                if fileURL:
+                    try:
+                        async with httpx.AsyncClient() as client:
+                            async with client.stream("GET", fileURL, timeout=5) as resp:
+                                content_type = resp.headers["content-type"]
+                                extension = mimetypes.guess_extension(content_type)
+                                if extension is not None:
+                                    fileName = fileName + extension
+                    except Exception:
+                        pass
+            if fileType:
+                if fileType.startswith("."):
+                    fileName = fileName + fileType
+                else:
+                    fileName = fileName + "." + fileType
+        payload = {
+            "ToUserUid": group,
+            "SendMsgType": "UploadGroupFile",
+            "FileName": fileName,
+            "Notify": notify,
+        }
+        if filePath:
+            payload.update({"FilePath": filePath})
+        elif fileURL:
+            payload.update({"FileUrl": fileURL})
+        elif fileBase64:
+            payload.update({"FileBase64": fileBase64})
+        else:
+            raise Exception("fileURL, fileBase64, filePath 必须给定其中一个")
+        return await self.post("SendMsgV2", payload)
+
+    async def openRedBag(self, redBagInfo: dict):
+        """打开红包
+
+        :param redBagInfo: 红包信息, ctx.RedBaginfo
+        """
+        return await self.post("OpenRedBag", redBagInfo)
+
+    async def getCookies(self) -> dict:
+        """获取QQ相关cookie"""
+        return await self.get("GetUserCook")
+
+    async def getUserInfo(self, user: int) -> dict:
+        """获取用户信息昵称头像等"""
+        return await self.post("GetUserInfo", {"UserID": user})
+
+    async def getSummaryCard(self, user: int) -> dict:
+        """获取企鹅卡片资料"""
+        return await self.post("SummaryCard.ReqSummaryCard", {"UserID": user})
+
+    async def getUserList(self) -> List[dict]:
+        """获取好友列表"""
+        friend_list = []
+        start_index = 0
+        while True:
+            data = await self.post("GetQQUserList", {"StartIndex": start_index})
+            if "Friendlist" not in data:
+                break
+            friend_list.extend(data["Friendlist"])
+            if len(friend_list) >= int(data.get("Totoal_friend_count", 0)):  # 这里有个拼写错误
+                break
+            if "GetfriendCount" not in data:
+                break
+            start_index += int(
+                data.get("GetfriendCount", 999999)
+            )  # 设置 999999 为了在 API 坏了的情况下能跳出循环
+        return friend_list
+
+    async def getGroupList(self) -> List[dict]:
+        """获取群列表"""
+        next_token = ""
+        group_list = []
+        while True:
+            data = await self.post("GetGroupList", {"NextToken": next_token})
+            if "TroopList" not in data:
+                break
+            group_list.extend(data["TroopList"])
+            next_token = data.get("NextToken", "")
+            if not next_token:
+                break
+        return group_list
+
+    async def getGroupMembers(self, group: int) -> List[dict]:
+        """获取群成员列表"""
+        members = []
+        lastUin = 0
+        while True:
+            data = await self.post(
+                "GetGroupUserList", {"GroupUin": group, "LastUin": lastUin}
+            )
+            if "MemberList" in data:
+                members.extend(data["MemberList"])
+            if "LastUin" not in data or data["LastUin"] == 0:
+                break
+            lastUin = data["LastUin"]
+            time.sleep(0.6)
+        return members
+
+    async def getGroupAdminList(self, group: int, include_owner=True) -> List[dict]:
+        """获取群管理员列表
+        :param group: 群号
+        :param include_owner: 是否包括群主
+        """
+        members = await self.getGroupMembers(group)
+        if include_owner:
+            # 获取群主id
+            owner = 0
+            for groupInfo in await self.getGroupList():
+                if groupInfo["GroupId"] == group:
+                    owner = groupInfo["GroupOwner"]
+                    break
+            admins = [
+                member
+                for member in members
+                if member["GroupAdmin"] == 1 or member["MemberUin"] == owner
+            ]
+        else:
+            admins = [member for member in members if member["GroupAdmin"] == 1]
+        return admins
+
+    async def getClusterInfo(self) -> dict:
+        """获取当前集群信息"""
+        return await self.get("", path="/v1/ClusterInfo")
 
     async def setUniqueTitle(self, user: int, group: int, title: str):
         """设置群头衔"""
@@ -568,6 +743,16 @@ class AsyncAction:
         """撤回群消息"""
         return await self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
 
+    async def inviteUserJoinGroup(self, group: int, user: int) -> dict:
+        """拉人入群
+        :param group: 哪个群?
+        :param user: 拉谁?
+        """
+        return await self.post(
+            "GroupMgr",
+            {"ActionType": 8, "GroupID": group, "ActionUserID": user, "Content": ""},
+        )
+
     async def joinGroup(self, group: int, content: str = "") -> dict:
         """加入群聊
         :param group: 哪个群?
@@ -601,6 +786,28 @@ class AsyncAction:
         """刷新key二次登陆"""
         return await self.get("", path="/v1/RefreshKeys")
 
+    async def dealFriend(self, ctx: EventMsg, cmd=None) -> dict:
+        """处理好友请求
+        :param ctx: 事件EventMsg, 类型不匹配将报错
+        :param cmd: True:同意,False:拒绝,None:忽略
+        """
+        friend_add_info = eventParser.friend_add(ctx)
+        assert friend_add_info, "事件类型不匹配"
+        return await self.post(
+            "DealFriend",
+            {
+                "UserID": friend_add_info.UserID,
+                "FromType": friend_add_info.FromType,
+                "Type": friend_add_info.Type,
+                "Field_3": friend_add_info.Field_3,
+                "Field_8": friend_add_info.Field_8,
+                "Content": friend_add_info.Content,
+                "FromGroupId": friend_add_info.FromGroupId,
+                "FromGroupName": friend_add_info.FromGroupName,
+                "Action": {True: 2, False: 3, None: 1}[cmd],  # 1忽略2同意3拒绝
+            },
+        )
+
     async def logout(self, flag=False) -> dict:
         """退出指定QQ
         :param flag: 是否删除设备信息文件
@@ -617,13 +824,13 @@ class AsyncAction:
             "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
         )
 
-    async def openRedBag(self, redBagInfo: dict):
-        """打开红包
-
-        :param redBagInfo: 红包信息, ctx.RedBaginfo
+    async def updateAvatar(self, url: str):
+        """上传头像
+        :param url: 图片链接
         """
-        return await self.post("OpenRedBag", redBagInfo)
+        return await self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
 
+    ############################################################################
     async def baseRequest(
         self,
         method: str,
