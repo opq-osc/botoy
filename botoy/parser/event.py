@@ -101,6 +101,8 @@ class GroupAdminsysnotify(BaseModel):
     ActionGroupCard: str  # 邀请人(处理人)群名片
     Action: str  # 加群理由 11 agree 14 忽略 12/21 disagree
     Content: str
+    Flag_7: int
+    Flag_8: int
 
 
 def group_adminsysnotify(ctx: EventMsg) -> Optional[GroupAdminsysnotify]:
@@ -138,5 +140,28 @@ def friend_delete(ctx: EventMsg) -> Optional[FriendDelete]:
     try:
         assert ctx.EventName == EventNames.ON_EVENT_FRIEND_DELETE
         return FriendDelete(**ctx.EventData)
+    except Exception:
+        return None
+
+
+class FriendAdd(BaseModel):
+    UserID: int
+    UserNick: str
+    FromType: int
+    Type: int
+    MsgTypeStr: str
+    Field_3: int
+    Field_8: int
+    Content: str
+    FromContent: str
+    FromGroupId: int
+    FromGroupName: str
+    Action: int
+
+
+def friend_add(ctx: EventMsg) -> Optional[FriendAdd]:
+    try:
+        assert ctx.EventName == EventNames.ON_EVENT_FRIEND_ADD
+        return FriendAdd(**ctx.EventData)
     except Exception:
         return None

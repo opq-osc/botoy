@@ -2,7 +2,7 @@ import json
 import threading
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from .constans import (
+from .constants import (
     CONFIG_FILE_PATH,
     DEFAULT_BLOCKED_USERS,
     DEFAULT_FRIEND_BLACKLIST,

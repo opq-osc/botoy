@@ -34,23 +34,23 @@ def event(ctx: EventMsg):
 
 async def async_friend(ctx: FriendMsg):
     try:
-        async with httpx.AsyncClient(timeout=timeout) as cilent:
-            await cilent.post(url, json=ctx.message)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            await client.post(url, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
 
 async def async_group(ctx: GroupMsg):
     try:
-        async with httpx.AsyncClient(timeout=timeout) as cilent:
-            await cilent.post(url, json=ctx.message)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            await client.post(url, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
 
 
 async def async_event(ctx: EventMsg):
     try:
-        async with httpx.AsyncClient(timeout=timeout) as cilent:
-            await cilent.post(url, json=ctx.message)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            await client.post(url, json=ctx.message)
     except Exception as e:
         logger.warning("Webhook请求中的错误: %s" % e)
