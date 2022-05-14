@@ -641,7 +641,7 @@ class Action:
 
     def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return self.get("", path="/v1/ClusterInfo")
+        return self.get("", path="/v1/ClusterInfo?isShow=1")
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
