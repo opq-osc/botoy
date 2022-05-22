@@ -17,14 +17,14 @@ def read_files(files):
 
 
 setup(
-    name="botoy",
-    description="OPQBot/IOTQQ/IOTBot的Python开发助手",
+    name="botoy_mutilhelper",
+    description="基于botoy写的多QAPI",
     long_description=read_files(["README.md", "CHANGELOG.md"]),
     long_description_content_type="text/markdown",
     version=meta["__version__"],
-    author="wongxy",
-    author_email="xiyao.wong@foxmail.com",
-    url="https://github.com/xiyaowong/botoy",
+    author="HeiLAAS",
+    author_email="heng809156@gmail.com",
+    url="https://github.com/HeiLAAS/botoy",
     license="MIT",
     keywords=["iotbot", "iotqq", "OPQ", "OPQBot"],
     packages=find_packages(),
