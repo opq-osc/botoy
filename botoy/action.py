@@ -641,7 +641,7 @@ class Action:
 
     def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return self.get("", path="/v1/ClusterInfo?isShow=1")
+        return self.get("", path="/v1/ClusterInfo", params={"isShow": 1})
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
@@ -821,6 +821,10 @@ class Action:
         :param url: 图片链接
         """
         return self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
+
+    def getAllBots(self) -> List[int]:
+        """获取OPQ登陆的所有机器人QQ号"""
+        return [i["QQ"] for i in self.getClusterInfo()["QQUsers"]]
 
     ############################################################################
     def baseRequest(

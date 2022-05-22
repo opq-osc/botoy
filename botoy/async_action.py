@@ -830,6 +830,10 @@ class AsyncAction:
         """
         return await self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
 
+    async def getAllBots(self) -> List[int]:
+        """获取OPQ登陆的所有机器人QQ号"""
+        return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
+
     ############################################################################
     async def baseRequest(
         self,
