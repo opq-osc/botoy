@@ -823,7 +823,7 @@ class Action:
         return self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
 
     def getAllBots(self) -> List[int]:
-        """获取该OPQ登陆的所有QQ，并返回一个数组"""
+        """获取OPQ登陆的所有机器人QQ号"""
         clusterInfo = self.getClusterInfo()
         return [i["QQ"] for i in clusterInfo["QQUsers"]]
 
