@@ -84,7 +84,7 @@ port 和 host 的含义和 Botoy 实例中的一致
 | getGroupList        | 获取群聊列表                                                 |
 | getGroupMembers     | 获取群成员列表                                               |
 | getGroupAdminList   | 获取群管理列表                                               |
-| getAllQQlist        | 获取该OPQ登陆的所有QQ列表                                     |
+| getAllBots          | 获取该OPQ登陆的所有QQ列表                                     |
 | setUniqueTitle      | 设置群成员头衔                                               |
 | modifyGroupCard     | 修改群名片                                                   |
 | shutAllUp           | 开启或关闭全员禁言                                           |
