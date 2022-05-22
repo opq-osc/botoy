@@ -29,15 +29,21 @@ class Action:
         self.port = port or jconfig.port
         self.address = utils.to_address(self.host, self.port)
 
-        self.qq = int(qq or jconfig.qq)  # type: ignore
+        self._qq = int(qq or jconfig.qq or 0)
 
         self.c = httpx.Client(
             headers={"Content-Type": "application/json"},
             timeout=timeout + 5,
             base_url=self.address,
-            params={"qq": self.qq, "timeout": timeout},
+            params={"timeout": timeout},
         )
         self.lock = threading.Lock()
+
+    @property
+    def qq(self) -> int:
+        if self._qq == 0:
+            self._qq = self.getAllBots()[0]
+        return self._qq
 
     @classmethod
     def from_ctx(
@@ -641,7 +647,7 @@ class Action:
 
     def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return self.get("", path="/v1/ClusterInfo", params={"isShow": 1})
+        return self.get("", path="/v1/ClusterInfo", params={"isShow": 1, "qq": 1})
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
@@ -836,10 +842,10 @@ class Action:
         params: Optional[dict] = None,
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
-        if params is not None:
-            params.update({"funcname": funcname})
-        else:
-            params = {"funcname": funcname}
+        params = params or {}
+        params["funcname"] = funcname
+        if not params.get("qq"):
+            params["qq"] = self.qq
 
         # 发送请求
         try:
@@ -854,7 +860,7 @@ class Action:
             return {}
         except httpx.HTTPStatusError:
             logger.error(
-                f"响应码出错 => {resp.status_code}",  # type:ignore
+                f"响应码出错 => {resp.status_code}，大概率是因为账号已离线或者qq号错误",  # type:ignore
             )
             return {}
         except Exception:
