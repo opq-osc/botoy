@@ -824,8 +824,7 @@ class Action:
 
     def getAllBots(self) -> List[int]:
         """获取OPQ登陆的所有机器人QQ号"""
-        clusterInfo = self.getClusterInfo()
-        return [i["QQ"] for i in clusterInfo["QQUsers"]]
+        return [i["QQ"] for i in self.getClusterInfo()["QQUsers"]]
 
     ############################################################################
     def baseRequest(
