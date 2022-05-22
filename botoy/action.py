@@ -641,7 +641,7 @@ class Action:
 
     def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return self.get("", path="/v1/ClusterInfo?isShow=1")
+        return self.get("", path="/v1/ClusterInfo",params={"isShow":1})
 
     ############操作############
     def setUniqueTitle(self, user: int, group: int, title: str) -> dict:
@@ -821,6 +821,56 @@ class Action:
         :param url: 图片链接
         """
         return self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
+
+    def getAllQQlist(self):
+        clusterInfo = self.getClusterInfo()
+        # for i in QQlist.keys():
+        #     logger.warning(i)
+        list = [i["QQ"] for i in clusterInfo["QQUsers"]]
+        return list
+
+    def sendAllGroupsText(self, content: str):
+        list = self.getAllQQlist()
+        for qq in list:
+            groupInfo = Action(qq = qq).getGroupList()
+            grouplist = []
+            for groupId in groupInfo:
+                grouplist.append(groupId["GroupId"])
+            logger.info(grouplist)
+            for group in grouplist:
+                Action(qq=qq).sendGroupText(group=group,content=content)
+                time.sleep(0.3)
+
+
+    def sendAllGroupsPic(
+        self,
+        *,
+        content: str = "",
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        picMd5s: Optional[Union[str, List[str]]] = None,
+        flashPic=False,
+    ) -> dict:
+        """发送群组图片消息"""
+        assert any([picUrl, picBase64Buf, picMd5s, picMd5s]), "缺少参数"
+        if isinstance(picMd5s, str):
+            picMd5s = [picMd5s]
+        picMd5s = [  # type: ignore
+            {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
+        ]
+        list = self.getAllQQlist()
+        for qq in list:
+            groupInfo = Action(qq = qq).getGroupList()
+            grouplist = []
+            for groupId in groupInfo:
+                grouplist.append(groupId["GroupId"])
+            logger.info(grouplist)
+            for group in grouplist:
+                Action(qq=qq).sendGroupPic(group=group,content=content,picUrl=picUrl,picBase64Buf=picBase64Buf,picMd5s=picMd5s,flashPic=flashPic)
+                time.sleep(0.3)
+
+
+
 
     ############################################################################
     def baseRequest(
