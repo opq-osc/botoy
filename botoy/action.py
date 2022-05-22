@@ -826,8 +826,6 @@ class Action:
         """获取该OPQ登陆的所有QQ，并返回一个数组
         """
         clusterInfo = self.getClusterInfo()
-        # for i in QQlist.keys():
-        #     logger.warning(i)
         list = [i["QQ"] for i in clusterInfo["QQUsers"]]
         return list
 
