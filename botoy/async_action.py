@@ -670,11 +670,10 @@ class AsyncAction:
     async def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
         return await self.post(
-            "ShutUp",
+            "OidbSvc.0x570_8",
             {
-                "ShutUpType": 0,
                 "GroupID": groupID,
-                "ShutUid": userid,
+                "ShutUpUserID": userid,
                 "ShutTime": ShutTime,
             },
         )
