@@ -34,160 +34,6 @@ def find_ctx(back_stack: int = 1) -> Union[FriendMsg, GroupMsg]:
     return ctx
 
 
-def Text(text: str, at=False):
-    """发送文字
-    :param text: 文字内容
-    :param at: 是否艾特发送该消息的用户
-    """
-    text = str(text)
-
-    ctx = find_ctx()
-    action = Action.from_ctx(ctx)
-
-    if isinstance(ctx, GroupMsg):
-        return action.sendGroupText(
-            ctx.FromGroupId, text, atUser=ctx.FromUserId if at else 0
-        )
-    if isinstance(ctx, FriendMsg):
-        if ctx.TempUin:  # 私聊消息
-            return action.sendPrivateText(ctx.FromUin, ctx.TempUin, text)
-        elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-            return action.sendPhoneText(text)
-        else:
-            return action.sendFriendText(ctx.FromUin, text)
-    return None
-
-
-def Picture(pic_url="", pic_base64="", pic_path="", pic_md5="", text=""):
-    """发送图片 经支持群消息和好友消息接收函数内调用
-    :param pic_url: 图片链接
-    :param pic_base64: 图片base64编码
-    :param pic_path: 图片文件路径
-    :param pic_md5: 已发送图片的MD5, 如果是发给群聊，可以传入图片MD5列表
-    :param text: 包含的文字消息
-
-    ``pic_url, pic_base64, pic_path必须给定一项``
-    """
-    assert any([pic_url, pic_base64, pic_path, pic_md5]), "必须给定一项"
-
-    ctx = find_ctx()
-    action = Action.from_ctx(ctx)
-
-    if isinstance(ctx, GroupMsg):
-        if pic_url:
-            return action.sendGroupPic(ctx.FromGroupId, content=text, picUrl=pic_url)
-
-        elif pic_base64:
-            return action.sendGroupPic(
-                ctx.FromGroupId, content=text, picBase64Buf=pic_base64
-            )
-        elif pic_path:
-            return action.sendGroupPic(
-                ctx.FromGroupId, content=text, picBase64Buf=file_to_base64(pic_path)
-            )
-        elif pic_md5:
-            return action.sendGroupPic(ctx.FromGroupId, content=text, picMd5s=pic_md5)
-
-    if isinstance(ctx, FriendMsg):
-        if pic_url:
-            if ctx.TempUin is not None:
-                return action.sendPrivatePic(
-                    ctx.FromUin, ctx.TempUin, content=text, picUrl=pic_url
-                )
-            else:
-                return action.sendFriendPic(ctx.FromUin, picUrl=pic_url, content=text)
-        elif pic_base64:
-            if ctx.TempUin:
-                return action.sendPrivatePic(
-                    ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=pic_base64
-                )
-            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-                return None
-            else:
-                return action.sendFriendPic(
-                    ctx.FromUin, picBase64Buf=pic_base64, content=text
-                )
-        elif pic_path:
-            if ctx.TempUin:
-                return action.sendPrivatePic(
-                    ctx.FromUin,
-                    ctx.TempUin,
-                    content=text,
-                    picBase64Buf=file_to_base64(pic_path),
-                )
-            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-                return None
-            else:
-                return action.sendFriendPic(
-                    ctx.FromUin, picBase64Buf=file_to_base64(pic_path), content=text
-                )
-        elif pic_md5:
-            if ctx.TempUin:
-                return action.sendPrivatePic(
-                    ctx.FromUin, ctx.TempUin, content=text, picMd5s=pic_md5
-                )
-            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-                return None
-            else:
-                return action.sendFriendPic(ctx.FromUin, picMd5s=pic_md5, content=text)
-    return None
-
-
-def Voice(voice_url="", voice_base64="", voice_path=""):
-    """发送语音 经支持群消息和好友消息接收函数内调用
-    :param voice_url: 语音链接
-    :param voice_base64: 语音base64编码
-    :param voice_path: 语音文件路径
-
-    voice_url, voice_base64, voice_path必须给定一项
-    """
-    assert any([voice_url, voice_base64, voice_path]), "必须给定一项"
-
-    ctx = find_ctx()
-    action = Action.from_ctx(ctx)
-
-    if isinstance(ctx, GroupMsg):
-        if voice_url:
-            return action.sendGroupVoice(ctx.FromGroupId, voiceUrl=voice_url)
-        elif voice_base64:
-            return action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=voice_base64)
-        elif voice_path:
-            return action.sendGroupVoice(
-                ctx.FromGroupId, voiceBase64Buf=file_to_base64(voice_path)
-            )
-    if isinstance(ctx, FriendMsg):
-        if voice_url:
-            if ctx.TempUin:
-                return action.sendPrivateVoice(
-                    ctx.FromUin, ctx.TempUin, voiceUrl=voice_url
-                )
-            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-                return None
-            else:
-                return action.sendFriendVoice(ctx.FromUin, voiceUrl=voice_url)
-        elif voice_base64:
-            if ctx.TempUin:
-                return action.sendPrivateVoice(
-                    ctx.FromUin, ctx.TempUin, voiceBase64Buf=voice_base64
-                )
-            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-                return None
-            else:
-                return action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=voice_base64)
-        elif voice_path:
-            if ctx.TempUin:
-                return action.sendPrivateVoice(
-                    ctx.FromUin, ctx.TempUin, voiceBase64Buf=file_to_base64(voice_path)
-                )
-            elif ctx.MsgType == MsgTypes.PhoneMsg:  # 来自手机的消息
-                return None
-            else:
-                return action.sendFriendVoice(
-                    ctx.FromUin, voiceBase64Buf=file_to_base64(voice_path)
-                )
-    return None
-
-
 # str => base64, md5, file path
 # bytes => base64
 # BytesIO =>base64
@@ -572,3 +418,53 @@ class _S:
 
 
 S = _S()
+
+
+def Text(text: str, at=False):
+    """发送文字
+    :param text: 文字内容
+    :param at: 是否艾特发送该消息的用户
+    """
+    return S.bind(find_ctx()).text(text, at)
+
+
+def Picture(pic_url="", pic_base64="", pic_path="", pic_md5="", text=""):
+    """发送图片 经支持群消息和好友消息接收函数内调用
+    :param pic_url: 图片链接
+    :param pic_base64: 图片base64编码
+    :param pic_path: 图片文件路径
+    :param pic_md5: 已发送图片的MD5, 如果是发给群聊，可以传入图片MD5列表
+    :param text: 包含的文字消息
+
+    ``pic_url, pic_base64, pic_path必须给定一项``
+    """
+    assert any([pic_url, pic_base64, pic_path, pic_md5]), "必须给定一项"
+
+    image = S.bind(find_ctx()).image
+    if pic_url:
+        return image(pic_url, text, type=S.TYPE_URL)
+    elif pic_base64:
+        return image(pic_base64, text, type=S.TYPE_BASE64)
+    elif pic_path:
+        return image(pic_path, text, type=S.TYPE_PATH)
+    elif pic_md5:
+        return image(pic_md5, text, type=S.TYPE_MD5)
+
+
+def Voice(voice_url="", voice_base64="", voice_path=""):
+    """发送语音 经支持群消息和好友消息接收函数内调用
+    :param voice_url: 语音链接
+    :param voice_base64: 语音base64编码
+    :param voice_path: 语音文件路径
+
+    voice_url, voice_base64, voice_path必须给定一项
+    """
+    assert any([voice_url, voice_base64, voice_path]), "必须给定一项"
+
+    voice = S.bind(find_ctx()).voice
+    if voice_url:
+        return voice(voice_url, type=S.TYPE_URL)
+    elif voice_base64:
+        return voice(voice_base64, type=S.TYPE_BASE64)
+    elif voice_path:
+        return voice(voice_path, type=S.TYPE_PATH)

@@ -26,14 +26,20 @@ class AsyncAction:
         self.port = port or jconfig.port
         self.address = utils.to_address(self.host, self.port)
 
-        self.qq = int(qq or jconfig.qq)  # type: ignore
+        self._qq = int(qq or jconfig.qq or 0)
 
         self.c = httpx.AsyncClient(
             headers={"Content-Type": "application/json"},
             timeout=timeout + 5,
             base_url=self.address,
-            params={"qq": self.qq, "timeout": timeout},
+            params={"timeout": timeout},
         )
+
+    @property
+    async def qq(self) -> int:
+        if self._qq == 0:
+            self._qq = (await self.getAllBots())[0]
+        return self._qq
 
     @classmethod
     def from_ctx(
@@ -646,7 +652,7 @@ class AsyncAction:
 
     async def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return await self.get("", path="/v1/ClusterInfo")
+        return await self.get("", path="/v1/ClusterInfo", params={"isShow": 1, "qq": 1})
 
     async def setUniqueTitle(self, user: int, group: int, title: str):
         """设置群头衔"""
@@ -664,11 +670,10 @@ class AsyncAction:
     async def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
         return await self.post(
-            "ShutUp",
+            "OidbSvc.0x570_8",
             {
-                "ShutUpType": 0,
                 "GroupID": groupID,
-                "ShutUid": userid,
+                "ShutUpUserID": userid,
                 "ShutTime": ShutTime,
             },
         )
@@ -830,6 +835,10 @@ class AsyncAction:
         """
         return await self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
 
+    async def getAllBots(self) -> List[int]:
+        """获取OPQ登陆的所有机器人QQ号"""
+        return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
+
     ############################################################################
     async def baseRequest(
         self,
@@ -840,10 +849,10 @@ class AsyncAction:
         params: Optional[dict] = None,
     ) -> dict:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
-        if params is not None:
-            params.update({"funcname": funcname})
-        else:
-            params = {"funcname": funcname}
+        params = params or {}
+        params["funcname"] = funcname
+        if not params.get("qq"):
+            params["qq"] = await self.qq
 
         # 发送请求
         try:
@@ -856,7 +865,7 @@ class AsyncAction:
             return {}
         except httpx.HTTPStatusError:
             logger.error(
-                f"响应码出错 => {resp.status_code}",  # type:ignore
+                f"响应码出错 => {resp.status_code}，大概率是因为账号已离线或者qq号错误",  # type:ignore
             )
             return {}
         except Exception:
