@@ -1,6 +1,5 @@
-name: format
-on:
-  push: { branches: ['main'] }
+name: black
+on: push
 
 jobs:
   format:
@@ -27,7 +26,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           if ! [[ -z $(git status -s) ]]; then
             git add *
-            git commit -m "Code format"
+            git commit -m "Format python"
           fi
 
       - name: Push changes
