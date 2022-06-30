@@ -6,7 +6,7 @@ local opq = _G.opq
 ---@param prefix string: a prefix
 ---@return boolean: true if `prefix` is a prefix of s
 function opq.startswith(s, prefix)
-	return s:sub(1, #prefix) == prefix
+  return s:sub(1, #prefix) == prefix
 end
 
 --- Tests if `s` ends with `suffix`.
@@ -15,5 +15,5 @@ end
 ---@param suffix string: a suffix
 ---@return boolean: true if `suffix` is a suffix of s
 function opq.endswith(s, suffix)
-	return #suffix == 0 or s:sub(-#suffix) == suffix
+  return #suffix == 0 or s:sub(-#suffix) == suffix
 end
