@@ -1,3 +1,8 @@
+_G.opq = opq
+_G.import = import
+_G._to_lua_value = _to_lua_value
+_G._unpacks_lua_table = _unpacks_lua_table
+
 local opq = _G.opq
 
 require 'opq.utils'
