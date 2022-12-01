@@ -125,7 +125,7 @@ class FriendRevoke(BaseModel):
 
 def friend_revoke(ctx: EventMsg) -> Optional[FriendRevoke]:
     try:
-        assert ctx.EventName == EventNames.ON_EVENT_FRIEND_DELETE
+        assert ctx.EventName == EventNames.ON_EVENT_FRIEND_REVOKE
         return FriendRevoke(**ctx.EventData)
     except Exception:
         return None
