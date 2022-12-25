@@ -826,7 +826,7 @@ class Action:
         """上传头像
         :param url: 图片链接
         """
-        return self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
+        return self.post("", {"HDIMGUrl": url}, path="/v1/User/SelfHDIMG")
 
     def getAllBots(self) -> List[int]:
         """获取OPQ登陆的所有机器人QQ号"""
