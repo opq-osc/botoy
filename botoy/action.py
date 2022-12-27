@@ -839,7 +839,7 @@ class Action:
         :param CityID: 城市ID
         :param Flag: 默认为0正常设置 为1则清空资料保留昵称
         """
-        self.post("", {
+        return self.post("", {
             "NickName": NickName,
             "Age": Age,
             "Sex": Sex,
