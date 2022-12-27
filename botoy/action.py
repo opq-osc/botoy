@@ -828,8 +828,16 @@ class Action:
         """
         return self.post("", {"HDIMGUrl": url}, path="/v1/User/SelfHDIMG")
 
-    def updateProfile(self, NickName: str, Age: int, Sex: int, ProviceID: int,
-                      CounrtyID: int, CityID: int, Flag: int = 0):
+    def updateProfile(
+        self,
+        NickName: str,
+        Age: int,
+        Sex: int,
+        ProviceID: int,
+        CounrtyID: int,
+        CityID: int,
+        Flag: int = 0,
+    ):
         """更改资料
         :param NickName: QQ名称
         :param Age: 年龄
@@ -839,15 +847,19 @@ class Action:
         :param CityID: 城市ID
         :param Flag: 默认为0正常设置 为1则清空资料保留昵称
         """
-        return self.post("", {
-            "NickName": NickName,
-            "Age": Age,
-            "Sex": Sex,
-            "ProviceID": ProviceID,
-            "CounrtyID": CounrtyID,
-            "CityID": CityID,
-            "Flag": Flag
-        }, path="/v1/User/SelfProfile")
+        return self.post(
+            "",
+            {
+                "NickName": NickName,
+                "Age": Age,
+                "Sex": Sex,
+                "ProviceID": ProviceID,
+                "CounrtyID": CounrtyID,
+                "CityID": CityID,
+                "Flag": Flag,
+            },
+            path="/v1/User/SelfProfile",
+        )
 
     def getAllBots(self) -> List[int]:
         """获取OPQ登陆的所有机器人QQ号"""

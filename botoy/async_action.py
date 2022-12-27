@@ -834,9 +834,17 @@ class AsyncAction:
         :param url: 图片链接
         """
         return await self.post("", {"HDIMGUrl": url}, path="/v1/User/SelfHDIMG")
-    
-    async def updateProfile(self, NickName: str, Age: int, Sex: int, ProviceID: int,
-                      CounrtyID: int, CityID: int, Flag: int = 0):
+
+    async def updateProfile(
+        self,
+        NickName: str,
+        Age: int,
+        Sex: int,
+        ProviceID: int,
+        CounrtyID: int,
+        CityID: int,
+        Flag: int = 0,
+    ):
         """更改资料
         :param NickName: QQ名称
         :param Age: 年龄
@@ -846,15 +854,19 @@ class AsyncAction:
         :param CityID: 城市ID
         :param Flag: 默认为0正常设置 为1则清空资料保留昵称
         """
-        return await self.post("", {
-            "NickName": NickName,
-            "Age": Age,
-            "Sex": Sex,
-            "ProviceID": ProviceID,
-            "CounrtyID": CounrtyID,
-            "CityID": CityID,
-            "Flag": Flag
-        }, path="/v1/User/SelfProfile")
+        return await self.post(
+            "",
+            {
+                "NickName": NickName,
+                "Age": Age,
+                "Sex": Sex,
+                "ProviceID": ProviceID,
+                "CounrtyID": CounrtyID,
+                "CityID": CityID,
+                "Flag": Flag,
+            },
+            path="/v1/User/SelfProfile",
+        )
 
     async def getAllBots(self) -> List[int]:
         """获取OPQ登陆的所有机器人QQ号"""
