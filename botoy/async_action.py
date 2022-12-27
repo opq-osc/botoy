@@ -39,7 +39,7 @@ class AsyncAction:
     async def qq(self) -> int:
         if self._qq == 0:
             self._qq = (await self.getAllBots())[0]
-        return self._qq
+        return int(self._qq)
 
     @classmethod
     def from_ctx(
@@ -833,7 +833,28 @@ class AsyncAction:
         """上传头像
         :param url: 图片链接
         """
-        return await self.post("", {"HDIMGUrl": url}, path="/v1/SelfHDIMG")
+        return await self.post("", {"HDIMGUrl": url}, path="/v1/User/SelfHDIMG")
+    
+    async def updateProfile(self, NickName: str, Age: int, Sex: int, ProviceID: int,
+                      CounrtyID: int, CityID: int, Flag: int = 0):
+        """更改资料
+        :param NickName: QQ名称
+        :param Age: 年龄
+        :param Sex: 性别 男1 女2
+        :param ProviceID: 省份ID
+        :param CounrtyID: 国家ID
+        :param CityID: 城市ID
+        :param Flag: 默认为0正常设置 为1则清空资料保留昵称
+        """
+        return await self.post("", {
+            "NickName": NickName,
+            "Age": Age,
+            "Sex": Sex,
+            "ProviceID": ProviceID,
+            "CounrtyID": CounrtyID,
+            "CityID": CityID,
+            "Flag": Flag
+        }, path="/v1/User/SelfProfile")
 
     async def getAllBots(self) -> List[int]:
         """获取OPQ登陆的所有机器人QQ号"""
