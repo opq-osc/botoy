@@ -39,7 +39,7 @@ class AsyncAction:
     async def qq(self) -> int:
         if self._qq == 0:
             self._qq = (await self.getAllBots())[0]
-        return self._qq
+        return int(self._qq)
 
     @classmethod
     def from_ctx(
