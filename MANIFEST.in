@@ -1,0 +1,1 @@
+recursive-include ./botoy/plugin/lua *.lua

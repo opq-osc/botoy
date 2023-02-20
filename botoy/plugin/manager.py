@@ -18,7 +18,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import colorama
 from prettytable import PrettyTable
 
-from .typing import T_EventReceiver, T_FriendMsgReceiver, T_GroupMsgReceiver
+from ..typing import T_EventReceiver, T_FriendMsgReceiver, T_GroupMsgReceiver
+from .lua import LuaRuntime
 
 
 def resolve_plugin_name(name: str) -> str:
@@ -97,6 +98,78 @@ class Plugin:
         return self.module.__dict__.get("receive_events")
 
 
+class LuaPlugin(Plugin):
+    def __init__(self, modname: str):
+        self.modname = modname
+        self.L: Optional[LuaRuntime] = None
+        self._enabled = True
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    def enable(self):
+        self._enabled = True
+
+    def disable(self):
+        self._enabled = False
+        if self.L:
+            when_disable = self.L.globals()["when_disable"]
+            if when_disable:
+                when_disable()
+
+    @property
+    def when_connected(self) -> Optional[Callable[[List[int], str, int], Any]]:
+        return self.L.globals()["when_connected"]  # type: ignore
+
+    @property
+    def when_disconnected(self) -> Optional[Callable[[List[int], str, int], Any]]:
+        return self.L.globals()["when_disconnected"]  # type: ignore
+
+    @property
+    def loaded(self) -> bool:
+        return self.L is not None
+
+    def load(self) -> "LuaPlugin":
+        self.L = LuaRuntime(register_eval=False, register_builtins=False)
+        self.L.require(self.modname)  # type: ignore
+        return self
+
+    def reload(self) -> "LuaPlugin":
+        self.load()
+        return self
+
+    @property
+    def help(self) -> str:
+        if self.L is not None:
+            return self.L.globals()["__doc__"] or ""
+        return ""
+
+    @property
+    def name(self) -> str:
+        if self.L is not None:
+            return resolve_plugin_name(self.L.globals()["__name__"] or self.modname)
+        return ""
+
+    @property
+    def receive_group_msg(self) -> Optional[T_GroupMsgReceiver]:
+        if self.L:
+            return self.L.receive_group_msg
+        return None
+
+    @property
+    def receive_friend_msg(self) -> Optional[T_FriendMsgReceiver]:
+        if self.L:
+            return self.L.receive_friend_msg
+        return None
+
+    @property
+    def receive_events(self) -> Optional[T_EventReceiver]:
+        if self.L:
+            return self.L.receive_events
+        return None
+
+
 CACHE_PATH = Path("REMOVED_PLUGINS")
 
 
@@ -154,7 +227,14 @@ class PluginManager:
         removed_plugins = read_removed_plugins()
         for path in paths:
             id_ = resolve_plugin_name(path)
-            plugin = Plugin(path)
+
+            modpath = Path(*path.split(".")).absolute()
+            if (modpath.is_dir() and (modpath / "init.lua").is_file()) or Path(
+                str(modpath) + ".lua"
+            ).is_file():
+                plugin = LuaPlugin(modpath.stem)
+            else:
+                plugin = Plugin(path)
             if id_ in removed_plugins:
                 plugin.disable()
             self.plugins[id_] = plugin
