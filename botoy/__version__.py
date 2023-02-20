@@ -25,10 +25,8 @@ def check_version(daemon=True):
         except Exception:
             pass
         else:
-
             local_version = V(__version__)
             if local_version < latest_version:
-
                 try:
                     from rich.console import Console
                     from rich.markdown import Markdown

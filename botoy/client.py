@@ -209,7 +209,6 @@ class Botoy:
                 self._pool.submit(receiver, new_context)
 
     def _get_context_receivers(self, context: Union[FriendMsg, GroupMsg, EventMsg]):
-
         if isinstance(context, FriendMsg):
             receivers = [
                 *self._friend_msg_receivers,

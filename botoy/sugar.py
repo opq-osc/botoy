@@ -317,7 +317,6 @@ class _S:
 
         ctx = self.ctx
         async with AsyncAction.from_ctx(ctx) as action:
-
             if isinstance(ctx, GroupMsg):
                 if at:
                     text = macro.atUser(ctx.FromUserId) + text
@@ -385,7 +384,6 @@ class _S:
 
         ctx = self.ctx
         async with AsyncAction.from_ctx(ctx) as action:
-
             if isinstance(ctx, GroupMsg):
                 if type == TYPE_URL:
                     return await action.sendGroupVoice(ctx.FromGroupId, voiceUrl=data)  # type: ignore

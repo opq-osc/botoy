@@ -54,7 +54,6 @@ def run(bot: Union[Botoy, AsyncBotoy], auto_reload: bool = False):
     注意：只有修改操作才会进行重载，添加和删除文件不会
     """
     if auto_reload and os.getenv("BOTOY_CHILD") != "true":
-
         print(
             textwrap.dedent(
                 f"""

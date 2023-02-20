@@ -199,6 +199,7 @@ class PluginManager:
     def load_plugins(self) -> None:
         """加载插件"""
         CACHE_PATH.touch()
+
         # 整理所有插件的导入路径
         # 如果是包形式，则还需要多读取一级目录
         def clean_path(name) -> Optional[str]:

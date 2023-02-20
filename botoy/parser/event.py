@@ -7,6 +7,7 @@ from ..model import EventMsg
 
 #  --------- group event ---------
 
+
 # revoke
 class GroupRevoke(BaseModel):
     AdminUserID: int

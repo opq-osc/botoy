@@ -29,7 +29,6 @@ class AsyncBotoy(Botoy):
         coros = []
 
         for receiver in self._get_context_receivers(context):
-
             new_context = copy.deepcopy(context)
             if asyncio.iscoroutinefunction(receiver):
                 coros.append(receiver(new_context))  # type: ignore
