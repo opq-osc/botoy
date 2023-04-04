@@ -13,8 +13,35 @@
 
 ## 安装
 
+安装前需要准备相关的依赖.
+
+### 系统依赖
+
+这里我模拟环境为Ubuntu18.04-Python3.8, 可以自由调整
+
+```shell
+sudo apt-get install -y python3.8 python3.8-dev python3-pip
+sudo apt-get install -y build-essential libssl-dev libffi-dev libxml2 libxml2-dev libxslt1-dev zlib1g-dev
+```
+
+### pip依赖
+
+```shell
+pip install multidict yarl async_timeout charset_normalizer aiosignal -i https://pypi.org/simple --upgrade
+```
+
+### 安装本体
+
 ```shell
 pip install botoy -i https://pypi.org/simple --upgrade
+```
+
+### 汇总脚本(模拟环境为Ubuntu18.04-Python3.8)
+
+```shell
+sudo apt-get install -y python3.8 python3.8-dev python3-pip
+sudo apt-get install -y build-essential libssl-dev libffi-dev libxml2 libxml2-dev libxslt1-dev zlib1g-dev
+python3.8 -m pip install multidict yarl async_timeout charset_normalizer aiosignal botoy -i https://pypi.org/simple --upgrade
 ```
 
 ## 示例
