@@ -2,17 +2,7 @@ import json
 import threading
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from .constants import (
-    CONFIG_FILE_PATH,
-    DEFAULT_BLOCKED_USERS,
-    DEFAULT_FRIEND_BLACKLIST,
-    DEFAULT_GROUP_BLACKLIST,
-    DEFAULT_HOST,
-    DEFAULT_PORT,
-    DEFAULT_WEBHOOK,
-    DEFAULT_WEBHOOK_POST_URL,
-    DEFAULT_WEBHOOK_TIMEOUT,
-)
+from .constants import CONFIG_FILE_PATH, DEFAULT_HOST, DEFAULT_PORT
 from .util import dict2tree, lookup
 
 V = TypeVar("V")
@@ -23,12 +13,6 @@ lock = threading.RLock()
 botoy_config = {
     "host": DEFAULT_HOST,
     "port": DEFAULT_PORT,
-    "group_blacklist": DEFAULT_GROUP_BLACKLIST,
-    "friend_blacklist": DEFAULT_FRIEND_BLACKLIST,
-    "blocked_users": DEFAULT_BLOCKED_USERS,
-    "webhook": DEFAULT_WEBHOOK,
-    "webhook_post_url": DEFAULT_WEBHOOK_POST_URL,
-    "webhook_timeout": DEFAULT_WEBHOOK_TIMEOUT,
 }
 botoy_config_tree = dict2tree(botoy_config)
 

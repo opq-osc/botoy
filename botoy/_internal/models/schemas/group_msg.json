@@ -1,0 +1,56 @@
+{
+  "$id": "group_msg.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GroupMsg",
+  "type": "object",
+  "properties": {
+    "MsgHead": {
+      "type": "object",
+      "properties": {
+        "FromUin": { "type": "integer" },
+        "ToUin": { "type": "integer" },
+        "FromType": { "type": "integer" },
+        "SenderUin": { "type": "integer" },
+        "SenderNick": { "type": "string" },
+        "MsgType": { "type": "integer" },
+        "C2cCmd": { "type": "integer" },
+        "MsgSeq": { "type": "integer" },
+        "MsgTime": { "type": "integer" },
+        "MsgRandom": { "type": "integer" },
+        "MsgUid": { "type": "integer" },
+        "GroupInfo": {
+          "type": "object",
+          "properties": {
+            "GroupCard": { "type": "string" },
+            "GroupCode": { "type": "integer" },
+            "GroupInfoSeq": { "type": "integer" },
+            "GroupLevel": { "type": "integer" },
+            "GroupRank": { "type": "integer" },
+            "GroupType": { "type": "integer" },
+            "GroupName": { "type": "string" }
+          }
+        },
+        "C2CTempMessageHead": { "type": "null" }
+      }
+    },
+    "MsgBody": {
+      "type": "object",
+      "properties": {
+        "SubMsgType": { "type": "integer" },
+        "Content": { "type": "string" },
+        "AtUinLists": { "type": "null" },
+        "Images": { "type": "null" },
+        "Video": {
+          "type": "object",
+          "properties": {
+            "FileMd5": { "type": "string" },
+            "FileSize": { "type": "integer" },
+            "Url": { "type": "string" }
+          },
+          "default": null
+        },
+        "Voice": { "type": "null" }
+      }
+    }
+  }
+}
