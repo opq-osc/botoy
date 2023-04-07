@@ -1,56 +1,138 @@
 {
-  "$id": "group_msg.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "GroupMsg",
   "type": "object",
   "properties": {
-    "MsgHead": {
+    "CurrentPacket": {
       "type": "object",
       "properties": {
-        "FromUin": { "type": "integer" },
-        "ToUin": { "type": "integer" },
-        "FromType": { "type": "integer" },
-        "SenderUin": { "type": "integer" },
-        "SenderNick": { "type": "string" },
-        "MsgType": { "type": "integer" },
-        "C2cCmd": { "type": "integer" },
-        "MsgSeq": { "type": "integer" },
-        "MsgTime": { "type": "integer" },
-        "MsgRandom": { "type": "integer" },
-        "MsgUid": { "type": "integer" },
-        "GroupInfo": {
+        "EventData": {
           "type": "object",
           "properties": {
-            "GroupCard": { "type": "string" },
-            "GroupCode": { "type": "integer" },
-            "GroupInfoSeq": { "type": "integer" },
-            "GroupLevel": { "type": "integer" },
-            "GroupRank": { "type": "integer" },
-            "GroupType": { "type": "integer" },
-            "GroupName": { "type": "string" }
-          }
-        },
-        "C2CTempMessageHead": { "type": "null" }
-      }
-    },
-    "MsgBody": {
-      "type": "object",
-      "properties": {
-        "SubMsgType": { "type": "integer" },
-        "Content": { "type": "string" },
-        "AtUinLists": { "type": "null" },
-        "Images": { "type": "null" },
-        "Video": {
-          "type": "object",
-          "properties": {
-            "FileMd5": { "type": "string" },
-            "FileSize": { "type": "integer" },
-            "Url": { "type": "string" }
+            "MsgHead": {
+              "type": "object",
+              "properties": {
+                "FromUin": { "type": "integer" },
+                "ToUin": { "type": "integer" },
+                "FromType": {
+                  "type": "integer",
+                  "enum": [1, 2, 3],
+                  "description": "消息来源类型 3私聊 2群组 1好友"
+                },
+                "SenderUin": { "type": "integer" },
+                "SenderNick": { "type": "string" },
+                "MsgType": { "type": "integer" },
+                "C2cCmd": { "type": "integer" },
+                "MsgSeq": { "type": "integer" },
+                "MsgTime": { "type": "integer" },
+                "MsgRandom": { "type": "integer" },
+                "MsgUid": { "type": "integer" },
+                "GroupInfo": {
+                  "type": "object",
+                  "properties": {
+                    "GroupCard": { "type": "string" },
+                    "GroupCode": { "type": "integer" },
+                    "GroupInfoSeq": { "type": "integer" },
+                    "GroupLevel": { "type": "integer" },
+                    "GroupRank": { "type": "integer" },
+                    "GroupType": { "type": "integer" },
+                    "GroupName": { "type": "string" }
+                  },
+                  "required": [
+                    "GroupCard",
+                    "GroupCode",
+                    "GroupInfoSeq",
+                    "GroupLevel",
+                    "GroupRank",
+                    "GroupType",
+                    "GroupName"
+                  ]
+                },
+                "C2CTempMessageHead": { "type": "null" }
+              },
+              "required": [
+                "FromUin",
+                "ToUin",
+                "FromType",
+                "SenderUin",
+                "SenderNick",
+                "MsgType",
+                "C2cCmd",
+                "MsgSeq",
+                "MsgTime",
+                "MsgRandom",
+                "MsgUid"
+              ]
+            },
+            "MsgBody": {
+              "type": "object",
+              "required": ["Content", "SubMsgType"],
+              "properties": {
+                "SubMsgType": {
+                  "type": "integer",
+                  "description": "0为单一或复合类型消息(文字 At 图片 自由组合), 12 Xml消息 19 Video消息 51 JSON卡片消息"
+                },
+                "Content": { "type": "string" },
+                "AtUinLists": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "QQNick": { "type": "string" },
+                      "QQUid": { "type": "integer" }
+                    },
+                    "required": ["QQUid", "QQNick"]
+                  }
+                },
+                "Images": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "FileId": { "type": "integer" },
+                      "FileMd5": { "type": "string" },
+                      "FileSize": { "type": "integer" },
+                      "Url": { "type": "string" }
+                    },
+                    "required": ["FileId", "FileMd5", "FileSize", "Url"]
+                  }
+                },
+                "Video": {
+                  "type": "object",
+                  "properties": {
+                    "FileMd5": { "type": "string" },
+                    "FileSize": { "type": "integer" },
+                    "Url": { "type": "string" }
+                  },
+                  "required": ["FileMd5", "FileSize", "Url"]
+                },
+                "Voice": {
+                  "type": "object",
+                  "properties": {
+                    "FileMd5": { "type": "string" },
+                    "FileSize": { "type": "integer" },
+                    "Url": { "type": "string" }
+                  },
+                  "required": ["FileMd5", "FileSize", "Url"]
+                }
+              }
+            }
           },
-          "default": null
+          "required": ["MsgHead", "MsgBody"]
         },
-        "Voice": { "type": "null" }
-      }
-    }
-  }
+        "EventName": {
+          "type": "string",
+          "enum": [
+            "ON_EVENT_QQNT_NEW_MSG",
+            "ON_EVENT_GROUP_NEW_MSG",
+            "ON_EVENT_GROUP_JOIN",
+            "ON_EVENT_GROUP_EXIT"
+          ]
+        }
+      },
+      "required": ["EventData", "EventName"]
+    },
+    "CurrentQQ": { "type": "integer", "description": "Bot QQ号" }
+  },
+  "required": ["CurrentQQ", "CurrentPacket"]
 }
