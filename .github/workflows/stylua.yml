@@ -5,9 +5,10 @@ jobs:
   stylua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: JohnnyMorganz/stylua-action@1.0.0
+      - uses: actions/checkout@v3
+      - uses: JohnnyMorganz/stylua-action@v2
         with:
+          version: latest
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --config-path=stylua.toml ./
       - name: Commit files
