@@ -28,7 +28,7 @@ class Context:
             msg = GroupMsg.parse_raw(self._data)
         except Exception:
             pass
-        ret = self.__dict__['group_msg'] = msg
+        ret = self.__dict__["group_msg"] = msg
         return ret
 
     @property
@@ -38,7 +38,7 @@ class Context:
             msg = FriendMsg.parse_raw(self._data)
         except Exception:
             pass
-        ret = self.__dict__['friend_msg'] = msg
+        ret = self.__dict__["friend_msg"] = msg
         return ret
 
     @property
@@ -48,5 +48,5 @@ class Context:
             msg = EventMsg.parse_raw(self._data)
         except Exception:
             pass
-        ret = self.__dict__['event_msg'] = msg
+        ret = self.__dict__["event_msg"] = msg
         return ret
