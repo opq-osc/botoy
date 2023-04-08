@@ -1,18 +1,17 @@
 import asyncio
-from contextvars import copy_context
-from uuid import uuid4
-import sys
-from urllib.parse import urlparse
 import importlib
 import inspect
 import os
-from .pool import WorkerPool
 import re
 import signal
+import sys
 import threading
 import traceback
+from contextvars import copy_context
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse
+from uuid import uuid4
 
 import prettytable
 from websockets.client import connect as ws_connect
@@ -21,6 +20,7 @@ from websockets.exceptions import ConnectionClosed, InvalidURI
 from .config import jconfig
 from .context import Context, ctx_var
 from .log import logger
+from .pool import WorkerPool
 
 connected_clients = []
 
@@ -114,7 +114,7 @@ class Botoy:
     def print_receivers(self):
         """在控制台打印接收函数信息"""
         table = prettytable.PrettyTable(["Name", "Author", "Usage", "Meta"])
-        for (_, receiver_info) in self.handlers:
+        for _, receiver_info in self.handlers:
             table.add_row(
                 [
                     receiver_info.get("name", ""),

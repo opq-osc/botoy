@@ -1,6 +1,6 @@
 import traceback
-from typing import Any, AnyStr, List, Optional, Union
 from contextvars import ContextVar
+from typing import Any, AnyStr, List, Optional, Union
 
 from pydantic import BaseModel
 
