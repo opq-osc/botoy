@@ -7,7 +7,7 @@ from loguru import logger as _logger
 
 logger = _logger
 
-CONSOLE_LOG_FORMAT = "{level.icon} {time:MM-DD HH:mm:ss} <lvl>{level}\t{message}</lvl>"
+CONSOLE_LOG_FORMAT = "{level.icon} {time:MM-DD HH:mm:ss} <lvl>{level} {message}</lvl>"
 FILE_LOG_FORMAT = "{time:YYYY-MM-DD HH:mm} {level}\t{message}"
 FILE_LOG_PATH_NAMING = "./logs/{time}.log"
 
@@ -66,10 +66,10 @@ class LoguruHandler(logging.Handler):
         )
 
 
-sio_logger = logging.getLogger("socketio.client")
-sio_logger.handlers.clear()
-sio_logger.addHandler(LoguruHandler())
-if sio_logger.level == logging.NOTSET:
-    sio_logger.setLevel(logging.INFO)
+# sio_logger = logging.getLogger("socketio.client")
+# sio_logger.handlers.clear()
+# sio_logger.addHandler(LoguruHandler())
+# if sio_logger.level == logging.NOTSET:
+#     sio_logger.setLevel(logging.INFO)
 
 logger_init()

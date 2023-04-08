@@ -46,6 +46,9 @@ def bind_contextvar(contextvar):
         def __delitem__(self, index):
             del contextvar.get()[index]
 
+        def __str__(self):
+            return str(contextvar.get())
+
     return ContextVarBind()
 
 

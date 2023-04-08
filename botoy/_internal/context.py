@@ -1,9 +1,11 @@
 import traceback
-from typing import AnyStr, List, Optional
+from typing import Any, AnyStr, List, Optional, Union
+from contextvars import ContextVar
 
 from pydantic import BaseModel
 
-from .models import group_msg as g
+from . import models
+from .utils import bind_contextvar
 
 
 def c(obj, key, value):  # c => cache
@@ -11,83 +13,132 @@ def c(obj, key, value):  # c => cache
     return value
 
 
-class GroupMsg(g.GroupMsg):
+class GroupMsg:
+    def __init__(self, data: Union[str, dict]):
+        if isinstance(data, str):
+            model = models.GroupMsg.parse_raw(data)
+        else:
+            model = models.GroupMsg(**data)
+
+        assert (
+            model.CurrentPacket.EventData.MsgHead.C2cCmd
+            == model.CurrentPacket.EventData.MsgHead.C2cCmd.integer_0
+        ), "GroupMsg: C2cCmd == 0"
+
+        self.__model = model
+
+    @property
+    def model(self) -> models.GroupMsg:
+        return self.__model
+
+    @property
+    def msg_head(self):
+        """CurrentPacket.EventData.MsgHead"""
+        return c(self, "msg_head", self.model.CurrentPacket.EventData.MsgHead)
+
+    @property
+    def msg_body(self):
+        """CurrentPacket.EventData.MsgBody"""
+        return c(self, "msg_body", self.model.CurrentPacket.EventData.MsgBody)
+
     @property
     def from_group(self) -> int:
+        """群ID"""
         # TODO: GroupInfo 有时候没有，需要确认
-        return c(self, "from_group", self.CurrentPacket.EventData.MsgHead.GroupInfo.GroupCode)  # type: ignore
+        return c(self, "from_group", self.msg_head.GroupInfo.GroupCode)  # type: ignore
 
     @property
     def images(self):
-        return c(self, "images", self.CurrentPacket.EventData.MsgBody.Images)
+        """图片列表 可能为None"""
+        return c(self, "images", self.msg_body.Images)
 
     @property
     def voice(self):
-        return c(self, "voice", self.CurrentPacket.EventData.MsgBody.Voice)
+        """语音 可能为None"""
+        return c(self, "voice", self.msg_body.Voice)
 
     @property
     def video(self):
-        return c(self, "video", self.CurrentPacket.EventData.MsgBody.Video)
+        """短视频 可能为None"""
+        return c(self, "video", self.msg_body.Video)
 
     @property
     def at_list(self):
-        return c(self, "at_list", self.CurrentPacket.EventData.MsgBody.AtUinLists or [])
+        """被艾特列表 注意不是int列表"""
+        return c(self, "at_list", self.msg_body.AtUinLists or [])
 
     @property
     def text(self):
-        return c(self, "text", self.CurrentPacket.EventData.MsgBody.Content)
+        """文字内容"""
+        return c(self, "text", self.msg_body.Content)
 
     def is_at_user(self, user_id: int):
+        """是否艾特某人"""
         return user_id in (i.QQUid for i in self.at_list or [])
 
     @property
     def is_at_bot(self):
-        return c(self, "is_at_bot", self.is_at_user(self.CurrentQQ))
+        """是否艾特机器人"""
+        return c(self, "is_at_bot", self.is_at_user(self.model.CurrentQQ))
 
     @property
     def is_from_self(self):
+        """是否来自机器人自身"""
         return c(
             self,
             "is_from_self",
-            self.CurrentQQ == self.CurrentPacket.EventData.MsgHead.SenderUin,
+            self.model.CurrentQQ == self.msg_head.SenderUin,
         )
 
     @property
     def sender_uin(self):
-        return c(self, "sender_uin", self.CurrentPacket.EventData.MsgHead.SenderUin)
+        """发送者qq号"""
+        return c(self, "sender_uin", self.msg_head.SenderUin)
 
     @property
     def sender_nick(self):
-        return c(self, "sender_nick", self.CurrentPacket.EventData.MsgHead.SenderNick)
+        """发送者昵称"""
+        return c(self, "sender_nick", self.msg_head.SenderNick)
 
 
-class FriendMsg(BaseModel):
-    pass
+class FriendMsg:
+    def __init__(self, data):
+        model = models.FriendMsg.parse_raw(data)  # type: ignore
+        self.model = model
 
 
-class EventMsg(BaseModel):
-    pass
+class EventMsg:
+    def __init__(self, data):
+        model = models.EventMsg.parse_raw(data)  # type: ignore
+        self.model = model
 
 
 class Context:
-    def __init__(self, data: AnyStr) -> None:
-        self._data = data
+    def __init__(self, data: str) -> None:
+        """
+        :param data: websokets收到的原始包数据
+        """
+        self.__data = data
+
+    @property
+    def data(self) -> str:
+        """websokets收到的原始包数据"""
+        return self.__data
 
     @property
     def group_msg(self) -> Optional[GroupMsg]:
         msg = None
         try:
-            msg = GroupMsg.parse_raw(self._data)
+            msg = GroupMsg(self.__data)
         except Exception:
             print(traceback.format_exc())
-
         return c(self, "group_msg", msg)
 
     @property
     def friend_msg(self) -> Optional[FriendMsg]:
         msg = None
         try:
-            msg = FriendMsg.parse_raw(self._data)
+            msg = FriendMsg(self.__data)
         except Exception:
             pass
         return c(self, "friend_msg", msg)
@@ -96,7 +147,11 @@ class Context:
     def event_msg(self) -> Optional[EventMsg]:
         msg = None
         try:
-            msg = EventMsg.parse_raw(self._data)
+            msg = EventMsg(self.__data)
         except Exception:
             pass
         return c(self, "event_msg", msg)
+
+
+ctx_var: ContextVar[Context] = ContextVar("ctx")
+ctx: Context = bind_contextvar(ctx_var)  # type: ignore

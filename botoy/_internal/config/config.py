@@ -2,7 +2,7 @@ import json
 import threading
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from .constants import CONFIG_FILE_PATH, DEFAULT_HOST, DEFAULT_PORT
+from .constants import CONFIG_FILE_PATH, DEFAULT_URL
 from .util import dict2tree, lookup
 
 V = TypeVar("V")
@@ -11,8 +11,7 @@ T = TypeVar("T")
 lock = threading.RLock()
 
 botoy_config = {
-    "host": DEFAULT_HOST,
-    "port": DEFAULT_PORT,
+    "url": DEFAULT_URL,
 }
 botoy_config_tree = dict2tree(botoy_config)
 
@@ -100,14 +99,7 @@ class Configurations:
     _instance: Optional["Configurations"] = None
 
     # 框架专属配置
-    host: str
-    port: int
-    group_blacklist: List[int]
-    friend_blacklist: List[int]
-    blocked_users: List[int]
-    webhook: bool
-    webhook_post_url: str
-    webhook_timeout: int
+    url: str
 
     def __new__(cls):
         if not cls._instance:

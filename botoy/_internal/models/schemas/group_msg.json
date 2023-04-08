@@ -19,10 +19,14 @@
                   "enum": [1, 2, 3],
                   "description": "消息来源类型 3私聊 2群组 1好友"
                 },
-                "SenderUin": { "type": "integer" },
+                "SenderUin": { "type": "integer", "description": "发送者QQ号" },
                 "SenderNick": { "type": "string" },
                 "MsgType": { "type": "integer" },
-                "C2cCmd": { "type": "integer" },
+                "C2cCmd": {
+                  "type": "integer",
+                  "enum": [0, 1, 17, 349, 20, 212, 8, 11],
+                  "description": "0 收到群消息, 1 发出去消息的回应, 17 群消息被撤回, 349 上下线, 20 被拉群， 212 群解散， 8 上线， 11 好友私聊"
+                },
                 "MsgSeq": { "type": "integer" },
                 "MsgTime": { "type": "integer" },
                 "MsgRandom": { "type": "integer" },
