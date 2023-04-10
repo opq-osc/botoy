@@ -13,17 +13,17 @@ action = Action(qq=123456)
 | 参数    | 是否必选 | 作用                                                                      |
 | ------- | -------- | ------------------------------------------------------------------------- |
 | qq      | 否       | 执行操作的 qq 号|
-| port    | 否       | bot 端端口                                                                |
-| host    | 否       | bot 端 ip                                                                 |
+| url    | 否       | bot 端url                                                                |
 | timeout | 否       | 等待 webapi 响应的延时,默认为 20                                          |
 
-qq如果未传，则尝试读取配置文件中的`qq` 字段，再找不到则尝试获取机器人服务端所有已登录qq号,**随机**(因为接口返回的结果具有随机性, 所以在使用多Q时，务必自行传参或使用配置文件)选取一个QQ作为参数。请尽可能传参或填写配置文件
+qq如果未传，则尝试读取配置文件中的`qq` 字段.
+<!-- 再找不到则尝试获取机器人服务端所有已登录qq号,**随机**(因为接口返回的结果具有随机性, 所以在使用多Q时，务必自行传参或使用配置文件)选取一个QQ作为参数。请尽可能传参或填写配置文件
 
 port 和 host 的含义和 Botoy 实例中的一致
 
 
 如果是在接收函数中，可以通过类方法`Action.from_ctx`获取`action`,
-该方法会处理`ctx`中的`_host`和`_port`属性
+该方法会处理`ctx`中的`_host`和`_port`属性 -->
 
 ## Action.baseRequest 方法
 
@@ -64,63 +64,63 @@ port 和 host 的含义和 Botoy 实例中的一致
 
 | 名称                  | 作用                                                         |
 |---------------------| ------------------------------------------------------------ |
-| sendPhoneText       | 给手机发文字                                                 |
+|                     | 给手机发文字                                                 |
 | sendFriendText      | 发送好友文本消息                                             |
-| sendFriendVoice     | 发送好友语音消息                                             |
-| sendFriendPic       | 发送好友图片消息                                             |
-| senfFriendXml       | 发送好友 Xml 类型消息                                        |
+|                     | 发送好友语音消息                                             |
+|                     | 发送好友图片消息                                             |
+|                     | 发送好友 Xml 类型消息                                        |
 | sendGroupText       | 发送群文字消息                                               |
-| sendGroupVoice      | 发送群语音                                                   |
-| sendGroupPic        | 发送群图片                                                   |
-| sendGroupMultiPic   | 发送群多图                                                   |
-| sendGroupJson       | 发送群 Json 类型信息                                         |
-| sendGroupXml        | 发送群 Xml 类型信息                                          |
-| sendPrivateText     | 发送私聊文字消息                                             |
-| sendPrivateVoice    | 发送私聊语音                                                 |
-| sendPrivatePic      | 发送私聊图片                                                 |
-| sendPrivateXml      | 发送私聊 Xml 类型信息                                        |
-| replyGroupMsg       | 发送回复消息,回复群消息                                      |
-| replyFriendMsg      | 发送回复消息,回复好友消息,不好用                             |
-| getUserInfo         | 获取用户信息                                                 |
-| getCookies          | 获取 cookies                                                 |
-| getUserList         | 获取好友列表                                                 |
-| getGroupList        | 获取群聊列表                                                 |
-| getGroupMembers     | 获取群成员列表                                               |
-| getGroupAdminList   | 获取群管理列表                                               |
-| getAllBots          | 获取该OPQ登陆的所有QQ列表                                     |
-| setUniqueTitle      | 设置群成员头衔                                               |
-| modifyGroupCard     | 修改群名片                                                   |
-| shutAllUp           | 开启或关闭全员禁言                                           |
-| shutUserUp          | 设置群成员禁言                                               |
-| likeUser            | 点赞                                                         |
-| setGroupAnnounce    | 设置群公告                                                   |
-| toggleGroupAdmin    | 设置或取消群管理员                                           |
-| revokeGroupMsg      | 撤回群消息                                                   |
-| revoke              | 撤回群消息, revokeGroupMsg 的便捷操作，直接传入消息 ctx 即可 |
-| inviteUserJoinGroup | 拉人入群                                                     |
-| joinGroup           | 加入群聊                                                     |
-| exitGroup           | 退出群聊                                                     |
-| driveUserAway       | 移出群聊                                                     |
-| getClusterInfo      | 获取当前集群信息                                             |
+|                     | 发送群语音                                                   |
+|                     | 发送群图片                                                   |
+|                     | 发送群多图                                                   |
+|                     | 发送群 Json 类型信息                                         |
+|                     | 发送群 Xml 类型信息                                          |
+|                     | 发送私聊文字消息                                             |
+|                     | 发送私聊语音                                                 |
+|                     | 发送私聊图片                                                 |
+|                     | 发送私聊 Xml 类型信息                                        |
+|                     | 发送回复消息,回复群消息                                      |
+|                     | 发送回复消息,回复好友消息,不好用                             |
+|                     | 获取用户信息                                                 |
+|                     | 获取 cookies                                                 |
+|                     | 获取好友列表                                                 |
+|                     | 获取群聊列表                                                 |
+|                     | 获取群成员列表                                               |
+|                     | 获取群管理列表                                               |
+|                     | 获取该OPQ登陆的所有QQ列表                                     |
+|                     | 设置群成员头衔                                               |
+|                     | 修改群名片                                                   |
+|                     | 开启或关闭全员禁言                                           |
+|                     | 设置群成员禁言                                               |
+|                     | 点赞                                                         |
+|                     | 设置群公告                                                   |
+|                     | 设置或取消群管理员                                           |
+|                     | 撤回群消息                                                   |
+|                     | 撤回群消息, revokeGroupMsg 的便捷操作，直接传入消息 ctx 即可 |
+|                     | 拉人入群                                                     |
+|                     | 加入群聊                                                     |
+|                     | 退出群聊                                                     |
+|                     | 移出群聊                                                     |
+|                     | 获取当前集群信息                                             |
 |                     | 搜索群组                                                     |
-| refreshKeys         | 刷新 key 二次登陆                                            |
+|                     | 刷新 key 二次登陆                                            |
 |                     | 添加好友                                                     |
-| dealFriend          | 处理好友请求                                                 |
-| logout              | 退出指定 qq                                                  |
+|                     | 处理好友请求                                                 |
+|                     | 退出指定 qq                                                  |
 |                     | 获取登录二维码的 base64 编码                                 |
-| getFriendFileURL    | 获取好友文件下载链接                                         |
-| getGroupFileURL     | 获取群文件下载链接                                           |
-| repostVideo2Group   | 转发视频到群聊                                               |
-| repostVideo2Friend  | 转发视频给好友                                               |
-| getVideoURL         | 获取短视频链接                                               |
-| sendGroupTeXiaoText | 发送群组特效文本消息                                         |
-| getSummaryCard      | 获取企鹅卡片资料                                             |
-| poke                | 戳一戳                                                       |
-| uploadGroupFile     | 上传群文件                                                   |
-| groupJoinAuth       | 入群审核                                                     |
-| getGroupPicInfo     | 上传群图片获取图片信息                                       |
-| updateAvatar        | 上传头像                                                     |
-| openRedBag          | 打开红包                                                     |
+|                     | 获取好友文件下载链接                                         |
+|                     | 获取群文件下载链接                                           |
+|                     | 转发视频到群聊                                               |
+|                     | 转发视频给好友                                               |
+|                     | 获取短视频链接                                               |
+|                     | 发送群组特效文本消息                                         |
+|                     | 获取企鹅卡片资料                                             |
+|                     | 戳一戳                                                       |
+|                     | 上传群文件                                                   |
+|                     | 入群审核                                                     |
+|                     | 上传群图片获取图片信息                                       |
+|                     | 上传头像                                                     |
+|                     | 打开红包                                                     |
 
 - 除特殊说明，API 返回的都是字典类型，如果出错则返回空字典
 - 没有方法名的表示还未封装，说明前面带\*号的表示还不完善

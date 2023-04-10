@@ -4,7 +4,7 @@
 建议不需要用的就别配置
 
 配置可以通过实例化时通过传参完成，因为客户端实例只有一个，所以并不麻烦，但是后面要用到动作发送
-API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原因就是你的 bot 端没有按默认设置运行，一般情况下端口(默认为 8888)
+API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原因就是你的 bot 端没有按默认设置运行，一般情况下端口(默认为 8086)
 有时 IP 也会根据各自有所不同
 
 所以可以新建一个配置文件，固定为`botoy.json`定义配置，配置项和默认值如下
@@ -36,10 +36,7 @@ API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原�
 ```json
 {
   "host": "http://127.0.0.1",
-  "port": 8888,
-  "group_blacklist": [],
-  "friend_blacklist": [],
-  "blocked_users": [],
+  "port": 8086,
   "webhook": false,
   "webhook_post_url": "http://127.0.0.1:5000",
   "webhook_timeout": 20,
@@ -68,10 +65,7 @@ format 表示推送格式，includeUrl 表示是否包括该项的网页地址
 ```json
 {
   "host": "new host",
-  "port": 8888,
-  "group_blacklist": [],
-  "friend_blacklist": [],
-  "blocked_users": [],
+  "port": 8086,
   "webhook": false,
   "webhook_post_url": "http://127.0.0.1:5000",
   "webhook_timeout": 20,
