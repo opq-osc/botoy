@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "GroupMsg",
+  "title": "FriendMsg",
   "type": "object",
   "properties": {
     "CurrentPacket": {
@@ -25,7 +25,7 @@
                 "C2cCmd": {
                   "type": "integer",
                   "enum": [0, 1, 17, 349, 20, 212, 8, 11],
-                  "description": "0 收到群消息, 1 发出去消息的回应, 17 群消息被撤回, 349 上下线, 20 被拉群， 212 群解散， 8 上线， 11 好友私聊"
+                  "description": "0 收到群消息, 1 发出去消息的回应, 17 群消息被撤回, 349 上下线, 20 被拉群， 212 群解散， 8 上线， 11 好友私聊 529 手机"
                 },
                 "MsgSeq": { "type": "integer" },
                 "MsgTime": { "type": "integer" },
@@ -126,7 +126,7 @@
         },
         "EventName": {
           "type": "string",
-          "enum": ["ON_EVENT_QQNT_NEW_MSG", "ON_EVENT_GROUP_NEW_MSG"]
+          "enum": ["ON_EVENT_FRIEND_NEW_MSG"]
         }
       },
       "required": ["EventData", "EventName"]

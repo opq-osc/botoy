@@ -1,10 +1,10 @@
 import traceback
+from abc import ABCMeta, abstractmethod
 from contextvars import ContextVar
-from typing import Any, AnyStr, List, Optional, Union
-
-from pydantic import BaseModel
+from typing import Any, AnyStr, Generic, List, Optional, TypeVar, Union
 
 from . import models
+from .log import logger
 from .utils import bind_contextvar
 
 
@@ -13,23 +13,12 @@ def c(obj, key, value):  # c => cache
     return value
 
 
-class GroupMsg:
-    def __init__(self, data: Union[str, dict]):
-        if isinstance(data, str):
-            model = models.GroupMsg.parse_raw(data)
-        else:
-            model = models.GroupMsg(**data)
-
-        assert (
-            model.CurrentPacket.EventData.MsgHead.C2cCmd
-            == model.CurrentPacket.EventData.MsgHead.C2cCmd.integer_0
-        ), "GroupMsg: C2cCmd == 0"
-
-        self.__model = model
-
+class BaseMsg(metaclass=ABCMeta):
     @property
-    def model(self) -> models.GroupMsg:
-        return self.__model
+    @abstractmethod
+    def model(self) -> Union[models.GroupMsg, models.FriendMsg]:
+        """数据包结构"""
+        ...
 
     @property
     def msg_head(self):
@@ -40,12 +29,6 @@ class GroupMsg:
     def msg_body(self):
         """CurrentPacket.EventData.MsgBody"""
         return c(self, "msg_body", self.model.CurrentPacket.EventData.MsgBody)
-
-    @property
-    def from_group(self) -> int:
-        """群ID"""
-        # TODO: GroupInfo 有时候没有，需要确认
-        return c(self, "from_group", self.msg_head.GroupInfo.GroupCode)  # type: ignore
 
     @property
     def images(self):
@@ -63,23 +46,9 @@ class GroupMsg:
         return c(self, "video", self.msg_body.Video)
 
     @property
-    def at_list(self):
-        """被艾特列表 注意不是int列表"""
-        return c(self, "at_list", self.msg_body.AtUinLists or [])
-
-    @property
     def text(self):
         """文字内容"""
         return c(self, "text", self.msg_body.Content)
-
-    def is_at_user(self, user_id: int):
-        """是否艾特某人"""
-        return user_id in (i.QQUid for i in self.at_list or [])
-
-    @property
-    def is_at_bot(self):
-        """是否艾特机器人"""
-        return c(self, "is_at_bot", self.is_at_user(self.model.CurrentQQ))
 
     @property
     def is_from_self(self):
@@ -100,11 +69,111 @@ class GroupMsg:
         """发送者昵称"""
         return c(self, "sender_nick", self.msg_head.SenderNick)
 
+    @property
+    def msg_random(self):
+        """CurrentPacket.EventData.MsgHead.MsgRandom"""
+        return c(self, "msg_random", self.msg_head.MsgRandom)
 
-class FriendMsg:
-    def __init__(self, data):
-        model = models.FriendMsg.parse_raw(data)  # type: ignore
-        self.model = model
+    @property
+    def msg_seq(self):
+        """CurrentPacket.EventData.MsgHead.MsgSeq"""
+        return c(self, "msg_seq", self.msg_head.MsgSeq)
+
+    @property
+    def msg_time(self):
+        """CurrentPacket.EventData.MsgHead.MsgTime"""
+        return c(self, "msg_time", self.msg_head.MsgTime)
+
+    @property
+    def msg_type(self):
+        """CurrentPacket.EventData.MsgHead.MsgType"""
+        return c(self, "msg_time", self.msg_head.MsgType)
+
+
+class GroupMsg(BaseMsg):
+    def __init__(self, data: Union[str, dict]):
+        super().__init__()
+        if isinstance(data, str):
+            model = models.GroupMsg.parse_raw(data)
+        else:
+            model = models.GroupMsg(**data)
+
+        assert (
+            model.CurrentPacket.EventData.MsgHead.C2cCmd
+            == model.CurrentPacket.EventData.MsgHead.C2cCmd.integer_0
+        ), "GroupMsg: C2cCmd == 0"
+
+        assert (
+            model.CurrentPacket.EventName
+            == model.CurrentPacket.EventName.ON_EVENT_GROUP_NEW_MSG
+        ), "GroupMsg: EventName == ON_EVENT_GROUP_NEW_MSG"
+
+        self.__model = model
+
+    @property
+    def model(self) -> models.GroupMsg:
+        return self.__model
+
+    @property
+    def from_group(self) -> int:
+        """群ID"""
+        return c(self, "from_group", self.msg_head.FromUin)
+
+    @property
+    def at_list(self):
+        """被艾特列表 注意不是int列表"""
+        return c(self, "at_list", self.msg_body.AtUinLists or [])
+
+    def is_at_user(self, user_id: int):
+        """是否艾特某人"""
+        return user_id in (i.QQUid for i in self.at_list or [])
+
+    @property
+    def is_at_bot(self):
+        """是否艾特机器人"""
+        return c(self, "is_at_bot", self.is_at_user(self.model.CurrentQQ))
+
+
+class FriendMsg(BaseMsg):
+    def __init__(self, data: Union[str, dict]):
+        super().__init__()
+        if isinstance(data, str):
+            model = models.FriendMsg.parse_raw(data)
+        else:
+            model = models.FriendMsg(**data)
+
+        assert (
+            model.CurrentPacket.EventData.MsgHead.C2cCmd
+            == model.CurrentPacket.EventData.MsgHead.C2cCmd.integer_11
+        ), "FriendMsg: C2cCmd == 11"
+
+        assert (
+            model.CurrentPacket.EventName
+            == model.CurrentPacket.EventName.ON_EVENT_FRIEND_NEW_MSG
+        ), "FriendMsg: EventName == ON_EVENT_FRIEND_NEW_MSG"
+
+        self.__model = model
+
+    @property
+    def model(self) -> models.FriendMsg:
+        return self.__model
+
+    @property
+    def from_user(self) -> int:
+        """发送者qq"""
+        return c(self, "from_user", self.msg_head.FromUin)
+
+    @property
+    def is_from_phone(self):
+        return c(
+            self,
+            "if_from_phone",
+            # NOTE: 来自手机MsgBody为空，但这种场景用得太少, 其他方法中
+            # 如果考虑msg_body为空的话，逻辑会增加不少
+            self.msg_body is None and self.msg_head.FromUin == self.msg_head.ToUin
+            # TODO: 用枚举
+            and self.msg_type == 529,
+        )
 
 
 class EventMsg:
@@ -130,8 +199,11 @@ class Context:
         msg = None
         try:
             msg = GroupMsg(self.__data)
-        except Exception:
-            print(traceback.format_exc())
+        except AssertionError:
+            pass
+        except:
+            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+
         return c(self, "group_msg", msg)
 
     @property
@@ -139,17 +211,22 @@ class Context:
         msg = None
         try:
             msg = FriendMsg(self.__data)
-        except Exception:
+        except AssertionError:
             pass
+        except:
+            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "friend_msg", msg)
 
     @property
     def event_msg(self) -> Optional[EventMsg]:
+        raise NotImplementedError
         msg = None
         try:
             msg = EventMsg(self.__data)
-        except Exception:
+        except AssertionError:
             pass
+        except:
+            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "event_msg", msg)
 
 
