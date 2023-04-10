@@ -5,15 +5,16 @@ import time
 import traceback
 import uuid
 from typing import List, Optional, Union
-from pydantic import BaseModel, Field
 
 import httpx
-
-# from botoy.parser import event as eventParser
+from pydantic import BaseModel, Field
 
 # from . import macro, utils
 from .config import jconfig
 from .log import logger
+
+# from botoy.parser import event as eventParser
+
 
 # from .model import EventMsg, FriendMsg, GroupMsg
 
