@@ -35,7 +35,7 @@ def async_signal_handler():
     asyncio.ensure_future(_handler())
 
 
-def mark_recv(receiver, name="", author="", usage="", *, __from_attach=False):
+def mark_recv(receiver, name="", author="", usage="", *, __directly_attached=False):
     """标记接收函数
     该信息仅用于开发者调试
     :param receiver: 接收函数
@@ -63,7 +63,7 @@ def mark_recv(receiver, name="", author="", usage="", *, __from_attach=False):
 
     # 插件通过加入额外信息标记接收函数, 其前提该函数能在import后的module中**被检索**到
     # 被attach调用时，函数会被直接添加，所以无需进行该操作
-    if not __from_attach:
+    if not __directly_attached:
         back_globals = inspect.currentframe().f_back.f_globals  # type: ignore
         if receiver not in back_globals.values():
             u = "receiver" + str(uuid4())
@@ -133,7 +133,7 @@ class Botoy:
             return
         #  不使用插件，基本不会调用mark_recv，这里自动调用补充默认信息
         if not hasattr(receiver, "receiver_info"):
-            mark_recv(receiver, __from_attach=True)
+            mark_recv(receiver, __directly_attached=True)
         info = getattr(receiver, "receiver_info", {})
 
         async def handler():
