@@ -89,6 +89,11 @@ class BaseMsg(metaclass=ABCMeta):
         """CurrentPacket.EventData.MsgHead.MsgType"""
         return c(self, "msg_time", self.msg_head.MsgType)
 
+    @property
+    def bot_qq(self):
+        """机器人qq"""
+        return c(self, "bot_qq", self.model.CurrentQQ)
+
 
 class GroupMsg(BaseMsg):
     def __init__(self, data: Union[str, dict]):
@@ -200,9 +205,11 @@ class Context:
         try:
             msg = GroupMsg(self.__data)
         except AssertionError:
+            # TODO: 忽略预期的异常
             pass
         except:
-            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+            pass
+            # logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
 
         return c(self, "group_msg", msg)
 
@@ -214,7 +221,8 @@ class Context:
         except AssertionError:
             pass
         except:
-            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+            pass
+            # logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "friend_msg", msg)
 
     @property

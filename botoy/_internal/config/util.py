@@ -1,7 +1,5 @@
 from typing import Optional
 
-from botoy.exceptions import InvalidConfigError
-
 
 def dict2tree(data: dict) -> dict:
     res = {}
@@ -22,7 +20,7 @@ def dict2tree(data: dict) -> dict:
                         pre[part] = {}
                     pre = pre[part]
                     if not isinstance(pre, dict):
-                        raise InvalidConfigError(f'"{part}" 不能作为键名, 请查看文档修改你的配置')
+                        raise ValueError(f'"{part}" 不能作为键名, 请查看文档修改你的配置')
     return res
 
 
