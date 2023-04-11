@@ -47,6 +47,9 @@ class Action:
             # self._qq = (await self.getAllBots())[0]
         return int(self._qq)
 
+    def set_qq(self, qq: int):
+        self._qq = qq
+
     # @classmethod
     # def from_ctx(
     #     cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20

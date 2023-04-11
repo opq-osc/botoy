@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import inspect
+import logging
 import os
 import re
 import signal
@@ -31,6 +32,14 @@ def async_signal_handler():
     async def _handler():
         for c in connected_clients[:]:
             await c.disconnect()
+
+        tasks = [
+            task for task in asyncio.all_tasks() if task is not asyncio.current_task()
+        ]
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        asyncio.get_event_loop().stop()
 
     asyncio.ensure_future(_handler())
 
@@ -140,11 +149,13 @@ class Botoy:
             try:
                 ctx = copy_context()
                 if asyncio.iscoroutinefunction(receiver):
-                    await receiver()
+                    return await receiver()
                 else:
-                    await asyncio.get_running_loop().run_in_executor(
+                    return await asyncio.get_running_loop().run_in_executor(
                         self.pool, lambda: ctx.run(receiver)
                     )
+            except asyncio.CancelledError:
+                pass
             except Exception:
                 logger.error("接收函数中出现错误：\n" + traceback.format_exc())
 
@@ -160,14 +171,15 @@ class Botoy:
             try:
                 if self.ws is not None:
                     async for pkt in self.ws:
-                        token = ctx_var.set(Context(pkt))  # type: ignore
-                        await asyncio.gather(
-                            *[
-                                self._start_task(receiver)
-                                for (receiver, *_) in self.handlers
-                            ]
-                        )
-                        ctx_var.reset(token)
+                        if self.handlers:
+                            token = ctx_var.set(Context(pkt))  # type: ignore
+                            await asyncio.gather(
+                                *[
+                                    self._start_task(receiver)
+                                    for (receiver, *_) in self.handlers
+                                ],
+                            )
+                            ctx_var.reset(token)
             except ConnectionClosed:
                 connected_clients.remove(self)
                 if self.state == "connected":
