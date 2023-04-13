@@ -7,15 +7,13 @@ import textwrap
 import time
 from functools import lru_cache
 from pathlib import Path
-from typing import Union
 
 import colorama
 
-from .async_client import AsyncBotoy
 from .client import Botoy
 
 
-@lru_cache(maxsize=2333)
+@lru_cache(maxsize=500)
 def _get_running_args():
     main = sys.modules["__main__"]
     spec = getattr(main, "__spec__", None)
@@ -45,7 +43,7 @@ def _iter_module_files():
             yield filename
 
 
-def run(bot: Union[Botoy, AsyncBotoy], auto_reload: bool = False):
+def run(bot: Botoy, auto_reload: bool = False):
     """运行
 
     :param bot: bot实例
@@ -106,4 +104,8 @@ def run(bot: Union[Botoy, AsyncBotoy], auto_reload: bool = False):
 
         return
 
-    return asyncio.run(bot.run()) if isinstance(bot, AsyncBotoy) else bot.run()
+    async def main():
+        await bot.connect()
+        await bot.wait()
+
+    return asyncio.get_event_loop().run_until_complete(main())
