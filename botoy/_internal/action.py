@@ -1,10 +1,11 @@
 # FIXME: 先凑合用
-# type: ignore
 import mimetypes
+import re
 import time
 import traceback
 import uuid
 from typing import List, Optional, Union
+from urllib.parse import urlparse
 
 import httpx
 from pydantic import BaseModel, Field
@@ -19,7 +20,27 @@ from .log import logger
 # from .model import EventMsg, FriendMsg, GroupMsg
 
 
+class BaseResponse(BaseModel):
+    Ret: int = 0
+    ErrMsg: str = ""
+
+
+class Response(BaseModel):
+    CgiBaseResponse: BaseResponse
+    ResponseData: dict
+
+
 # TODO: 发送接收数据结构化，但是用pydantic好麻烦哦... 后面再弄合适的方案
+
+
+def get_base_url(url):
+    if not re.match(r"$(http|https|ws)://", url):
+        url = "http://" + url
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+    assert hostname, f"{url} 有误，请检查!"
+    port = parsed_url.port
+    return f"http://{hostname}{ ':'+ str(port) if port is not None else ''}"
 
 
 class Action:
@@ -29,7 +50,7 @@ class Action:
         url: Optional[str] = None,
         timeout: int = 20,
     ):
-        self.base_url = url or jconfig.url
+        self.base_url = get_base_url(url or jconfig.url)
         self._qq = int(qq or jconfig.qq or 0)
 
         self.c = httpx.AsyncClient(
@@ -47,19 +68,11 @@ class Action:
             # self._qq = (await self.getAllBots())[0]
         return int(self._qq)
 
+    def set_url(self, url):
+        self.base_url = get_base_url(url)
+
     def set_qq(self, qq: int):
         self._qq = qq
-
-    # @classmethod
-    # def from_ctx(
-    #     cls, ctx: Union[EventMsg, FriendMsg, GroupMsg], timeout: int = 20
-    # ) -> "Action":
-    #     return cls(
-    #         ctx.CurrentQQ,
-    #         host=getattr(ctx, "_host", None),
-    #         port=getattr(ctx, "_port", None),
-    #         timeout=timeout,
-    #     )
 
     async def close(self):
         return await self.c.aclose()
@@ -76,11 +89,16 @@ class Action:
         return {"CgiCmd": cmd, "CgiRequest": request}
 
     ############发送相关############
-    async def sendFriendText(self, user: int, content: str) -> dict:
+
+    class SendFriendTextResponse(BaseModel):
+        MsgTime: int
+
+    async def sendFriendText(self, user: int, content: str):
         """发送好友文本消息"""
-        return await self.post(
+        data = await self.post(
             self.build_request({"ToUin": user, "ToType": 1, "Content": content})
         )
+        return self.SendFriendTextResponse.parse_obj(data)
 
     #
     #     async def sendFriendPic(
@@ -154,15 +172,21 @@ class Action:
     #             },
     #         )
     #
+
+    class SendGroupTextResponse(BaseModel):
+        MsgTime: int
+
     async def sendGroupText(
         self, group: int, content: str, atUser: Union[int, List[int]] = 0
-    ) -> dict:
+    ):
         """发送群组文本消息"""
         if isinstance(atUser, int) and atUser != 0:
             at_list = [atUser]
-        else:
+        elif isinstance(atUser, List):
             at_list = atUser
-        return await self.post(
+        else:
+            at_list = []
+        data = await self.post(
             self.build_request(
                 {
                     "ToUin": group,
@@ -172,61 +196,117 @@ class Action:
                 }
             )
         )
+        return self.SendGroupTextResponse.parse_obj(data)
 
-    #
-    #     async def sendGroupPic(
-    #         self,
-    #         group: int,
-    #         *,
-    #         content: str = "",
-    #         picUrl: str = "",
-    #         picBase64Buf: str = "",
-    #         picMd5s: Optional[Union[str, List[str]]] = None,
-    #         flashPic=False,
-    #         atUser: Union[int, List[int]] = 0,
-    #     ) -> dict:
-    #         """发送群组图片消息"""
-    #         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
-    #         if atUser != 0:
-    #             content = macro.atUser(atUser) + content
-    #         if isinstance(picMd5s, str):
-    #             picMd5s = [picMd5s]
-    #         picMd5s = [  # type: ignore
-    #             {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
-    #         ]
-    #         return await self.post(
-    #             "SendMsgV2",
-    #             {
-    #                 "ToUserUid": group,
-    #                 "SendToType": 2,
-    #                 "SendMsgType": "PicMsg",
-    #                 "Content": content,
-    #                 "PicUrl": picUrl,
-    #                 "PicBase64Buf": picBase64Buf,
-    #                 "PicMd5s": picMd5s,
-    #                 "FlashPic": flashPic,
-    #             },
-    #         )
-    #
-    #     async def sendGroupMultiPic(
-    #         self,
-    #         group,
-    #         *items: str,
-    #         text: str = "",
-    #         atUser: Union[int, List[int]] = 0,
-    #     ):
-    #         """发送群多图
-    #         items 支持填写图片http地址和base64，会自动判断类型
-    #         """
-    #         md5s = []
-    #         for item in items:
-    #             if item.startswith("http"):
-    #                 info = await self.getGroupPicInfo(url=item)
-    #             else:
-    #                 info = await self.getGroupPicInfo(base64=item)
-    #             md5s.append(info["PicInfo"]["PicMd5"])
-    #             time.sleep(0.5)
-    #         return await self.sendGroupPic(group, content=text, atUser=atUser, picMd5s=md5s)
+    async def at(self, group: int, user: Union[int, List[int]]):
+        """仅@群成员"""
+        return await self.sendGroupText(group, content=" ", atUser=user)
+
+    class UploadResponse(BaseModel):
+        FileMd5: str
+        FileSize: int
+        FileToken: str
+
+    async def upload(self, cmd: int, url: str = "", base64: str = "", path: str = ""):
+        """上传资源文件
+        :param cmd: 1好友图片 2群组图片 26好友语音 29群组语音
+        :param url: 链接
+        :param base64: base64
+        :param path: 文件路径，和机器人服务端在同一个文件系统中
+
+        url、base64和path三项不能同时存在
+
+        {
+            "CgiBaseResponse": {
+                "Ret": 0,
+                "ErrMsg": "string"
+            },
+            "ResponseData": {
+                "FileMd5": "string",
+                "FileSize": 0,
+                "FileToken": "string"
+            },
+            "Data": null
+        }
+        """
+        req = {"CommandId": cmd}
+        if url:
+            req["FileUrl"] = url  # type: ignore
+        elif base64:
+            req["Base64Buf"] = base64  # type: ignore
+        elif path:
+            req["FilePath"] = path  # type: ignore
+        else:
+            raise ValueError("缺少参数")
+        data = await self.post(
+            self.build_request(req, "PicUp.DataUp"), timeout=60  # 这个timeout可能不能写死
+        )
+        return self.UploadResponse.parse_obj(data)
+
+    class SendGroupPicResponse(BaseModel):
+        MsgTime: int
+
+    async def sendGroupPic(
+        self,
+        group: int,
+        *,
+        content: str = "",
+        picUrl: str = "",
+        picBase64Buf: str = "",
+        picMd5s: Optional[Union[str, List[str]]] = None,
+        flashPic=False,
+        atUser: Union[int, List[int]] = 0,
+    ):
+        """发送群组图片消息"""
+        assert flashPic or True  # 兼容
+        assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
+        req = {
+            "ToUin": group,
+            "ToType": 2,
+            "Content": content,
+        }
+        # images
+        md5_list = []
+        if picMd5s is not None:
+            if isinstance(picMd5s, str):
+                md5_list.append(picMd5s)
+            else:
+                md5_list.extend(picMd5s)
+        if picUrl:
+            md5_list.append((await self.upload(2, url=picUrl)).FileMd5)
+        if picBase64Buf:
+            md5_list.append((await self.upload(2, url=picBase64Buf)).FileMd5)
+        req["images"] = [{"FileMd5": md5} for md5 in md5_list]
+
+        # at list
+        if atUser != 0:
+            req["AtUinLists"] = [
+                {"Uin": user}
+                for user in ([atUser] if isinstance(atUser, int) else atUser)
+            ]
+        data = await self.post(self.build_request(req))
+        return self.SendGroupPicResponse.parse_obj(data)
+
+    # async def sendGroupMultiPic(
+    #     self,
+    #     group,
+    #     *items: str,
+    #     text: str = "",
+    #     atUser: Union[int, List[int]] = 0,
+    # ):
+    #     """发送群多图
+    #     items 支持填写图片http地址和base64，会自动判断类型
+    #     """
+    #     md5s = []
+    #     for item in items:
+    #         if item.startswith("http"):
+    #             info = await self.getGroupPicInfo(url=item)
+    #         else:
+    #             info = await self.getGroupPicInfo(base64=item)
+    #         md5s.append(info["PicInfo"]["PicMd5"])
+    #         time.sleep(0.5)
+    #     return await self.sendGroupPic(group, content=text, atUser=atUser, picMd5s=md5s)
+
     #
     #     async def sendGroupVoice(
     #         self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
@@ -354,12 +434,12 @@ class Action:
     #             },
     #         )
     #
-    #     async def sendPhoneText(self, content: str) -> dict:
-    #         """给手机发文字"""
-    #         return await self.post(
-    #             "SendMsgV2",
-    #             {"SendToType": 2, "SendMsgType": "PhoneMsg", "Content": content},
-    #         )
+    async def sendPhoneText(self, content: str):
+        """给手机发文字
+        TODO: 目前并不是给手机发送消息，是给自己发送消息
+        """
+        return await self.sendFriendText(await self.qq, content)
+
     #
     #     async def replyGroupMsg(
     #         self,
@@ -893,6 +973,7 @@ class Action:
         path: str,
         payload: Optional[dict] = None,
         params: Optional[dict] = None,
+        timeout: Optional[int] = None,
     ):
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         params = params or {}
@@ -901,9 +982,19 @@ class Action:
             params["qq"] = await self.qq
 
         # 发送请求
-        return await self.c.request(
-            method, httpx.URL(url=path, params=params), json=payload
+        resp = await self.c.request(
+            method,
+            httpx.URL(url=path, params=params),
+            json=payload,
+            **({"timeout": timeout} if timeout else {}),
         )
+        resp_model = Response.parse_raw(resp.text)
+        if resp_model.CgiBaseResponse.ErrMsg:
+            if resp_model.CgiBaseResponse.Ret == 0:
+                logger.success(resp_model.CgiBaseResponse.ErrMsg)
+            else:
+                logger.error(resp_model.CgiBaseResponse.ErrMsg)
+        return resp_model.ResponseData
         # try:
         #     resp = await self.c.request(
         #         method, httpx.URL(url=path, params=params), json=payload
@@ -959,6 +1050,7 @@ class Action:
         funcname: str = "MagicCgiCmd",
         params: Optional[dict] = None,
         path: str = "/v1/LuaApiCaller",
+        timeout: Optional[int] = None,
     ):
         """封装常用的post操作"""
         return await self.baseRequest(
@@ -967,6 +1059,7 @@ class Action:
             path=path,
             payload=payload,
             params=params,
+            timeout=timeout,
         )
 
 
