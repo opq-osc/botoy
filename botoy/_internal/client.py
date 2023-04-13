@@ -16,6 +16,7 @@ import prettytable
 from websockets.client import connect as ws_connect
 from websockets.exceptions import ConnectionClosed, InvalidURI
 
+from . import runner
 from .config import jconfig
 from .context import Context, ctx_var
 from .log import logger
@@ -115,6 +116,14 @@ class Botoy:
         self.state = "disconnected"
         self.loaded_plugins = False
         self.pool = WorkerPool(50)
+        self._url = self._get_ws_url(jconfig.url)
+
+    @property
+    def connection_url(self):
+        return self._url
+
+    def set_url(self, url):
+        self._url = self._get_ws_url(url)
 
     def load_plugins(self):
         """加载插件"""
@@ -196,10 +205,10 @@ class Botoy:
                         if self.handlers:
                             token = ctx_var.set(Context(pkt))  # type: ignore
                             await asyncio.gather(
-                                *[
+                                *(
                                     self._start_task(receiver)
                                     for (receiver, *_) in self.handlers
-                                ],
+                                ),
                             )
                             ctx_var.reset(token)
             except ConnectionClosed:
@@ -208,10 +217,7 @@ class Botoy:
                     self.reconnect_task = self._start_task(self._handle_reconnect)
                 break
 
-    async def connect(self, url=None, hot_reload=False):
-        self.connection_url = self._get_ws_url(url or jconfig.url)
-        self.hot_reload = hot_reload
-
+    async def connect(self):
         global is_signal_hander_set
         if (
             not is_signal_hander_set
@@ -257,7 +263,7 @@ class Botoy:
     async def _handle_reconnect(self):
         logger.info("准备重连中...")
         try:
-            await self.connect(self.connection_url, self.hot_reload)
+            await self.connect()
         except:
             pass
         else:
@@ -274,6 +280,12 @@ class Botoy:
             await self.reconnect_task
             if self.state != "connected":
                 break
+
+    def run(self, reload=False):
+        """一键启动
+        :param reload: 开启热重载
+        """
+        runner.run(self, reload)
 
     def _get_ws_url(self, url: str) -> str:
         if not re.match(r"$(http|https|ws)://", url):
