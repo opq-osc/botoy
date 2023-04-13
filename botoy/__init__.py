@@ -13,6 +13,8 @@ from ._internal.context import ctx as ctx
 from ._internal.schedule import async_scheduler as async_scheduler
 from ._internal.schedule import scheduler as scheduler
 from ._internal.schedule import start_scheduler as start_scheduler
+from ._internal import contrib as contrib
+from ._internal.sugar import S as S
 
 bot = Botoy()
 action = Action()
