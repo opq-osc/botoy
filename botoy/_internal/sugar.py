@@ -6,11 +6,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO, List, Optional, Tuple, Union
 
-from .context import Context, ctx as current_ctx
-
 from .action import Action
+from .context import Context
+from .context import ctx as current_ctx
 from .utils import file_to_base64
-
 
 # str => base64, md5, file path
 # bytes => base64
