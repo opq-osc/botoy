@@ -213,6 +213,8 @@ class Context:
 
         return c(self, "group_msg", msg)
 
+    g = group_msg
+
     @property
     def friend_msg(self) -> Optional[FriendMsg]:
         msg = None
@@ -225,6 +227,8 @@ class Context:
             # logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "friend_msg", msg)
 
+    f = friend_msg
+
     @property
     def event_msg(self) -> Optional[EventMsg]:
         raise NotImplementedError
@@ -236,6 +240,8 @@ class Context:
         except:
             logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "event_msg", msg)
+
+    e = event_msg
 
 
 ctx_var: ContextVar[Context] = ContextVar("ctx")
