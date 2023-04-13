@@ -10,8 +10,6 @@ from pathlib import Path
 
 import colorama
 
-from .client import Botoy
-
 
 @lru_cache(maxsize=500)
 def _get_running_args():
@@ -43,7 +41,7 @@ def _iter_module_files():
             yield filename
 
 
-def run(bot: Botoy, auto_reload: bool = False):
+def run(bot, auto_reload: bool = False):
     """运行
 
     :param bot: bot实例
