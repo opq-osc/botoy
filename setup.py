@@ -26,12 +26,12 @@ setup(
     author_email="xiyao.wong@foxmail.com",
     url="https://github.com/xiyaowong/botoy",
     license="MIT",
-    keywords=["iotbot", "iotqq", "OPQ", "OPQBot"],
+    keywords=["iotbot", "iotqq", "OPQ", "OPQBot", "botoy"],
     packages=find_packages(),
     install_requires=read_files(["requirements.txt"]),
-    entry_points="""
-        [console_scripts]
-        botoy=botoy.cli:cli
-    """,
+    # entry_points="""
+    #     [console_scripts]
+    #     botoy=botoy.cli:cli
+    # """,
     python_requires=">=3.7",
 )
