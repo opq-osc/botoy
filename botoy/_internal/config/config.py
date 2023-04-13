@@ -115,14 +115,14 @@ class Configurations:
         return Configuration(config_tree, section)
 
     # 兼容旧版API
-    def get(self, key: str, default=None):
+    def get(self, key: str, default=None) -> Any:
         """配置文件作为字典，此方法等于字典的get方法"""
         return botoy_config.get(key, default)
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> Any:
         return botoy_config.get(key)
 
-    def __getattr__(self, key: str):
+    def __getattr__(self, key: str) -> Any:
         return botoy_config.get(key)
 
     ############
