@@ -25,7 +25,14 @@ from .pool import WorkerPool
 
 class ReceiverMarker:
     def __call__(
-        self, receiver, name="", author="", usage="", *, __directly_attached=False
+        self,
+        receiver,
+        name="",
+        author="",
+        usage="",
+        *,
+        _directly_attached=False,
+        _back=1,
     ):
         """标记接收函数
         该信息仅用于开发者调试
@@ -52,24 +59,27 @@ class ReceiverMarker:
             "meta": meta or "",
         }
 
-        # 插件通过加入额外信息标记接收函数, 其前提该函数能在import后的module中**被检索**到
+        # 插件通过加入额外信息标记接收函数, 其前提该函数能在import后的module中`被检索`到
         # 被attach调用时，函数会被直接添加，所以无需进行该操作
-        if not __directly_attached:
-            back_globals = inspect.currentframe().f_back.f_globals  # type: ignore
-            if receiver not in back_globals.values():
+        if not _directly_attached:
+            frame = inspect.currentframe()
+            for _ in range(_back):
+                frame = frame.f_back  # type: ignore
+            _globals = frame.f_globals  # type: ignore
+            if receiver not in _globals.values():
                 u = "receiver" + str(uuid4())
-                back_globals[u] = receiver
+                _globals[u] = receiver
         return self
 
     def __add__(self, receiver: Union[Callable, Tuple, List]):
         if receiver == self:
             pass
         elif callable(receiver):
-            self(receiver)
+            self(receiver, _back=2)
         elif isinstance(receiver, (List, Tuple)):
             items = list(receiver)
             items.extend(["", "", ""])
-            self(items[0], *items[1:3])
+            self(items[0], *items[1:3], _back=2)
         else:
             # TODO ???
             pass
@@ -173,7 +183,7 @@ class Botoy:
             return
         #  不使用插件，基本不会调用mark_recv，这里自动调用补充默认信息
         if not hasattr(receiver, "receiver_info"):
-            mark_recv(receiver, __directly_attached=True)
+            mark_recv(receiver, _directly_attached=True)
         info = getattr(receiver, "receiver_info", {})
 
         async def handler():
