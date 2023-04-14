@@ -37,7 +37,7 @@ def start_scheduler():
         logger.info("异步定时任务已启动")
 
 
-if jconfig.apscheduler_autostart is None or jconfig.apscheduler_autostart:
+if jconfig.apscheduler_autostart:
     start_scheduler()
 
 __all__ = ["scheduler", "async_scheduler", "start_scheduler"]
