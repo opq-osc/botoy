@@ -94,6 +94,11 @@ class BaseMsg(metaclass=ABCMeta):
         """机器人qq"""
         return c(self, "bot_qq", self.model.CurrentQQ)
 
+    def __repr__(self) -> str:
+        return "{cls} => {data}".format(
+            cls=self.__class__.__name__, data=str(self.model)
+        )
+
 
 class GroupMsg(BaseMsg):
     def __init__(self, data: Union[str, dict]):
@@ -242,6 +247,9 @@ class Context:
         return c(self, "event_msg", msg)
 
     e = event_msg
+
+    def __repr__(self) -> str:
+        return "Context => {data}".format(data=str(self.data))
 
 
 ctx_var: ContextVar[Context] = ContextVar("ctx")
