@@ -22,7 +22,7 @@ pip install botoy -i https://pypi.org/simple --upgrade
 如果你配置好了 OPQ，并且配置保持默认(bot 连接地址`http://127.0.0.1:8086`)，
 下面示例可实现在收到群消息内容为 `test` 时回复 `ok`
 
-`./plugins/test.py` 插件
+新建文件 `bot.py`
 
 ```python
 from botoy import bot, ctx, S
@@ -32,7 +32,20 @@ async def test():
     if ctx.g and ctx.g.text == 'test':
         await S.text('ok')
 
+bot.print_receivers()
 bot.run()
+```
+
+运行 `python bot.py`
+
+```
++------+--------+-------+----------------+
+| Name | Author | Usage |      Meta      |
++------+--------+-------+----------------+
+| test |        |       | test.py line 4 |
++------+--------+-------+----------------+
+ℹ️ 04-15 19:21:58 INFO 连接中[ws://localhost:8086/ws]...
+✔️ 04-15 19:21:58 SUCCESS 连接成功!
 ```
 
 # [文档](https://botoy.readthedocs.io/)
