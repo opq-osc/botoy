@@ -1,14 +1,17 @@
 # FIXME: 先凑合用
+import asyncio
 import mimetypes
 import re
 import time
 import traceback
 import uuid
-from typing import List, Optional, Union
+from typing import List, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
 import httpx
 from pydantic import BaseModel, Field
+
+T = TypeVar("T")
 
 # from . import macro, utils
 from .config import jconfig
@@ -41,6 +44,12 @@ def get_base_url(url):
     assert hostname, f"{url} 有误，请检查!"
     port = parsed_url.port
     return f"http://{hostname}{ ':'+ str(port) if port is not None else ''}"
+
+
+def to_list(item: Union[T, List[T]]) -> List[T]:
+    if isinstance(item, List):
+        return item
+    return [item]
 
 
 class Action:
@@ -93,44 +102,64 @@ class Action:
     class SendFriendTextResponse(BaseModel):
         MsgTime: int
 
-    async def sendFriendText(self, user: int, content: str):
+    async def sendFriendText(self, user: int, text: str):
         """发送好友文本消息"""
         data = await self.post(
-            self.build_request({"ToUin": user, "ToType": 1, "Content": content})
+            self.build_request({"ToUin": user, "ToType": 1, "Content": text})
         )
         return self.SendFriendTextResponse.parse_obj(data)
 
-    #
-    #     async def sendFriendPic(
-    #         self,
-    #         user: int,
-    #         *,
-    #         picUrl: str = "",
-    #         picBase64Buf: str = "",
-    #         picMd5s: Optional[Union[str, List[str]]] = None,
-    #         content: str = "",
-    #         flashPic=False,
-    #     ):
-    #         """发送好友图片消息"""
-    #         assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
-    #         if isinstance(picMd5s, str):
-    #             picMd5s = [picMd5s]
-    #         picMd5s = [  # type: ignore
-    #             {"FileId": 1, "PicMd5": picmd5, "PicSize": 1} for picmd5 in picMd5s or []
-    #         ]
-    #         return await self.post(
-    #             "SendMsgV2",
-    #             {
-    #                 "ToUserUid": user,
-    #                 "SendToType": 1,
-    #                 "SendMsgType": "PicMsg",
-    #                 "Content": content,
-    #                 "PicUrl": picUrl,
-    #                 "PicBase64Buf": picBase64Buf,
-    #                 "PicMd5s": picMd5s,
-    #                 "FlashPic": flashPic,
-    #             },
-    #         )
+    async def sendFriendPic(
+        self,
+        user: int,
+        *,
+        text: str = "",
+        url: Union[str, List[str]] = "",
+        base64: Union[str, List[str]] = "",
+        # md5: Union[str, List[str]] = '',
+    ):
+        """发送好友图片消息
+        :param user: 好友ID
+        :param content: 发送文字内容, 可以为列表
+        :param url: 发送图片链接, 可以为列表
+        :param base64: 发送图片base64, 可以为列表
+        :param md5: 发送图片md5或md5列表, 可以为列表
+        """
+        req = {
+            "ToUin": user,
+            "ToType": 1,
+            "Content": text,
+        }
+        # images
+        url_list = [url for url in to_list(url) if url]
+        base64_list = [b64 for b64 in to_list(base64) if b64]
+        # md5_list = [md5 for md5 in to_list(md5) if md5]
+
+        images = []
+
+        def add_image(resp: "Action.UploadResponse"):
+            images.append(
+                {
+                    "FileMd5": resp.FileMd5,
+                    "FileSize": resp.FileSize,
+                    "FileId": resp.FileId,
+                }
+            )
+
+        for url in url_list:
+            add_image(await self.upload(1, url=url))
+            await asyncio.sleep(0.5)
+        for b64 in base64_list:
+            add_image(await self.upload(1, base64=b64))
+            await asyncio.sleep(0.5)
+        # for md5 in md5_list:
+        #     images.append({'FileMd5': md5})
+        req["Images"] = images
+        ###########
+
+        data = await self.post(self.build_request(req))
+        return self.SendGroupPicResponse.parse_obj(data)
+
     #
     #     async def sendFriendVoice(
     #         self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
@@ -177,22 +206,49 @@ class Action:
         MsgTime: int
 
     async def sendGroupText(
-        self, group: int, content: str, atUser: Union[int, List[int]] = 0
+        self,
+        group: int,
+        text: str,
+        atUser: Union[int, List[int]] = 0,
+        atUserNick: Union[str, List[str]] = "",
     ):
-        """发送群组文本消息"""
+        """发送群组文本消息
+        :param group: 发送群ID
+        :param content: 发送内容
+        :param atUser: 需要艾特的用户QQ号
+        :param atUserNick: 需要艾特的用户昵称, 需与atUser对应，如果缺失会将被艾特用户QQ号作为昵称
+        """
+        # NOTE: 用两个参数是因为，后续可能会支持不提供nick也能正确艾特出来
+        # 因为个人觉得还需要传nick太多余了，但目前不传不行
         if isinstance(atUser, int) and atUser != 0:
-            at_list = [atUser]
+            at_uins = [atUser]
         elif isinstance(atUser, List):
-            at_list = atUser
+            at_uins = atUser
         else:
-            at_list = []
+            at_uins = []
+
+        if isinstance(atUserNick, str) and atUserNick:
+            at_nicks = [atUserNick]
+        elif isinstance(atUserNick, List):
+            at_nicks = atUserNick
+        else:
+            at_nicks = []
+
+        at_list = []
+        for idx, uin in enumerate(at_uins):
+            try:
+                nick = at_nicks[idx]
+            except:
+                nick = str(uin)
+            at_list.append({"Uin": uin, "Nick": nick})
+
         data = await self.post(
             self.build_request(
                 {
                     "ToUin": group,
                     "ToType": 2,
-                    "Content": content,
-                    "AtUinLists": [{"Uin": qq} for qq in at_list],
+                    "Content": text,
+                    "AtUinLists": at_list,
                 }
             )
         )
@@ -200,12 +256,12 @@ class Action:
 
     async def at(self, group: int, user: Union[int, List[int]]):
         """仅@群成员"""
-        return await self.sendGroupText(group, content=" ", atUser=user)
+        return await self.sendGroupText(group, text=" ", atUser=user)
 
     class UploadResponse(BaseModel):
         FileMd5: str
         FileSize: int
-        FileToken: str
+        FileId: int
 
     async def upload(self, cmd: int, url: str = "", base64: str = "", path: str = ""):
         """上传资源文件
@@ -241,6 +297,7 @@ class Action:
         data = await self.post(
             self.build_request(req, "PicUp.DataUp"), timeout=60  # 这个timeout可能不能写死
         )
+        print(data)
         return self.UploadResponse.parse_obj(data)
 
     class SendGroupPicResponse(BaseModel):
@@ -250,62 +307,70 @@ class Action:
         self,
         group: int,
         *,
-        content: str = "",
-        picUrl: str = "",
-        picBase64Buf: str = "",
-        picMd5s: Optional[Union[str, List[str]]] = None,
-        flashPic=False,
+        text: str = "",
+        url: Union[str, List[str]] = "",
+        base64: Union[str, List[str]] = "",
+        # md5: Union[str, List[str]] = '',
         atUser: Union[int, List[int]] = 0,
+        atUserNick: Union[str, List[str]] = "",
     ):
-        """发送群组图片消息"""
-        assert flashPic or True  # 兼容
-        assert any([picUrl, picBase64Buf, picMd5s]), "缺少参数"
+        """发送群组图片消息
+        :param group: 发送群ID
+        :param content: 发送文字内容
+        :param url: 发送图片链接, 可以为列表
+        :param base64: 发送图片base64, 可以为列表
+        :param md5: 发送图片md5, 可以为列表
+        :param atUser: 需要艾特的用户QQ号, 可以为列表
+        :param atUserNick: 需要艾特的用户昵称, 需与atUser对应，如果缺失会将被艾特用户QQ号作为昵称
+        """
         req = {
             "ToUin": group,
             "ToType": 2,
-            "Content": content,
+            "Content": text,
         }
         # images
-        md5_list = []
-        if picMd5s is not None:
-            if isinstance(picMd5s, str):
-                md5_list.append(picMd5s)
-            else:
-                md5_list.extend(picMd5s)
-        if picUrl:
-            md5_list.append((await self.upload(2, url=picUrl)).FileMd5)
-        if picBase64Buf:
-            md5_list.append((await self.upload(2, url=picBase64Buf)).FileMd5)
-        req["images"] = [{"FileMd5": md5} for md5 in md5_list]
+        url_list = [url for url in to_list(url) if url]
+        base64_list = [b64 for b64 in to_list(base64) if b64]
+        # FIXME: 支持用户直接传递md5，size，id
+        # md5_list = [md5 for md5 in to_list(md5) if md5]
+
+        images = []
+
+        def add_image(resp: "Action.UploadResponse"):
+            image = {
+                "FileMd5": resp.FileMd5,
+                "FileSize": resp.FileSize,
+                "FileId": resp.FileId,
+            }
+            images.append(image)
+
+        for url in url_list:
+            add_image(await self.upload(2, url=url))
+            await asyncio.sleep(0.5)
+        for b64 in base64_list:
+            add_image(await self.upload(2, base64=b64))
+            await asyncio.sleep(0.5)
+        # for md5 in md5_list:
+        #     images.append({'FileMd5': md5})
+        req["Images"] = images  # type: ignore
+        ###########
 
         # at list
-        if atUser != 0:
-            req["AtUinLists"] = [
-                {"Uin": user}
-                for user in ([atUser] if isinstance(atUser, int) else atUser)
-            ]
+        at_uins = to_list(atUser) if atUser else []
+        at_nicks = to_list(atUserNick) if atUserNick else []
+
+        at_list = []
+        for idx, uin in enumerate(at_uins):
+            try:
+                nick = at_nicks[idx]
+            except:
+                nick = str(uin)
+            at_list.append({"Uin": uin, "Nick": nick})
+        req["AtUinLists"] = at_list  # type: ignore
+        ###########
+
         data = await self.post(self.build_request(req))
         return self.SendGroupPicResponse.parse_obj(data)
-
-    # async def sendGroupMultiPic(
-    #     self,
-    #     group,
-    #     *items: str,
-    #     text: str = "",
-    #     atUser: Union[int, List[int]] = 0,
-    # ):
-    #     """发送群多图
-    #     items 支持填写图片http地址和base64，会自动判断类型
-    #     """
-    #     md5s = []
-    #     for item in items:
-    #         if item.startswith("http"):
-    #             info = await self.getGroupPicInfo(url=item)
-    #         else:
-    #             info = await self.getGroupPicInfo(base64=item)
-    #         md5s.append(info["PicInfo"]["PicMd5"])
-    #         time.sleep(0.5)
-    #     return await self.sendGroupPic(group, content=text, atUser=atUser, picMd5s=md5s)
 
     #
     #     async def sendGroupVoice(

@@ -134,7 +134,10 @@ class _S:
         async with action:
             if g := self.g_msg:
                 return await action.sendGroupText(
-                    g.from_group, text, atUser=g.sender_uin if at else 0
+                    g.from_group,
+                    text,
+                    atUser=g.sender_uin if at else 0,
+                    atUserNick=g.sender_nick,
                 )
             elif f := self.f_msg:
                 # TODO 处理私聊
@@ -173,30 +176,34 @@ class _S:
                 if type == TYPE_URL:
                     return await action.sendGroupPic(
                         g.from_group,
-                        content=text,
-                        picUrl=data,  # type:ignore
+                        text=text,
+                        url=data,  # type:ignore
                         atUser=atUser,
+                        atUserNick=g.sender_nick,
                     )
                 elif type == TYPE_BASE64:
                     return await action.sendGroupPic(
                         g.from_group,
-                        content=text,
-                        picBase64Buf=data,  # type: ignore
+                        text=text,
+                        base64=data,  # type: ignore
                         atUser=atUser,
+                        atUserNick=g.sender_nick,
                     )
                 elif type == TYPE_MD5:
                     return await action.sendGroupPic(
                         g.from_group,
-                        content=text,
-                        picMd5s=data,  # type:ignore
+                        text=text,
+                        md5=data,  # type:ignore
                         atUser=atUser,
+                        atUserNick=g.sender_nick,
                     )
                 elif type == TYPE_PATH:
                     return await action.sendGroupPic(
                         g.from_group,
-                        content=text,
-                        picBase64Buf=file_to_base64(data),
+                        text=text,
+                        base64=file_to_base64(data),
                         atUser=atUser,
+                        atUserNick=g.sender_nick,
                     )
             elif f := self.f_msg:
                 # TODO 处理私聊
@@ -220,13 +227,13 @@ class _S:
                 #         ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=file_to_base64(data)  # type: ignore
                 #     )
                 if type == TYPE_URL:
-                    return await action.sendFriendPic(f.from_user, content=text, picUrl=data)  # type: ignore
+                    return await action.sendFriendPic(f.from_user, text=text, url=data)  # type: ignore
                 elif type == TYPE_BASE64:
-                    return await action.sendFriendPic(f.from_user, content=text, picBase64Buf=data)  # type: ignore
+                    return await action.sendFriendPic(f.from_user, text=text, base64=data)  # type: ignore
                 elif type == TYPE_MD5:
-                    return await action.sendFriendPic(f.from_user, content=text, picMd5s=data)  # type: ignore
+                    return await action.sendFriendPic(f.from_user, text=text, md5=data)  # type: ignore
                 elif type == TYPE_PATH:
-                    return await action.sendFriendPic(f.from_user, content=text, picBase64Buf=file_to_base64(data))  # type: ignore
+                    return await action.sendFriendPic(f.from_user, text=text, base64=file_to_base64(data))  # type: ignore
 
         return None
 
