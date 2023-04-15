@@ -253,6 +253,9 @@ class Botoy:
             except asyncio.TimeoutError as e:
                 logger.error(f"连接超时: {e}")
                 await asyncio.sleep(2)
+            except Exception as e:
+                logger.error(f"连接失败: {e}")
+                await asyncio.sleep(2)
             else:
                 logger.success("连接成功!")
                 break
