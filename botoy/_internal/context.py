@@ -213,8 +213,7 @@ class Context:
             # TODO: 忽略预期的异常
             pass
         except:
-            pass
-            # logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
 
         return c(self, "group_msg", msg)
 
@@ -228,8 +227,7 @@ class Context:
         except AssertionError:
             pass
         except:
-            pass
-            # logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "friend_msg", msg)
 
     f = friend_msg
