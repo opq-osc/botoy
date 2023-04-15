@@ -29,9 +29,9 @@ setup(
     keywords=["iotbot", "iotqq", "OPQ", "OPQBot", "botoy"],
     packages=find_packages(),
     install_requires=read_files(["requirements.txt"]),
-    # entry_points="""
-    #     [console_scripts]
-    #     botoy=botoy.cli:cli
-    # """,
+    entry_points="""
+        [console_scripts]
+        botoy=botoy._internal.cli:cli
+    """,
     python_requires=">=3.7",
 )
