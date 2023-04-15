@@ -137,7 +137,7 @@ class GroupMsg(BaseMsg):
 
     def is_at_user(self, user_id: int):
         """是否艾特某人"""
-        return user_id in (i.Uid for i in self.at_list or [])
+        return user_id in (i.Uin for i in self.at_list or [])
 
     @property
     def is_at_bot(self):
