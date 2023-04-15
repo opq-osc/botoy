@@ -1,4 +1,5 @@
 import json
+import re
 import traceback
 from abc import ABCMeta, abstractmethod
 from contextvars import ContextVar
@@ -95,6 +96,10 @@ class BaseMsg(metaclass=ABCMeta):
         """机器人qq"""
         return c(self, "bot_qq", self.model.CurrentQQ)
 
+    def text_match(self, pattern: Union[str, re.Pattern[str]]):
+        """等于 re.match(pattern, text)"""
+        return re.match(pattern, self.text)
+
     def __repr__(self) -> str:
         return "{cls} => {data}".format(
             cls=self.__class__.__name__, data=str(self.model)
@@ -129,6 +134,11 @@ class GroupMsg(BaseMsg):
     def from_group(self) -> int:
         """群ID"""
         return c(self, "from_group", self.msg_head.FromUin)
+
+    @property
+    def from_user(self) -> int:
+        """发送者"""
+        return c(self, "from_user", self.msg_head.SenderUin)
 
     @property
     def at_list(self):
