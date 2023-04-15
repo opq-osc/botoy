@@ -82,10 +82,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "QQNick": { "type": "string" },
-                      "QQUid": { "type": "integer" }
+                      "Nick": { "type": "string" },
+                      "Uin": { "type": "integer" }
                     },
-                    "required": ["QQUid", "QQNick"]
+                    "required": ["Uin", "Nick"]
                   }
                 },
                 "Images": {

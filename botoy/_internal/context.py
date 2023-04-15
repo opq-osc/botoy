@@ -1,7 +1,8 @@
+import json
 import traceback
 from abc import ABCMeta, abstractmethod
 from contextvars import ContextVar
-from typing import Any, AnyStr, Generic, List, Optional, TypeVar, Union
+from typing import Optional, Union
 
 from . import models
 from .log import logger
@@ -136,7 +137,7 @@ class GroupMsg(BaseMsg):
 
     def is_at_user(self, user_id: int):
         """是否艾特某人"""
-        return user_id in (i.QQUid for i in self.at_list or [])
+        return user_id in (i.Uid for i in self.at_list or [])
 
     @property
     def is_at_bot(self):
@@ -197,7 +198,7 @@ class Context:
         """
         :param data: websokets收到的原始包数据
         """
-        self.__data = data
+        self.__data = json.loads(data)
 
     @property
     def data(self) -> str:
