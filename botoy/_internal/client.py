@@ -132,7 +132,7 @@ class Botoy:
     def connection_url(self):
         return self._url
 
-    def set_url(self, url):
+    def set_url(self, url: str):
         self._url = self._get_ws_url(url)
 
     def load_plugins(self):
