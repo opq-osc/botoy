@@ -1053,7 +1053,7 @@ class Action:
             json=payload,
             **({"timeout": timeout} if timeout else {}),
         )
-        resp_model = Response.parse_raw(resp.text)
+        resp_model = Response.parse_obj(resp.json())
         if resp_model.CgiBaseResponse.ErrMsg:
             if resp_model.CgiBaseResponse.Ret == 0:
                 logger.success(resp_model.CgiBaseResponse.ErrMsg)
