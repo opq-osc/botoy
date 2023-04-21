@@ -140,8 +140,8 @@ class _S:
                     atUserNick=g.sender_nick,
                 )
             elif f := self.f_msg:
-                if f.msg_type == 141: # NOTE: 私聊
-                    return await action.sendPrivateText(f.from_user,f.from_group, text)
+                if f.msg_type == 141:  # NOTE: 私聊
+                    return await action.sendPrivateText(f.from_user, f.from_group, text)
                 elif f.is_from_phone:
                     return await action.sendPhoneText(text)
                 else:
@@ -209,13 +209,13 @@ class _S:
             elif f := self.f_msg:
                 if f.msg_type == 141:
                     if type == TYPE_URL:
-                        return await action.sendPrivatePic(f.from_user, f.from_group,text=text, url=data)  # type: ignore
+                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, url=data)  # type: ignore
                     elif type == TYPE_BASE64:
                         return await action.sendPrivatePic(f.from_user, f.from_group, text=text, base64=data)  # type: ignore
                     elif type == TYPE_MD5:
-                        return await action.sendPrivatePic(f.from_user, f.from_group,text=text, md5=data)  # type: ignore
+                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, md5=data)  # type: ignore
                     elif type == TYPE_PATH:
-                        return await action.sendPrivatePic(f.from_user, f.from_group,text=text, base64=file_to_base64(data))  # type: ignore
+                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, base64=file_to_base64(data))  # type: ignore
                 else:
                     if type == TYPE_URL:
                         return await action.sendFriendPic(f.from_user, text=text, url=data)  # type: ignore

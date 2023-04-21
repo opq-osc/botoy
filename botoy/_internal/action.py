@@ -112,7 +112,9 @@ class Action:
     async def sendPrivateText(self, user: int, group: int, text: str):
         """发送私聊文本消息"""
         data = await self.post(
-            self.build_request({"ToUin": user, "GroupCode": group, "ToType": 3, "Content": text})
+            self.build_request(
+                {"ToUin": user, "GroupCode": group, "ToType": 3, "Content": text}
+            )
         )
         return self.SendFriendTextResponse.parse_obj(data)
 
@@ -311,14 +313,14 @@ class Action:
         MsgTime: int
 
     async def sendPrivatePic(
-            self,
-            user: int,
-            group:int,
-            *,
-            text: str = "",
-            url: Union[str, List[str]] = "",
-            base64: Union[str, List[str]] = "",
-            # md5: Union[str, List[str]] = '',
+        self,
+        user: int,
+        group: int,
+        *,
+        text: str = "",
+        url: Union[str, List[str]] = "",
+        base64: Union[str, List[str]] = "",
+        # md5: Union[str, List[str]] = '',
     ):
         """发送私聊图片消息
         :param user: 好友ID
@@ -363,7 +365,6 @@ class Action:
 
         data = await self.post(self.build_request(req))
         return self.SendGroupPicResponse.parse_obj(data)
-
 
     async def sendGroupPic(
         self,

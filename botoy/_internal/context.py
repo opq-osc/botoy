@@ -183,7 +183,7 @@ class FriendMsg(BaseMsg):
     def from_user(self) -> int:
         """发送者qq"""
         return c(self, "from_user", self.msg_head.FromUin)
-    
+
     @property
     def from_group(self) -> int:
         """发送者群号"""
