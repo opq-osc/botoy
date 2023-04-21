@@ -140,7 +140,7 @@ class _S:
                     atUserNick=g.sender_nick,
                 )
             elif f := self.f_msg:
-                if f.msg_type == 141:
+                if f.msg_type == 141: # NOTE: 私聊
                     return await action.sendPrivateText(f.from_user,f.from_group, text)
                 elif f.is_from_phone:
                     return await action.sendPhoneText(text)
