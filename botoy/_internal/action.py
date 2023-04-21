@@ -109,6 +109,13 @@ class Action:
         )
         return self.SendFriendTextResponse.parse_obj(data)
 
+    async def sendPrivateText(self, user: int, group: int, text: str):
+        """发送私聊文本消息"""
+        data = await self.post(
+            self.build_request({"ToUin": user, "GroupCode": group, "ToType": 3, "Content": text})
+        )
+        return self.SendFriendTextResponse.parse_obj(data)
+
     async def sendFriendPic(
         self,
         user: int,
@@ -302,6 +309,61 @@ class Action:
 
     class SendGroupPicResponse(BaseModel):
         MsgTime: int
+
+    async def sendPrivatePic(
+            self,
+            user: int,
+            group:int,
+            *,
+            text: str = "",
+            url: Union[str, List[str]] = "",
+            base64: Union[str, List[str]] = "",
+            # md5: Union[str, List[str]] = '',
+    ):
+        """发送私聊图片消息
+        :param user: 好友ID
+        :param group: 群号
+        :param content: 发送文字内容, 可以为列表
+        :param url: 发送图片链接, 可以为列表
+        :param base64: 发送图片base64, 可以为列表
+        :param md5: 发送图片md5或md5列表, 可以为列表
+        """
+        req = {
+            "ToUin": user,
+            "GroupCode": group,
+            "ToType": 3,
+            "Content": text,
+        }
+        # images
+        url_list = [url for url in to_list(url) if url]
+        base64_list = [b64 for b64 in to_list(base64) if b64]
+        # md5_list = [md5 for md5 in to_list(md5) if md5]
+
+        images = []
+
+        def add_image(resp: "Action.UploadResponse"):
+            images.append(
+                {
+                    "FileMd5": resp.FileMd5,
+                    "FileSize": resp.FileSize,
+                    "FileId": resp.FileId,
+                }
+            )
+
+        for url in url_list:
+            add_image(await self.upload(1, url=url))
+            await asyncio.sleep(0.5)
+        for b64 in base64_list:
+            add_image(await self.upload(1, base64=b64))
+            await asyncio.sleep(0.5)
+        # for md5 in md5_list:
+        #     images.append({'FileMd5': md5})
+        req["Images"] = images
+        ###########
+
+        data = await self.post(self.build_request(req))
+        return self.SendGroupPicResponse.parse_obj(data)
+
 
     async def sendGroupPic(
         self,

@@ -140,8 +140,9 @@ class _S:
                     atUserNick=g.sender_nick,
                 )
             elif f := self.f_msg:
-                # TODO 处理私聊
-                if f.is_from_phone:
+                if f.msg_type == 141: # NOTE: 私聊
+                    return await action.sendPrivateText(f.from_user,f.from_group, text)
+                elif f.is_from_phone:
                     return await action.sendPhoneText(text)
                 else:
                     return await action.sendFriendText(f.from_user, text)
@@ -206,34 +207,24 @@ class _S:
                         atUserNick=g.sender_nick,
                     )
             elif f := self.f_msg:
-                # TODO 处理私聊
-                # if type == TYPE_URL:
-                #     return action.sendPrivatePic(
-                #         ctx.FromUin, ctx.TempUin, content=text, picUrl=data  # type: ignore
-                #     )
-                # elif type == TYPE_BASE64:
-                #     return action.sendPrivatePic(
-                #         ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=data  # type: ignore
-                #     )
-                # elif type == TYPE_MD5:
-                #     return action.sendPrivatePic(
-                #         ctx.FromUin,
-                #         ctx.TempUin,
-                #         content=text,
-                #         picMd5s=data,  # type:ignore
-                #     )
-                # elif type == TYPE_PATH:
-                #     return action.sendPrivatePic(
-                #         ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=file_to_base64(data)  # type: ignore
-                #     )
-                if type == TYPE_URL:
-                    return await action.sendFriendPic(f.from_user, text=text, url=data)  # type: ignore
-                elif type == TYPE_BASE64:
-                    return await action.sendFriendPic(f.from_user, text=text, base64=data)  # type: ignore
-                elif type == TYPE_MD5:
-                    return await action.sendFriendPic(f.from_user, text=text, md5=data)  # type: ignore
-                elif type == TYPE_PATH:
-                    return await action.sendFriendPic(f.from_user, text=text, base64=file_to_base64(data))  # type: ignore
+                if f.msg_type == 141:
+                    if type == TYPE_URL:
+                        return await action.sendPrivatePic(f.from_user, f.from_group,text=text, url=data)  # type: ignore
+                    elif type == TYPE_BASE64:
+                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, base64=data)  # type: ignore
+                    elif type == TYPE_MD5:
+                        return await action.sendPrivatePic(f.from_user, f.from_group,text=text, md5=data)  # type: ignore
+                    elif type == TYPE_PATH:
+                        return await action.sendPrivatePic(f.from_user, f.from_group,text=text, base64=file_to_base64(data))  # type: ignore
+                else:
+                    if type == TYPE_URL:
+                        return await action.sendFriendPic(f.from_user, text=text, url=data)  # type: ignore
+                    elif type == TYPE_BASE64:
+                        return await action.sendFriendPic(f.from_user, text=text, base64=data)  # type: ignore
+                    elif type == TYPE_MD5:
+                        return await action.sendFriendPic(f.from_user, text=text, md5=data)  # type: ignore
+                    elif type == TYPE_PATH:
+                        return await action.sendFriendPic(f.from_user, text=text, base64=file_to_base64(data))  # type: ignore
 
         return None
 
