@@ -93,7 +93,7 @@ class BaseMsg(metaclass=ABCMeta):
     
     @property
     def from_type(self):
-        """CurrentPacket.EventData.MsgHead.MsgType"""
+        """CurrentPacket.EventData.MsgHead.FromType"""
         return c(self, "from_type", self.msg_head.FromType)
 
     @property
