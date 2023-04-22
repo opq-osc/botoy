@@ -10,12 +10,6 @@ from typing import Any, List, Optional
 from pydantic import BaseModel, Field
 
 
-class FromType(Enum):
-    integer_1 = 1
-    integer_2 = 2
-    integer_3 = 3
-
-
 class C2cCmd(Enum):
     integer_0 = 0
     integer_1 = 1
@@ -40,7 +34,7 @@ class GroupInfo(BaseModel):
 class MsgHead(BaseModel):
     FromUin: int
     ToUin: int
-    FromType: FromType = Field(..., description="消息来源类型 3私聊 2群组 1好友")
+    FromType: int = Field(..., description="消息来源类型 3私聊 2群组 1好友")
     SenderUin: int = Field(..., description="发送者QQ号")
     SenderNick: str
     MsgType: int
