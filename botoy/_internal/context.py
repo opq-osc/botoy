@@ -89,7 +89,12 @@ class BaseMsg(metaclass=ABCMeta):
     @property
     def msg_type(self):
         """CurrentPacket.EventData.MsgHead.MsgType"""
-        return c(self, "msg_time", self.msg_head.MsgType)
+        return c(self, "msg_type", self.msg_head.MsgType)
+
+    @property
+    def from_type(self):
+        """CurrentPacket.EventData.MsgHead.FromType"""
+        return c(self, "from_type", self.msg_head.FromType)
 
     @property
     def bot_qq(self):
