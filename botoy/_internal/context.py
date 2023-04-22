@@ -185,9 +185,20 @@ class FriendMsg(BaseMsg):
         return c(self, "from_user", self.msg_head.FromUin)
 
     @property
+    def is_private(self) -> bool:
+        """是否为私聊"""
+        try:
+            self.from_group
+        except Exception:
+            return False
+        else:
+            return True
+
+    @property
     def from_group(self) -> int:
-        """发送者群号"""
-        return c(self, "from_group", self.msg_head.C2CTempMessageHead.get("GroupCode"))
+        """发送者群号, 私聊才有，如果非私聊进行调用会报错"""
+        assert self.msg_head.C2CTempMessageHead is not None
+        return c(self, "from_group", self.msg_head.C2CTempMessageHead.GroupCode)
 
     @property
     def is_from_phone(self):

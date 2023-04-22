@@ -52,7 +52,16 @@
                     "GroupName"
                   ]
                 },
-                "C2CTempMessageHead": { "type": "null" }
+                "C2CTempMessageHead": {
+                  "type": "object",
+                  "properties": {
+                    "C2CType": { "type": "integer" },
+                    "Sig": { "type": "string" },
+                    "GroupUin": { "type": "integer" },
+                    "GroupCode": { "type": "integer" }
+                  },
+                  "required": ["C2CType", "Sig", "GroupCode", "GroupUin"]
+                }
               },
               "required": [
                 "FromUin",
