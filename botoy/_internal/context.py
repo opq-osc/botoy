@@ -155,6 +155,7 @@ class GroupMsg(BaseMsg):
         return c(self, "is_at_bot", self.is_at_user(self.model.CurrentQQ))
 
 
+
 class FriendMsg(BaseMsg):
     def __init__(self, data: Union[str, dict]):
         super().__init__()

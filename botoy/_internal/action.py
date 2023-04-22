@@ -871,9 +871,9 @@ class Action:
     #             admins = [member for member in members if member["GroupAdmin"] == 1]
     #         return admins
     #
-    #     async def getClusterInfo(self) -> dict:
-    #         """获取当前集群信息"""
-    #         return await self.get("", path="/v1/ClusterInfo", params={"isShow": 1, "qq": 1})
+    async def getClusterInfo(self) -> dict:
+        """获取当前集群信息"""
+        return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})
     #
     #     async def setUniqueTitle(self, user: int, group: int, title: str):
     #         """设置群头衔"""
@@ -1089,11 +1089,11 @@ class Action:
     #             path="/v1/User/SelfProfile",
     #         )
     #
-    #     async def getAllBots(self) -> List[int]:
-    #         """获取OPQ登陆的所有机器人QQ号"""
-    #         return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
-    #
-    #     ############################################################################
+        async def getAllBots(self) -> List[int]:
+            """获取OPQ登陆的所有机器人QQ号"""
+            return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
+
+        ############################################################################
     async def baseRequest(
         self,
         method: str,
