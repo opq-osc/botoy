@@ -3,7 +3,7 @@ import re
 import traceback
 from abc import ABCMeta, abstractmethod
 from contextvars import ContextVar
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from . import models
 from .log import logger
@@ -282,5 +282,6 @@ class Context:
         return "Context => {data}".format(data=str(self.data))
 
 
-ctx_var: ContextVar[Context] = ContextVar("ctx")
+# 用Any避开类型警告
+ctx_var: ContextVar[Any] = ContextVar("ctx")
 ctx: Context = bind_contextvar(ctx_var)  # type: ignore

@@ -204,6 +204,13 @@ class Botoy:
 
     __call__ = attach
 
+    async def _packet_handler(self, pkt):
+        token = ctx_var.set(Context(pkt))
+        await asyncio.gather(
+            *(self._start_task(receiver) for (receiver, *_) in self.handlers),
+        )
+        ctx_var.reset(token)
+
     def _start_task(self, target, *args, **kwargs):
         return asyncio.ensure_future(target(*args, **kwargs))
 
@@ -213,14 +220,7 @@ class Botoy:
                 if self.ws is not None:
                     async for pkt in self.ws:
                         if self.handlers:
-                            token = ctx_var.set(Context(pkt))  # type: ignore
-                            await asyncio.gather(
-                                *(
-                                    self._start_task(receiver)
-                                    for (receiver, *_) in self.handlers
-                                ),
-                            )
-                            ctx_var.reset(token)
+                            await self._packet_handler(pkt)
             except ConnectionClosed:
                 connected_clients.remove(self)
                 if self.state == "connected":
