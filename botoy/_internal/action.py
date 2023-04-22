@@ -874,226 +874,228 @@ class Action:
     async def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
         return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})
-    #
-    #     async def setUniqueTitle(self, user: int, group: int, title: str):
-    #         """设置群头衔"""
-    #         return await self.post(
-    #             "OidbSvc.0x8fc_2",
-    #             {"GroupID": group, "UserID": user, "NewTitle": title},
-    #         )
-    #
-    #     async def modifyGroupCard(self, user: int, group: int, nick: str):
-    #         """修改群名片"""
-    #         return await self.post(
-    #             "ModifyGroupCard", {"UserID": user, "GroupID": group, "NewNick": nick}
-    #         )
-    #
-    #     async def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
-    #         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
-    #         return await self.post(
-    #             "OidbSvc.0x570_8",
-    #             {
-    #                 "GroupID": groupID,
-    #                 "ShutUpUserID": userid,
-    #                 "ShutTime": ShutTime,
-    #             },
-    #         )
-    #
-    #     async def shutAllUp(self, group: int, switch: int):
-    #         """全体禁言
-    #         :param switch: 1 开启; 0 关闭
-    #         """
-    #         return await self.post(
-    #             "OidbSvc.0x89a_0",
-    #             {"GroupID": group, "Switch": switch},
-    #         )
-    #
-    #     async def setGroupAnnounce(
-    #         self,
-    #         group: int,
-    #         text: str,
-    #         pinned: bool = False,
-    #         title: str = "",
-    #         typ: bool = True,
-    #     ):
-    #         """设置群公告
-    #         :param group: 群号
-    #         :param text: 内容
-    #         :param pinned: 是否置顶
-    #         :param title: 标题,可以空
-    #         :param typ: 是否发送新成员
-    #         """
-    #         return await self.post(
-    #             path="/v1/Group/Announce",
-    #             funcname="",
-    #             payload={
-    #                 "GroupID": group,
-    #                 "Title": title,
-    #                 "Text": text,
-    #                 "Pinned": 1 if pinned else 0,
-    #                 "Type": 20 if typ else 10,  # 20 发给新成员, 10 弹窗
-    #             },
-    #         )
-    #
-    #     async def likeUser(self, user: int, cmd=0) -> dict:
-    #         """给某人点赞
-    #         :param user: 用户QQ号
-    #         :param cmd: 发送包选项, 0 或 1; 0表示使用``QQZan``; 1表示使用``OidbSvc.0x7e5_4``, 默认为0
-    #         """
-    #         return await self.post(
-    #             "QQZan" if cmd == 0 else "OidbSvc.0x7e5_4", {"UserID": user}
-    #         )
-    #
-    #     async def toggleGroupAdmin(self, user: int, group: int, flag=1) -> dict:
-    #         """设置和取消群管理员
-    #         :param user: 用户QQ
-    #         :param group: 群号
-    #         :param flag: 1 或 0, 1表示设置为管理员; 0 表示取消管理员, 默认为1
-    #         """
-    #         return await self.post(
-    #             "OidbSvc.0x55c_1",
-    #             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
-    #         )
-    #
-    #     async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
-    #         """撤回群消息
-    #         :param group: 群号
-    #         :param msgSeq: 消息msgSeq
-    #         :param msgRandom: 消息msgRandom
-    #         """
-    #         return await self.post(
-    #             "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
-    #         )
-    #
-    #     async def revoke(self, ctx: GroupMsg):
-    #         """撤回群消息"""
-    #         return await self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
-    #
-    #     async def inviteUserJoinGroup(self, group: int, user: int) -> dict:
-    #         """拉人入群
-    #         :param group: 哪个群?
-    #         :param user: 拉谁?
-    #         """
-    #         return await self.post(
-    #             "GroupMgr",
-    #             {"ActionType": 8, "GroupID": group, "ActionUserID": user, "Content": ""},
-    #         )
-    #
-    #     async def joinGroup(self, group: int, content: str = "") -> dict:
-    #         """加入群聊
-    #         :param group: 哪个群?
-    #         :param content: 加群理由
-    #         """
-    #         return await self.post(
-    #             "GroupMgr",
-    #             {"ActionType": 1, "GroupID": group, "ActionUserID": 0, "Content": content},
-    #         )
-    #
-    #     async def exitGroup(self, group: int) -> dict:
-    #         """退出群聊
-    #         :param group: 哪个群?
-    #         """
-    #         return await self.post(
-    #             "GroupMgr",
-    #             {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
-    #         )
-    #
-    #     async def driveUserAway(self, group: int, user: int) -> dict:
-    #         """移出群聊
-    #         :param group: 哪个群?
-    #         :param user:把谁踢出去?
-    #         """
-    #         return await self.post(
-    #             "GroupMgr",
-    #             {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
-    #         )
-    #
-    #     async def refreshKeys(self) -> dict:
-    #         """刷新key二次登陆"""
-    #         return await self.get("", path="/v1/RefreshKeys")
-    #
-    #     async def dealFriend(self, ctx: EventMsg, cmd=None) -> dict:
-    #         """处理好友请求
-    #         :param ctx: 事件EventMsg, 类型不匹配将报错
-    #         :param cmd: True:同意,False:拒绝,None:忽略
-    #         """
-    #         friend_add_info = eventParser.friend_add(ctx)
-    #         assert friend_add_info, "事件类型不匹配"
-    #         return await self.post(
-    #             "DealFriend",
-    #             {
-    #                 "UserID": friend_add_info.UserID,
-    #                 "FromType": friend_add_info.FromType,
-    #                 "Type": friend_add_info.Type,
-    #                 "Field_3": friend_add_info.Field_3,
-    #                 "Field_8": friend_add_info.Field_8,
-    #                 "Content": friend_add_info.Content,
-    #                 "FromGroupId": friend_add_info.FromGroupId,
-    #                 "FromGroupName": friend_add_info.FromGroupName,
-    #                 "Action": {True: 2, False: 3, None: 1}[cmd],  # 1忽略2同意3拒绝
-    #             },
-    #         )
-    #
-    #     async def logout(self, flag=False) -> dict:
-    #         """退出指定QQ
-    #         :param flag: 是否删除设备信息文件
-    #         """
-    #         return await self.post("LogOut", {"Flag": flag})
-    #
-    #     async def getGroupPicInfo(self, url: str = "", base64: str = ""):
-    #         """上传群图片获取图片信息
-    #         :param url: 图片链接
-    #         :param base64: 图片base64
-    #         """
-    #         assert any([url, base64]), "缺少参数"
-    #         return await self.post(
-    #             "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
-    #         )
-    #
-    #     async def updateAvatar(self, url: str):
-    #         """上传头像
-    #         :param url: 图片链接
-    #         """
-    #         return await self.post("", {"HDIMGUrl": url}, path="/v1/User/SelfHDIMG")
-    #
-    #     async def updateProfile(
-    #         self,
-    #         NickName: str,
-    #         Age: int,
-    #         Sex: int,
-    #         ProviceID: int,
-    #         CounrtyID: int,
-    #         CityID: int,
-    #         Flag: int = 0,
-    #     ):
-    #         """更改资料
-    #         :param NickName: QQ名称
-    #         :param Age: 年龄
-    #         :param Sex: 性别 男1 女2
-    #         :param ProviceID: 省份ID
-    #         :param CounrtyID: 国家ID
-    #         :param CityID: 城市ID
-    #         :param Flag: 默认为0正常设置 为1则清空资料保留昵称
-    #         """
-    #         return await self.post(
-    #             "",
-    #             {
-    #                 "NickName": NickName,
-    #                 "Age": Age,
-    #                 "Sex": Sex,
-    #                 "ProviceID": ProviceID,
-    #                 "CounrtyID": CounrtyID,
-    #                 "CityID": CityID,
-    #                 "Flag": Flag,
-    #             },
-    #             path="/v1/User/SelfProfile",
-    #         )
-    #
+
+        #
+        #     async def setUniqueTitle(self, user: int, group: int, title: str):
+        #         """设置群头衔"""
+        #         return await self.post(
+        #             "OidbSvc.0x8fc_2",
+        #             {"GroupID": group, "UserID": user, "NewTitle": title},
+        #         )
+        #
+        #     async def modifyGroupCard(self, user: int, group: int, nick: str):
+        #         """修改群名片"""
+        #         return await self.post(
+        #             "ModifyGroupCard", {"UserID": user, "GroupID": group, "NewNick": nick}
+        #         )
+        #
+        #     async def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
+        #         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
+        #         return await self.post(
+        #             "OidbSvc.0x570_8",
+        #             {
+        #                 "GroupID": groupID,
+        #                 "ShutUpUserID": userid,
+        #                 "ShutTime": ShutTime,
+        #             },
+        #         )
+        #
+        #     async def shutAllUp(self, group: int, switch: int):
+        #         """全体禁言
+        #         :param switch: 1 开启; 0 关闭
+        #         """
+        #         return await self.post(
+        #             "OidbSvc.0x89a_0",
+        #             {"GroupID": group, "Switch": switch},
+        #         )
+        #
+        #     async def setGroupAnnounce(
+        #         self,
+        #         group: int,
+        #         text: str,
+        #         pinned: bool = False,
+        #         title: str = "",
+        #         typ: bool = True,
+        #     ):
+        #         """设置群公告
+        #         :param group: 群号
+        #         :param text: 内容
+        #         :param pinned: 是否置顶
+        #         :param title: 标题,可以空
+        #         :param typ: 是否发送新成员
+        #         """
+        #         return await self.post(
+        #             path="/v1/Group/Announce",
+        #             funcname="",
+        #             payload={
+        #                 "GroupID": group,
+        #                 "Title": title,
+        #                 "Text": text,
+        #                 "Pinned": 1 if pinned else 0,
+        #                 "Type": 20 if typ else 10,  # 20 发给新成员, 10 弹窗
+        #             },
+        #         )
+        #
+        #     async def likeUser(self, user: int, cmd=0) -> dict:
+        #         """给某人点赞
+        #         :param user: 用户QQ号
+        #         :param cmd: 发送包选项, 0 或 1; 0表示使用``QQZan``; 1表示使用``OidbSvc.0x7e5_4``, 默认为0
+        #         """
+        #         return await self.post(
+        #             "QQZan" if cmd == 0 else "OidbSvc.0x7e5_4", {"UserID": user}
+        #         )
+        #
+        #     async def toggleGroupAdmin(self, user: int, group: int, flag=1) -> dict:
+        #         """设置和取消群管理员
+        #         :param user: 用户QQ
+        #         :param group: 群号
+        #         :param flag: 1 或 0, 1表示设置为管理员; 0 表示取消管理员, 默认为1
+        #         """
+        #         return await self.post(
+        #             "OidbSvc.0x55c_1",
+        #             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
+        #         )
+        #
+        #     async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
+        #         """撤回群消息
+        #         :param group: 群号
+        #         :param msgSeq: 消息msgSeq
+        #         :param msgRandom: 消息msgRandom
+        #         """
+        #         return await self.post(
+        #             "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
+        #         )
+        #
+        #     async def revoke(self, ctx: GroupMsg):
+        #         """撤回群消息"""
+        #         return await self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
+        #
+        #     async def inviteUserJoinGroup(self, group: int, user: int) -> dict:
+        #         """拉人入群
+        #         :param group: 哪个群?
+        #         :param user: 拉谁?
+        #         """
+        #         return await self.post(
+        #             "GroupMgr",
+        #             {"ActionType": 8, "GroupID": group, "ActionUserID": user, "Content": ""},
+        #         )
+        #
+        #     async def joinGroup(self, group: int, content: str = "") -> dict:
+        #         """加入群聊
+        #         :param group: 哪个群?
+        #         :param content: 加群理由
+        #         """
+        #         return await self.post(
+        #             "GroupMgr",
+        #             {"ActionType": 1, "GroupID": group, "ActionUserID": 0, "Content": content},
+        #         )
+        #
+        #     async def exitGroup(self, group: int) -> dict:
+        #         """退出群聊
+        #         :param group: 哪个群?
+        #         """
+        #         return await self.post(
+        #             "GroupMgr",
+        #             {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
+        #         )
+        #
+        #     async def driveUserAway(self, group: int, user: int) -> dict:
+        #         """移出群聊
+        #         :param group: 哪个群?
+        #         :param user:把谁踢出去?
+        #         """
+        #         return await self.post(
+        #             "GroupMgr",
+        #             {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
+        #         )
+        #
+        #     async def refreshKeys(self) -> dict:
+        #         """刷新key二次登陆"""
+        #         return await self.get("", path="/v1/RefreshKeys")
+        #
+        #     async def dealFriend(self, ctx: EventMsg, cmd=None) -> dict:
+        #         """处理好友请求
+        #         :param ctx: 事件EventMsg, 类型不匹配将报错
+        #         :param cmd: True:同意,False:拒绝,None:忽略
+        #         """
+        #         friend_add_info = eventParser.friend_add(ctx)
+        #         assert friend_add_info, "事件类型不匹配"
+        #         return await self.post(
+        #             "DealFriend",
+        #             {
+        #                 "UserID": friend_add_info.UserID,
+        #                 "FromType": friend_add_info.FromType,
+        #                 "Type": friend_add_info.Type,
+        #                 "Field_3": friend_add_info.Field_3,
+        #                 "Field_8": friend_add_info.Field_8,
+        #                 "Content": friend_add_info.Content,
+        #                 "FromGroupId": friend_add_info.FromGroupId,
+        #                 "FromGroupName": friend_add_info.FromGroupName,
+        #                 "Action": {True: 2, False: 3, None: 1}[cmd],  # 1忽略2同意3拒绝
+        #             },
+        #         )
+        #
+        #     async def logout(self, flag=False) -> dict:
+        #         """退出指定QQ
+        #         :param flag: 是否删除设备信息文件
+        #         """
+        #         return await self.post("LogOut", {"Flag": flag})
+        #
+        #     async def getGroupPicInfo(self, url: str = "", base64: str = ""):
+        #         """上传群图片获取图片信息
+        #         :param url: 图片链接
+        #         :param base64: 图片base64
+        #         """
+        #         assert any([url, base64]), "缺少参数"
+        #         return await self.post(
+        #             "", {"PicUrl": url, "PicBase64Buf": base64}, path="/v1/GetGroupPicInfo"
+        #         )
+        #
+        #     async def updateAvatar(self, url: str):
+        #         """上传头像
+        #         :param url: 图片链接
+        #         """
+        #         return await self.post("", {"HDIMGUrl": url}, path="/v1/User/SelfHDIMG")
+        #
+        #     async def updateProfile(
+        #         self,
+        #         NickName: str,
+        #         Age: int,
+        #         Sex: int,
+        #         ProviceID: int,
+        #         CounrtyID: int,
+        #         CityID: int,
+        #         Flag: int = 0,
+        #     ):
+        #         """更改资料
+        #         :param NickName: QQ名称
+        #         :param Age: 年龄
+        #         :param Sex: 性别 男1 女2
+        #         :param ProviceID: 省份ID
+        #         :param CounrtyID: 国家ID
+        #         :param CityID: 城市ID
+        #         :param Flag: 默认为0正常设置 为1则清空资料保留昵称
+        #         """
+        #         return await self.post(
+        #             "",
+        #             {
+        #                 "NickName": NickName,
+        #                 "Age": Age,
+        #                 "Sex": Sex,
+        #                 "ProviceID": ProviceID,
+        #                 "CounrtyID": CounrtyID,
+        #                 "CityID": CityID,
+        #                 "Flag": Flag,
+        #             },
+        #             path="/v1/User/SelfProfile",
+        #         )
+        #
         async def getAllBots(self) -> List[int]:
             """获取OPQ登陆的所有机器人QQ号"""
             return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
 
         ############################################################################
+
     async def baseRequest(
         self,
         method: str,
