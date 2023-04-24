@@ -230,7 +230,7 @@ class Botoy:
                 if self.ws is not None:
                     async for pkt in self.ws:
                         if self.handlers:
-                            await self._packet_handler(pkt)
+                            self._start_task(self._packet_handler, pkt)
             except ConnectionClosed:
                 connected_clients.remove(self)
                 if self.state == "connected":
