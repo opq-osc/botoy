@@ -101,7 +101,7 @@ class BaseMsg(metaclass=ABCMeta):
         """机器人qq"""
         return c(self, "bot_qq", self.model.CurrentQQ)
 
-    def text_match(self, pattern: Union[str, re.Pattern[str]]):
+    def text_match(self, pattern: Union[str, re.Pattern]):
         """等于 re.match(pattern, text)"""
         return re.match(pattern, self.text)
 
