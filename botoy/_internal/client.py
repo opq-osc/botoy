@@ -209,9 +209,9 @@ class Botoy:
         # 当前的实现，副作用：增加一项要求: 接收函数有 name 并且 name 唯一
         # TODO: 在mark_recv中处理好name
         # 由botoy注册的框架名自动添加 BOTOY前缀如："name" => "BOTOY name"
+        token = ctx_var.set(Context(pkt))
         if __available_names is not None:
             __available_names = [i[6:] for i in __available_names]
-            token = ctx_var.set(Context(pkt))
             await asyncio.gather(
                 *(
                     self._start_task(receiver)
@@ -219,7 +219,11 @@ class Botoy:
                     if info.get("name", "") in __available_names
                 ),
             )
-            ctx_var.reset(token)
+        else:
+            await asyncio.gather(
+                *(self._start_task(receiver) for (receiver, _) in self.handlers),
+            )
+        ctx_var.reset(token)
 
     def _start_task(self, target, *args, **kwargs):
         return asyncio.ensure_future(target(*args, **kwargs))
