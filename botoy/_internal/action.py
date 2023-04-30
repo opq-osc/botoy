@@ -875,12 +875,9 @@ class Action:
         """获取当前集群信息"""
         return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})
 
-
     async def getGroupList(self) -> List[dict]:
         """获取群列表"""
-        data = await self.post(
-            self.build_request(request={}, cmd="GetGroupLists")
-        )
+        data = await self.post(self.build_request(request={}, cmd="GetGroupLists"))
         return data["GroupLists"]
 
     async def getGroupMembers(self, group: int) -> List[dict]:
@@ -889,11 +886,10 @@ class Action:
         LastBuffer = ""
         while True:
             data = await self.post(
-                self.build_request(request={
-                    "Uin": group,
-                    "LastBuffer": LastBuffer
-                }, cmd="GetGroupMemberLists")
-
+                self.build_request(
+                    request={"Uin": group, "LastBuffer": LastBuffer},
+                    cmd="GetGroupMemberLists",
+                )
             )
             if "MemberLists" in data:
                 members.extend(data["MemberLists"])
@@ -909,15 +905,10 @@ class Action:
         """
         members = await self.getGroupMembers(group)
         if include_owner:
-            admins = [
-                member
-                for member in members
-                if member["MemberFlag"] in [1, 2]
-            ]
+            admins = [member for member in members if member["MemberFlag"] in [1, 2]]
         else:
             admins = [member for member in members if member["MemberFlag"] == 2]
         return admins
-
 
         #
         #     async def setUniqueTitle(self, user: int, group: int, title: str):
