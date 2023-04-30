@@ -875,6 +875,50 @@ class Action:
         """获取当前集群信息"""
         return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})
 
+
+    async def getGroupList(self) -> List[dict]:
+        """获取群列表"""
+        data = await self.post(
+            self.build_request(request={}, cmd="GetGroupLists")
+        )
+        return data["GroupLists"]
+
+    async def getGroupMembers(self, group: int) -> List[dict]:
+        """获取群成员列表"""
+        members = []
+        LastBuffer = ""
+        while True:
+            data = await self.post(
+                self.build_request(request={
+                    "Uin": group,
+                    "LastBuffer": LastBuffer
+                }, cmd="GetGroupMemberLists")
+
+            )
+            if "MemberLists" in data:
+                members.extend(data["MemberLists"])
+            if "LastBuffer" not in data or data["LastBuffer"] == "":
+                break
+            LastBuffer = data["LastBuffer"]
+        return members
+
+    async def getGroupAdminList(self, group: int, include_owner=True) -> List[dict]:
+        """获取群管理员列表
+        :param group: 群号
+        :param include_owner: 是否包括群主
+        """
+        members = await self.getGroupMembers(group)
+        if include_owner:
+            admins = [
+                member
+                for member in members
+                if member["MemberFlag"] in [1, 2]
+            ]
+        else:
+            admins = [member for member in members if member["MemberFlag"] == 2]
+        return admins
+
+
         #
         #     async def setUniqueTitle(self, user: int, group: int, title: str):
         #         """设置群头衔"""
