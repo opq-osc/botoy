@@ -1,16 +1,14 @@
 import asyncio
 import importlib
-import inspect
-import os
 import re
 import signal
+import textwrap
 import threading
 import traceback
 from contextvars import copy_context
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple, Union
+from typing import List, Optional
 from urllib.parse import urlparse
-from uuid import uuid4
 
 import prettytable
 from websockets.client import connect as ws_connect
@@ -21,83 +19,7 @@ from .config import jconfig
 from .context import Context, ctx_var
 from .log import logger
 from .pool import WorkerPool
-
-
-class ReceiverMarker:
-    def __call__(
-        self,
-        receiver,
-        name="",
-        author="",
-        usage="",
-        *,
-        _directly_attached=False,
-        _back=1,
-    ):
-        """标记接收函数
-        该信息仅用于开发者调试
-        :param receiver: 接收函数
-        :param name: 插件名称，默认为__name__
-        :param author: 插件作者，默认为空
-        :param usage: 插件用法，默认为__doc__
-        """
-        receiver.__dict__["is_receiver"] = True
-        meta = ""
-        if file := inspect.getsourcefile(receiver):
-            meta += str(Path(file).relative_to(os.getcwd()))
-        try:
-            lines = inspect.getsourcelines(receiver)
-            if meta:
-                meta += " line {}".format(lines[1])
-        except:
-            pass
-
-        receiver.__dict__["receiver_info"] = {
-            "author": author or "",
-            "usage": usage or receiver.__doc__ or "",
-            "name": name or receiver.__name__ or "",
-            "meta": meta or "",
-        }
-
-        # 插件通过加入额外信息标记接收函数, 其前提该函数能在import后的module中`被检索`到
-        # 被attach调用时，函数会被直接添加，所以无需进行该操作
-        if not _directly_attached:
-            frame = inspect.currentframe()
-            for _ in range(_back):
-                frame = frame.f_back  # type: ignore
-            _globals = frame.f_globals  # type: ignore
-            if receiver not in _globals.values():
-                u = "receiver" + str(uuid4())
-                _globals[u] = receiver
-        return self
-
-    def __add__(self, receiver: Union[Callable, Tuple, List]):
-        if receiver == self:
-            pass
-        elif callable(receiver):
-            self(receiver, _back=2)
-        elif isinstance(receiver, (List, Tuple)):
-            items = list(receiver)
-            items.extend(["", "", ""])
-            self(items[0], *items[1:3], _back=2)
-        else:
-            # TODO ???
-            pass
-        return self
-
-
-mark_recv = ReceiverMarker()
-
-
-def is_recv(receiver):
-    try:
-        return receiver.__dict__.get("is_receiver", False)
-    except Exception:
-        return False
-
-
-#####################
-
+from .receiver import Receiver, ReceiverInfo, is_recv, mark_recv
 
 connected_clients = []
 is_signal_hander_set = False
@@ -122,7 +44,7 @@ def async_signal_handler():
 class Botoy:
     def __init__(self):
         self.ws = None
-        self.handlers = []
+        self.receivers: List[Receiver] = []
         self.state = "disconnected"
         self.loaded_plugins = False
         self.pool = WorkerPool(50)
@@ -164,43 +86,40 @@ class Botoy:
     def print_receivers(self):
         """在控制台打印接收函数信息"""
         table = prettytable.PrettyTable(["Name", "Author", "Usage", "Meta"])
-        for _, receiver_info in self.handlers:
-            table.add_row(
-                [
-                    receiver_info.get("name", ""),
-                    receiver_info.get("author", ""),
-                    receiver_info.get("usage", ""),
-                    receiver_info.get("meta", ""),
-                ]
-            )
+        for receiver in self.receivers:
+            info = receiver.info
+            table.add_row([info.name, info.author, info.usage, info.meta])
         print(table)
 
-    def attach(self, receiver):
+    def attach(self, callback):
         """绑定接收函数
-        :param receiver: 消息接收函数
+        :param callback: 消息接收函数
         """
-        if receiver in (i[0] for i in self.handlers):
+        if callback in (i.callback for i in self.receivers):
             return
         #  不使用插件，基本不会调用mark_recv，这里自动调用补充默认信息
-        if not hasattr(receiver, "receiver_info"):
-            mark_recv(receiver, _directly_attached=True)
-        info = getattr(receiver, "receiver_info", {})
+        if not hasattr(callback, "_info"):
+            mark_recv(callback, _directly_attached=True)
+        info = getattr(callback, "_info", ReceiverInfo())
 
-        async def handler():
+        async def _callback():
             try:
                 ctx = copy_context()
-                if asyncio.iscoroutinefunction(receiver):
-                    return await receiver()
+                if asyncio.iscoroutinefunction(callback):
+                    return await callback()
                 else:
                     return await asyncio.get_running_loop().run_in_executor(
-                        self.pool, lambda: ctx.run(receiver)
+                        self.pool, lambda: ctx.run(callback)
                     )
             except asyncio.CancelledError:
                 pass
             except Exception:
-                logger.error("接收函数中出现错误：\n" + traceback.format_exc())
+                logger.error(
+                    "接收函数中出现错误：\n" + textwrap.indent(traceback.format_exc(), " " * 2)
+                )
 
-        self.handlers.append((handler, info))
+        receiver = Receiver(_callback, info)
+        self.receivers.append(receiver)
 
     __call__ = attach
 
@@ -215,13 +134,15 @@ class Botoy:
             await asyncio.gather(
                 *(
                     self._start_task(receiver)
-                    for (receiver, info) in self.handlers
-                    if info.get("name", "") in __available_names
+                    for receiver in self.receivers
+                    if receiver.info.name in __available_names
                 ),
+                return_exceptions=True,
             )
         else:
             await asyncio.gather(
-                *(self._start_task(receiver) for (receiver, _) in self.handlers),
+                *(self._start_task(receiver) for receiver in self.receivers),
+                return_exceptions=True,
             )
         ctx_var.reset(token)
 
@@ -233,7 +154,7 @@ class Botoy:
             try:
                 if self.ws is not None:
                     async for pkt in self.ws:
-                        if self.handlers:
+                        if self.receivers:
                             self._start_task(self._packet_handler, pkt)
             except ConnectionClosed:
                 connected_clients.remove(self)
