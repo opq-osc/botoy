@@ -38,7 +38,7 @@ class ReceiverMarker:
             **{
                 "author": author or "",
                 "usage": usage or receiver.__doc__ or "",
-                "name": name or receiver.__name__ or "",
+                "name": name or receiver.__name__.strip("r_") or "",  # 注意r_
                 "meta": meta or "",
             }
         )

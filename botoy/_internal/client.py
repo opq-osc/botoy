@@ -1,5 +1,6 @@
 import asyncio
 import importlib
+import inspect
 import re
 import signal
 import textwrap
@@ -7,7 +8,7 @@ import threading
 import traceback
 from contextvars import copy_context
 from pathlib import Path
-from typing import List, Optional
+from typing import Callable, List, Optional
 from urllib.parse import urlparse
 
 import prettytable
@@ -66,6 +67,10 @@ class Botoy:
         # 哪些可能是插件
         # 1. 所有.py文件
         # 2. 所有包目录
+        # 插件提供接收函数，扫描所有接收函数
+        # 哪些是接收函数
+        # 1. 被mark_recv包装过的所有可调用对象
+        # 2. 命名以r_开头的所有函数
         mods = []
         plugins_dir = Path("plugins")
         for path in plugins_dir.iterdir():
@@ -80,8 +85,11 @@ class Botoy:
             module = importlib.import_module(mod)
             # print(module.__dict__.keys())
             for v in module.__dict__.values():
-                if is_recv(v):
-                    self.attach(v)
+                if isinstance(v, Callable):
+                    if is_recv(v) or (
+                        inspect.isfunction(v) and v.__name__.startswith("r_")
+                    ):
+                        self.attach(v)
 
     def print_receivers(self):
         """在控制台打印接收函数信息"""
