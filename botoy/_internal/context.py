@@ -283,5 +283,5 @@ class Context:
 
 
 # 用Any避开类型警告
-ctx_var: ContextVar[Any] = ContextVar("ctx")
-ctx: Context = bind_contextvar(ctx_var)  # type: ignore
+current_ctx: ContextVar[Any] = ContextVar("ctx")
+ctx: Context = bind_contextvar(current_ctx)  # type: ignore
