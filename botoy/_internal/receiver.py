@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Callable, Coroutine, List, Tuple, Union
 from uuid import uuid4
 
+from .keys import *
+
 
 class ReceiverMarker:
     def __call__(
@@ -23,7 +25,7 @@ class ReceiverMarker:
         :param author: 插件作者，默认为空
         :param usage: 插件用法，默认为__doc__
         """
-        receiver.__dict__["is_receiver"] = True
+        receiver.__dict__[IS_RECEIVER] = True
         meta = ""
         if file := inspect.getsourcefile(receiver):
             meta += str(Path(file).relative_to(os.getcwd()))
@@ -34,7 +36,7 @@ class ReceiverMarker:
         except:
             pass
 
-        receiver.__dict__["_info"] = ReceiverInfo(
+        receiver.__dict__[RECEIVER_INFO] = ReceiverInfo(
             **{
                 "author": author or "",
                 "usage": usage or receiver.__doc__ or "",
@@ -75,7 +77,7 @@ mark_recv = ReceiverMarker()
 
 def is_recv(receiver):
     try:
-        return receiver.__dict__.get("is_receiver", False)
+        return receiver.__dict__.get(IS_RECEIVER, False)
     except Exception:
         return False
 

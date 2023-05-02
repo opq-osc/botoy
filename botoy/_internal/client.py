@@ -18,6 +18,7 @@ from websockets.exceptions import ConnectionClosed, InvalidURI
 from . import runner
 from .config import jconfig
 from .context import Context, ctx_var
+from .keys import *
 from .log import logger
 from .pool import WorkerPool
 from .receiver import Receiver, ReceiverInfo, is_recv, mark_recv
@@ -106,9 +107,9 @@ class Botoy:
         if callback in (i.callback for i in self.receivers):
             return
         #  不使用插件，基本不会调用mark_recv，这里自动调用补充默认信息
-        if not hasattr(callback, "_info"):
+        if not hasattr(callback, RECEIVER_INFO):
             mark_recv(callback, _directly_attached=True)
-        info = getattr(callback, "_info", ReceiverInfo())
+        info = getattr(callback, RECEIVER_INFO, ReceiverInfo())
 
         async def _callback():
             try:
