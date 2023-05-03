@@ -907,7 +907,7 @@ class Action:
             admins = [member for member in members if member["MemberFlag"] == 2]
         return admins
 
-    async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
+    async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int):
         """撤回群消息
         :param group: 群号
         :param msgSeq: 消息msgSeq
@@ -1161,20 +1161,24 @@ class Action:
         if not params.get("qq"):
             params["qq"] = await self.qq
 
-        # 发送请求
-        resp = await self.c.request(
-            method,
-            httpx.URL(url=path, params=params),
-            json=payload,
-            **({"timeout": timeout} if timeout else {}),
-        )
-        resp_model = Response.parse_obj(resp.json())
-        if resp_model.CgiBaseResponse.ErrMsg:
-            if resp_model.CgiBaseResponse.Ret == 0:
-                logger.success(resp_model.CgiBaseResponse.ErrMsg)
-            else:
-                logger.error(resp_model.CgiBaseResponse.ErrMsg)
-        return resp_model.ResponseData
+        try:
+            # 发送请求
+            resp = await self.c.request(
+                method,
+                httpx.URL(url=path, params=params),
+                json=payload,
+                **({"timeout": timeout} if timeout else {}),
+            )
+            resp_model = Response.parse_obj(resp.json())
+            if resp_model.CgiBaseResponse.ErrMsg:
+                if resp_model.CgiBaseResponse.Ret == 0:
+                    logger.success(resp_model.CgiBaseResponse.ErrMsg)
+                else:
+                    logger.error(resp_model.CgiBaseResponse.ErrMsg)
+            return resp_model.ResponseData
+        except Exception as e:
+            logger.error(e)
+            return None
         # try:
         #     resp = await self.c.request(
         #         method, httpx.URL(url=path, params=params), json=payload
