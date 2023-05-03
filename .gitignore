@@ -138,3 +138,4 @@ local*
 .nvimlog
 botoy-cache
 tests/botoy.json
+botoy.local.json
