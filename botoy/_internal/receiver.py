@@ -263,7 +263,9 @@ class Session:
         :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
         """
         try:
-            return await asyncio.wait_for(self.queue.get(), timeout or 10)
+            return await asyncio.wait_for(
+                self.queue.get(), timeout or self.default_timeout
+            )
         except asyncio.TimeoutError:
             return None
 
