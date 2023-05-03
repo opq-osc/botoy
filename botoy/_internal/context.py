@@ -241,11 +241,8 @@ class Context:
         msg = None
         try:
             msg = GroupMsg(self.__data)
-        except AssertionError:
-            # TODO: 忽略预期的异常
-            pass
-        except:
-            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+        except Exception:
+            logger.debug(f"filter message: {traceback.format_exc()}")
 
         return c(self, "group_msg", msg)
 
@@ -256,10 +253,8 @@ class Context:
         msg = None
         try:
             msg = FriendMsg(self.__data)
-        except AssertionError:
-            pass
-        except:
-            logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
+        except Exception:
+            logger.debug(f"filter message: {traceback.format_exc()}")
         return c(self, "friend_msg", msg)
 
     f = friend_msg
@@ -282,6 +277,5 @@ class Context:
         return "Context => {data}".format(data=str(self.data))
 
 
-# 用Any避开类型警告
-current_ctx: ContextVar[Any] = ContextVar("ctx")
+current_ctx: ContextVar[Context] = ContextVar("ctx")
 ctx: Context = bind_contextvar(current_ctx)  # type: ignore

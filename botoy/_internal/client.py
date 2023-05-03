@@ -3,10 +3,7 @@ import importlib
 import inspect
 import re
 import signal
-import textwrap
 import threading
-import traceback
-from contextvars import copy_context
 from pathlib import Path
 from typing import Callable, List, Optional
 from urllib.parse import urlparse
@@ -49,7 +46,7 @@ class Botoy:
         self.receivers: List[Receiver] = []
         self.state = "disconnected"
         self.loaded_plugins = False
-        self.pool = WorkerPool(50)
+        self.pool = WorkerPool()
         self._url = self._get_ws_url(jconfig.url)
 
     @property
@@ -111,23 +108,7 @@ class Botoy:
             mark_recv(callback, _directly_attached=True)
         info = getattr(callback, RECEIVER_INFO, ReceiverInfo())
 
-        async def _callback():
-            try:
-                ctx = copy_context()
-                if asyncio.iscoroutinefunction(callback):
-                    return await callback()
-                else:
-                    return await asyncio.get_running_loop().run_in_executor(
-                        self.pool, lambda: ctx.run(callback)
-                    )
-            except asyncio.CancelledError:
-                pass
-            except Exception:
-                logger.error(
-                    "接收函数中出现错误：\n" + textwrap.indent(traceback.format_exc(), " " * 2)
-                )
-
-        receiver = Receiver(_callback, info)
+        receiver = Receiver(callback, info, pool=self.pool)
         self.receivers.append(receiver)
 
     __call__ = attach

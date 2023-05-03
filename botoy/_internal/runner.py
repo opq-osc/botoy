@@ -21,6 +21,7 @@ def _get_running_args():
 
 
 def _restart_process():
+    print("")
     return subprocess.Popen(
         _get_running_args(),
         env={
