@@ -11,8 +11,8 @@ T = TypeVar("T")
 
 # from . import macro, utils
 from .config import jconfig
-from .log import logger
 from .context import GroupMsg
+from .log import logger
 
 # from botoy.parser import event as eventParser
 
@@ -908,11 +908,11 @@ class Action:
         return admins
 
     async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
-    """撤回群消息
-    :param group: 群号
-    :param msgSeq: 消息msgSeq
-    :param msgRandom: 消息msgRandom
-    """
+        """撤回群消息
+        :param group: 群号
+        :param msgSeq: 消息msgSeq
+        :param msgRandom: 消息msgRandom
+        """
         return await self.post(
             self.build_request(
                 request={"Uin": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
