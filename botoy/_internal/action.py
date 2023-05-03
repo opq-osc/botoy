@@ -913,12 +913,12 @@ class Action:
     :param msgSeq: 消息msgSeq
     :param msgRandom: 消息msgRandom
     """
-    return await self.post(
-        self.build_request(
-            request={"Uin": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
-            cmd="GroupRevokeMsg",
+        return await self.post(
+            self.build_request(
+                request={"Uin": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom},
+                cmd="GroupRevokeMsg",
+            )
         )
-    )
 
     async def revoke(self, msg: GroupMsg):
         """撤回群消息"""
