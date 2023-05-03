@@ -76,6 +76,7 @@ def start_session(
             multi_user = False
             sid = str(g.from_user)
         else:
+            group = True
             multi_user = False
             friend = True
             sid = f"{g.from_group}-{g.from_user}"
