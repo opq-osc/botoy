@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from uuid import uuid4
 
-from .context import Context
 from .context import Context as T_Context
 from .context import FriendMsg as T_FriendMsg
 from .context import GroupMsg as T_GroupMsg
@@ -141,7 +140,7 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
 
 class FinishSession(Exception):
-    pass
+    '''抛异常快速跳出执行'''
 
 
 class Session:
@@ -155,7 +154,7 @@ class Session:
     ):
         self.sid = sid
         self.receiver = receiver
-        self.queue = asyncio.Queue[Context]()
+        self.queue = asyncio.Queue[T_Context]()
         self.lock = asyncio.Lock()
         self.default_timeout = 20
 
@@ -196,13 +195,13 @@ class Session:
     def waiting_friend(self):
         return self._waiting_friend
 
-    async def add_ctx(self, ctx: "Context"):
+    async def add_ctx(self, ctx: T_Context):
         async with self.lock:
             if (self.waiting_friend and ctx.f) or (self.waiting_group and ctx.g):
                 await self.queue.put(ctx)
                 self._waiting_friend = self._waiting_group = False
 
-    async def get_ctx(self, timeout=None) -> Optional["Context"]:
+    async def get_ctx(self, timeout=None) -> Optional[T_Context]:
         """队列中获取ctx
         :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
         """
