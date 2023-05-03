@@ -32,15 +32,15 @@ def start_session(
     由群消息开启会话
     ================
 
-    A. group=True, friend参数失效
+    A. ``group=True``, ``friend``参数失效
 
-    - multi_user=True
-        会话为该群所有用户共享。该群所有消息都会被捕获。session无法获取下一条好友消息（无法调用f方法，并且ctx方法只返回群消息）
+    - ``multi_user=True``
+        会话为该群所有用户共享。该群所有消息都会被捕获。``session``无法获取下一条好友消息（无法调用``f``方法，并且``ctx``方法只返回群消息）
 
-    - multi_user=False
+    - ``multi_user=False``
         会话为该群该用户共享，同时自动支持好友消息。来自该用户在该群的消息以及该用户的私聊消息都会被捕获。
 
-    B. friend=True
+    B. ``friend=True``
 
     开启与该用户的私聊会话。只捕获该用户的私聊消息。
 
@@ -370,6 +370,7 @@ class Receiver:
         # 3. userID 仅该用户私聊
         self.state: Dict[str, weakref.ReferenceType[Session]] = {}
 
+        # 没检测出问题也不大
         source = inspect.getsource(callback)
         self.using_session = bool(re.findall(r"start_session\(.*?\)", source))
         if self.using_session:
