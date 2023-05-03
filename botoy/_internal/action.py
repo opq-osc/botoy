@@ -1,15 +1,11 @@
 # FIXME: 先凑合用
 import asyncio
-import mimetypes
 import re
-import time
-import traceback
-import uuid
 from typing import List, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 T = TypeVar("T")
 
@@ -1125,9 +1121,10 @@ class Action:
         #             path="/v1/User/SelfProfile",
         #         )
         #
-        async def getAllBots(self) -> List[int]:
-            """获取OPQ登陆的所有机器人QQ号"""
-            return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
+
+    async def getAllBots(self) -> List[int]:
+        """获取OPQ登陆的所有机器人QQ号"""
+        return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
 
         ############################################################################
 
@@ -1227,15 +1224,15 @@ class Action:
             timeout=timeout,
         )
 
-
-#
-# async def get(
-#     self,
-#     funcname: str,
-#     params: Optional[dict] = None,
-#     path: str = "/v1/LuaApiCaller",
-# ) -> dict:
-#     """封装get操作"""
-#     return await self.baseRequest(
-#         "GET", funcname=funcname, path=path, params=params
-#     )
+    #
+    async def get(
+        self,
+        funcname: str,
+        params: Optional[dict] = None,
+        path: str = "/v1/LuaApiCaller",
+        timeout: Optional[int] = None,
+    ) -> dict:
+        """封装get操作"""
+        return await self.baseRequest(
+            "GET", funcname=funcname, path=path, params=params, timeout=timeout
+        )
