@@ -65,6 +65,8 @@ def start_session(
     multi_user = bool(multi_user)
     ctx = current_ctx.get()
     if g := ctx.g:
+        if g.is_from_self:
+            raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
         if group:
             if multi_user:
                 friend = False
@@ -81,6 +83,8 @@ def start_session(
             friend = True
             sid = f"{g.from_group}-{g.from_user}"
     elif f := ctx.f:
+        if f.is_from_self:
+            raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
         group = multi_user = False
         sid = str(f.from_user)
     else:
