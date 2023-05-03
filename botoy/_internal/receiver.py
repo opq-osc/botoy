@@ -7,7 +7,7 @@ import traceback
 import weakref
 from contextvars import ContextVar, copy_context
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, NoReturn, Optional, Tuple, Union
 from uuid import uuid4
 
 from .context import Context as T_Context
@@ -99,22 +99,50 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
     async def text(self, timeout=None):
         """获取下一条信息文本
-        :param timeout: 超时时间，单位为秒。超时返回`None`
+        :param timeout: 超时时间，单位为秒。超时返回``None``。默认20s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_text(timeout)
 
+    async def must_text(self, timeout=None):
+        """获取下一条信息文本
+        :param timeout: 超时时间，单位为秒。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
+        """
+        text, s = await self.__s__.next_text(timeout)
+        if text is None:
+            self.finish()
+        return text, s
+
     async def g(self, timeout=None):
         """获取下一条群消息
-        如果该会话不支持捕捉群消息，将报错。
+        如果该会话不支持捕捉群消息，将报错。超时返回``None``。默认20s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_g(timeout)
+
+    async def must_g(self, timeout=None):
+        """获取下一条群消息
+        如果该会话不支持捕捉群消息，将报错。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
+        """
+        msg, s = await self.__s__.next_g(timeout)
+        if msg is None:
+            self.finish()
+        return msg, s
 
     async def f(self, timeout=None):
         """获取下一条好友消息
         如果该会话不支持捕捉好友消息，将报错。
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回``None``。默认20s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_f(timeout)
+
+    async def must_f(self, timeout=None):
+        """获取下一条好友消息
+        如果该会话不支持捕捉好友消息，将报错。
+        :param timeout: 超时时间，单位为秒。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
+        """
+        msg, s = await self.__s__.next_f(timeout)
+        if msg is None:
+            self.finish()
+        return msg, s
 
     async def ctx(self, timeout=None):
         """获取下一个ctx
@@ -122,15 +150,24 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
         """
         return await self.__s__.next_ctx(timeout)
 
+    async def must_ctx(self, timeout=None):
+        """获取下一个ctx
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        """
+        c, s = await self.__s__.next_ctx(timeout)
+        if c is None:
+            self.finish()
+        return c, s
+
     def set_default_timeout(self, timeout: int):
         """设置消息等待的默认超时时间，单位为秒
         :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
         """
         self.__s__.set_default_timeout(timeout)
 
-    def finish(self):
+    def finish(self) -> NoReturn:
         """结束会话"""
-        self.__s__.finish()
+        return self.__s__.finish()
 
     def __repr__(self) -> str:
         return self.__s__.__repr__()
@@ -140,7 +177,7 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
 
 class FinishSession(Exception):
-    '''抛异常快速跳出执行'''
+    """抛异常快速跳出执行"""
 
 
 class Session:
@@ -167,7 +204,7 @@ class Session:
 
         self.finished = False  # py没法做到理想raii， 加个标记吧
 
-    def finish(self):
+    def finish(self) -> NoReturn:
         self.finished = True
         raise FinishSession()
 
