@@ -107,10 +107,25 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
         """获取下一条信息文本
         :param timeout: 超时时间，单位为秒。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
         """
-        text, s = await self.__s__.next_text(timeout)
+        text, s = await self.text(timeout)
         if text is None:
             self.finish()
         return text, s
+
+    async def image(self, timeout=None):
+        """获取下一条消息的图片内容(图片列表), 图片不可能为空
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        """
+        return await self.__s__.next_image(timeout)
+
+    async def must_image(self, timeout=None):
+        """获取下一条消息的图片内容(图片列表), 图片不可能为空
+        :param timeout: 超时时间，单位为秒。超时直接结束会话。默认20s，可通过`set_default_timeout`修改。
+        """
+        images, s = await self.image(timeout)
+        if images is None:
+            self.finish()
+        return images, s
 
     async def g(self, timeout=None):
         """获取下一条群消息
@@ -122,7 +137,7 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
         """获取下一条群消息
         如果该会话不支持捕捉群消息，将报错。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
         """
-        msg, s = await self.__s__.next_g(timeout)
+        msg, s = await self.g(timeout)
         if msg is None:
             self.finish()
         return msg, s
@@ -139,7 +154,7 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
         如果该会话不支持捕捉好友消息，将报错。
         :param timeout: 超时时间，单位为秒。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
         """
-        msg, s = await self.__s__.next_f(timeout)
+        msg, s = await self.f(timeout)
         if msg is None:
             self.finish()
         return msg, s
@@ -154,7 +169,7 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
         """获取下一个ctx
         :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
         """
-        c, s = await self.__s__.next_ctx(timeout)
+        c, s = await self.ctx(timeout)
         if c is None:
             self.finish()
         return c, s
@@ -255,6 +270,17 @@ class Session:
         if the_ctx and the_S:
             if msg := the_ctx.f or the_ctx.g:  # 在receiver里进行了消息过滤, 此处无需再次判断
                 return msg.text, the_S
+        return None, the_S
+
+    async def next_image(self, timeout=None):
+        """获取下一条消息的图片内容(图片列表), 图片不可能为空
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        """
+        the_ctx, the_S = await self.next_ctx(timeout=timeout)
+        if the_ctx and the_S:
+            if msg := the_ctx.f or the_ctx.g:
+                if msg.images:
+                    return msg.images, the_S
         return None, the_S
 
     async def next_g(self, timeout=None) -> Tuple[Optional[T_GroupMsg], T_S]:
