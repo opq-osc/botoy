@@ -143,7 +143,7 @@ class GroupMsg(BaseMsg):
     @property
     def from_group_name(self) -> str:
         """群名称"""
-        return c(self, "from_group_name", self.msg_head.GroupName)
+        return c(self, "from_group_name", self.msg_head.GroupInfo.GroupName)
 
     @property
     def from_user(self) -> int:
