@@ -104,13 +104,13 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
     async def text(self, timeout=None):
         """获取下一条信息文本
-        :param timeout: 超时时间，单位为秒。超时返回``None``。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回``None``。默认30s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_text(timeout)
 
     async def must_text(self, timeout=None):
         """获取下一条信息文本
-        :param timeout: 超时时间，单位为秒。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时直接结束对话。默认30s，可通过`set_default_timeout`修改。
         """
         text, s = await self.text(timeout)
         if text is None:
@@ -119,13 +119,13 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
     async def image(self, timeout=None):
         """获取下一条消息的图片内容(图片列表), 图片不可能为空
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_image(timeout)
 
     async def must_image(self, timeout=None):
         """获取下一条消息的图片内容(图片列表), 图片不可能为空
-        :param timeout: 超时时间，单位为秒。超时直接结束会话。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时直接结束会话。默认30s，可通过`set_default_timeout`修改。
         """
         images, s = await self.image(timeout)
         if images is None:
@@ -134,13 +134,13 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
     async def g(self, timeout=None):
         """获取下一条群消息
-        如果该会话不支持捕捉群消息，将报错。超时返回``None``。默认20s，可通过`set_default_timeout`修改。
+        如果该会话不支持捕捉群消息，将报错。超时返回``None``。默认30s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_g(timeout)
 
     async def must_g(self, timeout=None):
         """获取下一条群消息
-        如果该会话不支持捕捉群消息，将报错。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
+        如果该会话不支持捕捉群消息，将报错。超时直接结束对话。默认30s，可通过`set_default_timeout`修改。
         """
         msg, s = await self.g(timeout)
         if msg is None:
@@ -150,14 +150,14 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
     async def f(self, timeout=None):
         """获取下一条好友消息
         如果该会话不支持捕捉好友消息，将报错。
-        :param timeout: 超时时间，单位为秒。超时返回``None``。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回``None``。默认30s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_f(timeout)
 
     async def must_f(self, timeout=None):
         """获取下一条好友消息
         如果该会话不支持捕捉好友消息，将报错。
-        :param timeout: 超时时间，单位为秒。超时直接结束对话。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时直接结束对话。默认30s，可通过`set_default_timeout`修改。
         """
         msg, s = await self.f(timeout)
         if msg is None:
@@ -166,13 +166,13 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
     async def ctx(self, timeout=None):
         """获取下一个ctx
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         return await self.__s__.next_ctx(timeout)
 
     async def must_ctx(self, timeout=None):
         """获取下一个ctx
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         c, s = await self.ctx(timeout)
         if c is None:
@@ -181,7 +181,7 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
 
     def set_default_timeout(self, timeout: int):
         """设置消息等待的默认超时时间，单位为秒
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         self.__s__.set_default_timeout(timeout)
 
@@ -213,7 +213,7 @@ class Session:
         self.receiver = receiver
         self.queue = asyncio.Queue[T_Context]()
         self.lock = asyncio.Lock()
-        self.default_timeout = 20
+        self.default_timeout = 30
 
         self.group = bool(group)
         self.friend = bool(friend)
@@ -229,7 +229,7 @@ class Session:
         raise FinishSession()
 
     def set_default_timeout(self, timeout: int):
-        """设置消息等待的默认超时时间, 默认20s，单位为秒"""
+        """设置消息等待的默认超时时间, 默认30s，单位为秒"""
         self.default_timeout = timeout
 
     @property
@@ -260,7 +260,7 @@ class Session:
 
     async def get_ctx(self, timeout=None) -> Optional[T_Context]:
         """队列中获取ctx
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         try:
             return await asyncio.wait_for(
@@ -271,7 +271,7 @@ class Session:
 
     async def next_text(self, timeout=None) -> Tuple[Optional[str], T_S]:
         """获取下一条消息的文本内容
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         the_ctx, the_S = await self.next_ctx(timeout=timeout)
         if the_ctx and the_S:
@@ -281,7 +281,7 @@ class Session:
 
     async def next_image(self, timeout=None):
         """获取下一条消息的图片内容(图片列表), 图片不可能为空
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         the_ctx, the_S = await self.next_ctx(timeout=timeout)
         if the_ctx and the_S:
@@ -293,7 +293,7 @@ class Session:
     async def next_g(self, timeout=None) -> Tuple[Optional[T_GroupMsg], T_S]:
         """获取下一条群消息
         如果该会话不支持捕捉群消息，将报错。
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         if not self.allow_waiting_group:
             raise RuntimeError("该会话不支持获取群消息")
@@ -309,7 +309,7 @@ class Session:
     async def next_f(self, timeout=None) -> Tuple[Optional[T_FriendMsg], T_S]:
         """获取下一条好友消息
         如果该会话不支持捕捉好友消息，将报错。
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         if not self.allow_waiting_group:
             raise RuntimeError("该会话不支持获取好友消息")
@@ -324,7 +324,7 @@ class Session:
 
     async def next_ctx(self, timeout=None) -> Tuple[Optional[T_Context], T_S]:
         """获取下一个ctx
-        :param timeout: 超时时间，单位为秒。超时返回`None`。默认20s，可通过`set_default_timeout`修改。
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
         """
         async with self.lock:
             self._waiting_group = True
