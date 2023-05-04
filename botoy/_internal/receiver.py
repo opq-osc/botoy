@@ -185,9 +185,9 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容
         """
         self.__s__.set_default_timeout(timeout)
 
-    def finish(self) -> NoReturn:
+    def finish(self, info: str = "") -> NoReturn:
         """结束会话"""
-        return self.__s__.finish()
+        return self.__s__.finish(info)
 
     def __repr__(self) -> str:
         return self.__s__.__repr__()
@@ -224,9 +224,14 @@ class Session:
 
         self.finished = False  # py没法做到理想raii， 加个标记吧
 
-    def finish(self) -> NoReturn:
+        self.prev_s: Optional[T_S] = None
+
+    def finish(self, info: str = "") -> NoReturn:
         self.finished = True
-        raise FinishSession()
+        if info:
+            raise FinishSession({"info": info, "s": self.prev_s or S})
+        else:
+            raise FinishSession
 
     def set_default_timeout(self, timeout: int):
         """设置消息等待的默认超时时间, 默认30s，单位为秒"""
@@ -303,7 +308,8 @@ class Session:
         async with self.lock:
             self._waiting_group = False
         if the_ctx:
-            return the_ctx.g, S.bind(the_ctx)  # type: ignore
+            self.prev_s = S.bind(the_ctx)
+            return the_ctx.g, self.prev_s
         return None, S
 
     async def next_f(self, timeout=None) -> Tuple[Optional[T_FriendMsg], T_S]:
@@ -319,7 +325,8 @@ class Session:
         async with self.lock:
             self._waiting_friend = False
         if the_ctx:
-            return the_ctx.f, S.bind(the_ctx)  # type: ignore
+            self.prev_s = S.bind(the_ctx)
+            return the_ctx.f, self.prev_s
         return None, S
 
     async def next_ctx(self, timeout=None) -> Tuple[Optional[T_Context], T_S]:
@@ -334,7 +341,8 @@ class Session:
             self._waiting_group = False
             self._waiting_friend = False
         if the_ctx:
-            return the_ctx, S.bind(the_ctx)
+            self.prev_s = S.bind(the_ctx)
+            return the_ctx, self.prev_s
         return None, S
 
     def __repr__(self) -> str:
@@ -499,8 +507,9 @@ class Receiver:
             await self.last_execution
         except asyncio.CancelledError:
             pass
-        except FinishSession:
-            logger.debug("==> finishing session")
+        except FinishSession as e:
+            if e.args and (arg := e.args[0]):
+                await arg["s"].text(arg["info"])
         except Exception:
             logger.error(
                 "Error occured in receiver：\n"
