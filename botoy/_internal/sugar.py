@@ -233,6 +233,9 @@ class _S:
         """A shortcut of asyncio.sleep"""
         return await asyncio.sleep(delay)
 
+    def __repr__(self) -> str:
+        return f"S <g: {self.g_msg}, f: {self.f_msg}>"
+
 
 #
 #     def voice(self, data: _T_Data, type: int = 0):
