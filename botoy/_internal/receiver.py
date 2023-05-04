@@ -203,6 +203,12 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容, 同时
         """
         return self.__s__.finish(info)
 
+    def set_finish_info(self, info: Union[Callable[[], str], str]):
+        """设置finish时的默认提示信息，默认为空不发送。
+        :param info: 可以是字符串或者返回字符串的函数
+        """
+        return self.__s__.set_finish_info(info)
+
     def __repr__(self) -> str:
         return self.__s__.__repr__()
 
@@ -240,8 +246,22 @@ class Session:
 
         self.prev_s: Optional[T_S] = None
 
+        # 调用finish的默认提示信息，字符串或者返回字符串的函数
+        self.finish_info: Union[Callable[[], str], str] = ""
+
+    def set_finish_info(self, info: Union[Callable[[], str], str]):
+        """设置finish时的默认提示信息，默认为空不发送。
+        :param info: 可以是字符串或者返回字符串的函数
+        """
+        self.finish_info = info
+
     def finish(self, info: str = "") -> NoReturn:
         """可选提示结束信息"""
+        if not info and self.finish_info:
+            if isinstance(self.finish_info, str):
+                info = self.finish_info
+            else:
+                info = self.finish_info()
         self.finished = True
         if info:
             raise FinishSession({"info": info, "s": self.prev_s or S})
