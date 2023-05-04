@@ -141,9 +141,19 @@ class GroupMsg(BaseMsg):
         return c(self, "from_group", self.msg_head.FromUin)
 
     @property
+    def from_group_name(self) -> str:
+        """群名称"""
+        return c(self, "from_group_name", self.msg_head.GroupInfo.GroupName)
+
+    @property
     def from_user(self) -> int:
         """发送者"""
         return c(self, "from_user", self.msg_head.SenderUin)
+
+    @property
+    def from_user_name(self) -> str:
+        """发送者昵称"""
+        return c(self, "from_user_name", self.msg_head.SenderNick)
 
     @property
     def at_list(self):
@@ -188,6 +198,11 @@ class FriendMsg(BaseMsg):
     def from_user(self) -> int:
         """发送者qq"""
         return c(self, "from_user", self.msg_head.FromUin)
+
+    @property
+    def from_user_name(self) -> str:
+        """发送者昵称"""
+        return c(self, "from_user_name", self.msg_head.SenderNick)
 
     @property
     def is_private(self) -> bool:
