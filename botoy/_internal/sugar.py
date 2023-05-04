@@ -1,5 +1,6 @@
 # pylint: disable=W0212
 """深度封装发送操作"""
+import asyncio
 import base64
 import re
 from io import BytesIO
@@ -227,6 +228,10 @@ class _S:
                         return await action.sendFriendPic(f.from_user, text=text, base64=file_to_base64(data))  # type: ignore
 
         return None
+
+    async def sleep(self, delay: float):
+        """A shortcut of asyncio.sleep"""
+        return await asyncio.sleep(delay)
 
 
 #
