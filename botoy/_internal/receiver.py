@@ -1,7 +1,9 @@
 import asyncio
 import inspect
 import os
+import random
 import re
+import string
 import textwrap
 import traceback
 import weakref
@@ -468,6 +470,16 @@ class Session:
 
 
 class ReceiverMarker:
+    def __init__(self) -> None:
+        self.__name_codes = []
+
+    def __get_naming_code(self) -> str:
+        code = "".join(random.choices(list(string.ascii_uppercase), k=3))
+        while code in self.__name_codes:
+            code = "".join(random.choices(list(string.ascii_uppercase), k=3))
+        self.__name_codes.append(code)
+        return code
+
     def __call__(
         self,
         receiver,
@@ -497,11 +509,14 @@ class ReceiverMarker:
         except:
             pass
 
+        name = name or receiver.__name__.strip("r_") or ""
         receiver.__dict__[RECEIVER_INFO] = ReceiverInfo(
             **{
                 "author": author or "",
                 "usage": usage or receiver.__doc__ or "",
-                "name": name or receiver.__name__.strip("r_") or "",  # 注意r_
+                "name": name
+                + (" " if " " in name else "-")
+                + self.__get_naming_code(),  # 注意r_
                 "meta": meta or "",
             }
         )
