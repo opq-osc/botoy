@@ -26,11 +26,14 @@ def start_session(
     group: Optional[bool] = None,
     friend: Optional[bool] = None,
     multi_user: Optional[bool] = None,
+    skip_responder: bool = True,
 ) -> "SessionExport":
     """开启会话
 
     由群消息开启会话
     ================
+
+    Args: group friend multi_user
 
     A. ``group=True``, ``friend``参数失效
 
@@ -59,6 +62,13 @@ def start_session(
     ==================
 
     暂不支持
+
+    Args: skip_responder
+
+    参数``skip_responder``表示跳过抢答。在处在对话中，程序还在处理其他逻辑，此时并不需要用户的输入，但用户仍然可能发送信息，比如用户对当前功能十分熟悉。
+    该行为被定义为抢答。
+    当该参数为``True``时，仅当``正在``请求用户消息时才会处理新消息。
+    当该参数为``False``时，用户消息会被存入队列，当请求用户消息时，会直接作为最新消息返回。
     """
     group = bool(group)
     friend = bool(friend)
@@ -92,7 +102,7 @@ def start_session(
     receiver = current_receiver.get()
     if sid in receiver.state:
         raise RuntimeError(f"该类型对话已经创建，不能重复创建。session id = {sid}")
-    session = Session(sid, receiver, group, friend, multi_user)
+    session = Session(sid, receiver, group, friend, multi_user, skip_responder)
     receiver.state[sid] = weakref.ref(session)
     logger.debug(f"{receiver=} start {session=}")
     return SessionExport(session)
@@ -228,6 +238,7 @@ class Session:
         group: bool,
         friend: bool,
         multi_user: bool,
+        skip_responder: bool,
     ):
         self.sid = sid
         self.receiver = receiver
@@ -238,6 +249,7 @@ class Session:
         self.group = bool(group)
         self.friend = bool(friend)
         self.multi_user = bool(multi_user)
+        self.skip_responder = skip_responder
 
         self._waiting_group = False
         self._waiting_friend = False
@@ -548,7 +560,7 @@ class Receiver:
                 for sid, session_ref in self.state.items():
                     if this_user == int(sid.split("-")[-1]):
                         if session := session_ref():
-                            if session.waiting:
+                            if session.waiting or not session.skip_responder:
                                 await session.add_ctx(ctx)
                         else:
                             del self.state[sid]
