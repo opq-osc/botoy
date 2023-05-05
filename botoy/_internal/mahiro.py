@@ -48,8 +48,8 @@ class Mahiro(Botoy):
 
     async def __exchange_authentication(self, data):
         self.set_token(data["token"])
-        for _, info in self.handlers:
-            name = "BOTOY " + info.get("name")
+        for receiver in self.receivers:
+            name = "BOTOY " + receiver.info.name
             httpx.post(
                 self.REGISTER_PLUGIN_URL,
                 headers=self.headers,

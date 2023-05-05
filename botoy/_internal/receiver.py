@@ -560,10 +560,10 @@ def is_recv(receiver):
 
 class ReceiverInfo:
     def __init__(self, **kwargs):
-        self.name = kwargs.get("name", "")
-        self.author = kwargs.get("author", "")
-        self.usage = kwargs.get("usage", "")
-        self.meta = kwargs.get("meta", "")
+        self.name: str = kwargs.get("name", "")
+        self.author: str = kwargs.get("author", "")
+        self.usage: str = kwargs.get("usage", "")
+        self.meta: str = kwargs.get("meta", "")
 
     def __repr__(self) -> str:
         return f"<ReceiverInfo[{self.name}]>"
