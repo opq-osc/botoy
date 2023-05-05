@@ -23,17 +23,23 @@ current_receiver: ContextVar["Receiver"] = ContextVar("current_receiver")
 
 
 def start_session(
-    group: Optional[bool] = None,
-    friend: Optional[bool] = None,
+    group: Optional[Union[bool, int]] = None,
+    friend: Optional[Union[bool, int]] = None,
     multi_user: Optional[bool] = None,
     skip_responder: bool = True,
 ) -> "SessionExport":
     """开启会话
 
+    约定：只分群消息和好友消息，好友消息与私聊消息在本节所表示含义一致。
+
+    Args: group friend multi_user
+
+    >>> 参数group和friend都不是整数类型的情况 <<<
+
     由群消息开启会话
     ================
 
-    Args: group friend multi_user
+    -
 
     A. ``group=True``, ``friend``参数失效
 
@@ -63,42 +69,84 @@ def start_session(
 
     暂不支持
 
+    参数处理或组合的优先级为：group > multi_user > friend
+    -
+
+    >>> 参数group和friend存在整数类型的情况 <<<
+
+    直接传入群ID，用户ID来开启指定对话
+
+    - 仅指定群id(group)时：参数friend和multi_user均被忽略。此时捕获指定群所有消息。
+
+    - 仅指定用户id(friend)时：参数group和multi_user均被忽略。此时仅捕获指定用户私聊消息。
+
+    - 同时指定群id(group)和用户id(friend)时：
+
+      如果开启多用户(multi_user)，将忽略参数friend。此时捕获指定群所有消息。
+      如果关闭多用户(multi_user)，此时捕获该群来自该用户在该群的消息以及该用户的私聊消息。
+
+    参数处理或组合的优先级为：group > multi_user > friend
+    -
+
     Args: skip_responder
+    -
 
     参数``skip_responder``表示跳过抢答。在处在对话中，程序还在处理其他逻辑，此时并不需要用户的输入，但用户仍然可能发送信息，比如用户对当前功能十分熟悉。
     该行为被定义为抢答。
     当该参数为``True``时，仅当``正在``请求用户消息时才会处理新消息。
     当该参数为``False``时，用户消息会被存入队列，当请求用户消息时，会直接作为最新消息返回。
     """
-    group = bool(group)
-    friend = bool(friend)
+    # prepare
+    group = bool(group) if group is None else group
+    friend = bool(friend) if friend is None else friend
     multi_user = bool(multi_user)
     ctx = current_ctx.get()
-    if g := ctx.g:
-        if g.is_from_self:
-            raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
-        if group:
+    # logic
+    group_int = isinstance(group, int)
+    friend_int = isinstance(friend, int)
+    if group_int or friend_int:
+        if group_int:
             if multi_user:
                 friend = False
-                sid = str(g.from_group)
+                sid = str(group)
             else:
+                if friend_int:
+                    sid = f"{group}-{friend}"
+                else:
+                    friend = False
+                    multi_user = True
+                    sid = str(group)
+        else:
+            multi_user = False
+            group = False
+            sid = str(friend)
+
+    else:
+        if g := ctx.g:
+            if g.is_from_self:
+                raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
+            if group:
+                if multi_user:
+                    friend = False
+                    sid = str(g.from_group)
+                else:
+                    friend = True
+                    sid = f"{g.from_group}-{g.from_user}"
+            elif friend:
+                multi_user = False
+                sid = str(g.from_user)
+            else:
+                group = True
+                multi_user = False
                 friend = True
                 sid = f"{g.from_group}-{g.from_user}"
-        elif friend:
-            multi_user = False
-            sid = str(g.from_user)
+        elif f := ctx.f:
+            if f.is_from_self:
+                raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
+            group = multi_user = False
+            sid = str(f.from_user)
         else:
-            group = True
-            multi_user = False
-            friend = True
-            sid = f"{g.from_group}-{g.from_user}"
-    elif f := ctx.f:
-        if f.is_from_self:
-            raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
-        group = multi_user = False
-        sid = str(f.from_user)
-    else:
-        raise NotImplementedError("事件类型暂不支持创建对话")
+            raise NotImplementedError("事件类型暂不支持创建对话")
     receiver = current_receiver.get()
     if sid in receiver.state:
         raise RuntimeError(f"该类型对话已经创建，不能重复创建。session id = {sid}")
@@ -235,8 +283,8 @@ class Session:
         self,
         sid: str,
         receiver: "Receiver",
-        group: bool,
-        friend: bool,
+        group: Union[bool, int],
+        friend: Union[bool, int],
         multi_user: bool,
         skip_responder: bool,
     ):
@@ -246,9 +294,9 @@ class Session:
         self.lock = asyncio.Lock()
         self.default_timeout = 30
 
-        self.group = bool(group)
-        self.friend = bool(friend)
-        self.multi_user = bool(multi_user)
+        self.group = group
+        self.friend = friend
+        self.multi_user = multi_user
         self.skip_responder = skip_responder
 
         self._waiting_group = False
