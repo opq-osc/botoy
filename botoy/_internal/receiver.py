@@ -9,7 +9,7 @@ import traceback
 import weakref
 from contextvars import ContextVar, copy_context
 from pathlib import Path
-from typing import Callable, Dict, List, NoReturn, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, NoReturn, Optional, Tuple, TypeVar, Union
 from uuid import uuid4
 
 from .context import Context as T_Context
@@ -20,6 +20,8 @@ from .keys import *
 from .log import logger
 from .sugar import _S as T_S
 from .sugar import S
+
+T = TypeVar("T")
 
 current_receiver: ContextVar["Receiver"] = ContextVar("current_receiver")
 
@@ -280,6 +282,50 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容, 同时
                 return False
             else:
                 user_text, _ = await self.text(f"无效输入\n\n{text}\n\n{prompt}")
+
+    async def select(
+        self,
+        candidates: List[T],
+        retry_times: int = 1,
+        key: Optional[Callable[[T], Any]] = None,
+        always_prompt: bool = True,
+        timeout: Optional[float] = None,
+    ) -> Optional[Tuple[T, int]]:
+        """提示用户发送序号选择列表中的一项,
+        返回值为元组: (选择项, 对应索引)。 超出重试次数或超时，返回None
+
+        :param candidates: 选项列表
+        :param retry_times: 重试次数
+        :param key: 一个函数，参数为候选列表中项，返回的值将用于发送给用户的提示信息, 默认为`str`
+        :param always_prompt: 重试时是否再次发送提示
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
+        """
+        key = key or str
+        timeout = timeout or self.__s__.default_timeout
+        items = list(key(candidate) for candidate in candidates)
+        info = "\n".join([f"【{idx}】 {item}" for idx, item in enumerate(items, 1)])
+
+        ret, s = await self.text(
+            f"发送序号选择一项(总次数：{retry_times}次, 超时时间：{timeout}秒)" + "\n" + info,
+            timeout,
+        )
+        while retry_times > 0:
+            retry_times -= 1
+            if ret is None:
+                return
+            try:
+                idx = int(ret) - 1
+                return candidates[idx], idx
+            except Exception:
+                pass
+            if retry_times > 0:
+                msg = f"序号错误。\n发送序号选择一项(剩余次数：{retry_times}次, 超时时间：{timeout}秒)" + (
+                    f"\n{info}" if always_prompt else ""
+                )
+                ret, s = await self.text(msg, timeout)
+            else:
+                await s.text("序号错误，已退出选择。")
+        return
 
     def set_default_timeout(self, timeout: float):
         """设置消息等待的默认超时时间，单位为秒
