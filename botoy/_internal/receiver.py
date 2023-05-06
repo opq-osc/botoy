@@ -689,7 +689,7 @@ class Receiver:
                 for sid in (f"{this_group}-{this_user}", str(this_group)):
                     if session_ref := self.state.get(sid):
                         if session := session_ref():
-                            if session.waiting:
+                            if session.waiting or not session.skip_responder:
                                 await session.add_ctx(ctx)
                         else:
                             del self.state[sid]
