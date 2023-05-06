@@ -550,9 +550,10 @@ class ReceiverMarker:
         self.__name_codes = []
 
     def __gen_naming_code(self) -> str:
-        code = "".join(random.choices(list(string.ascii_uppercase), k=3))
+        chars = list(string.ascii_lowercase)
+        code = "".join(random.choices(chars, k=3))
         while code in self.__name_codes:
-            code = "".join(random.choices(list(string.ascii_uppercase), k=3))
+            code = "".join(random.choices(chars, k=3))
         self.__name_codes.append(code)
         return code
 
@@ -585,14 +586,14 @@ class ReceiverMarker:
         except:
             pass
 
+        code = self.__gen_naming_code()
         name = name or receiver.__name__.strip("r_") or ""
+        name = f"{name} {code}" if name else code
         receiver.__dict__[RECEIVER_INFO] = ReceiverInfo(
             **{
                 "author": author or "",
                 "usage": usage or receiver.__doc__ or "",
-                "name": name
-                + (" " if " " in name else "-")
-                + self.__gen_naming_code(),  # 注意r_
+                "name": name,
                 "meta": meta or "",
             }
         )
