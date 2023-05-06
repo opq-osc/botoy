@@ -6,3 +6,7 @@ prettytable
 apscheduler
 pydantic
 colorama
+
+# mahiro
+fastapi
+uvicorn

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import httpx
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from .client import Botoy
 from .config import jconfig
@@ -24,8 +24,8 @@ class Mahiro(Botoy):
         self._token = ""
         mahiro = jconfig.get_configuration("mahiro")
         # TODO: mahiro相关配置抽离到jconfig里
-        self.default_address = mahiro.get("listen_url", "0.0.0.0:8099")
-        server_url = mahiro.get("server_url", "http://0.0.0.0:8098")
+        self.default_address = mahiro.get("listen_url", "http://0.0.0.0:8099")
+        server_url = mahiro.get("server_url", "http://localhost:8098")
         self.REGISTER_PLUGIN_URL = f"{server_url}/api/v1/panel/plugin/register"
         self.GET_TOKEN_URL = f"{server_url}/api/v1/panel/auth/gettoken"
         self.__setup_routes()
@@ -37,8 +37,9 @@ class Mahiro(Botoy):
     def headers(self):
         return {"x-mahiro-token": self._token}
 
-    async def __message_handler(self, data):
+    async def __message_handler(self, req: Request):
         await self.__ensure_token()
+        data = await req.json()
         self._start_task(
             self._packet_handler,
             data["raw"],
@@ -46,7 +47,8 @@ class Mahiro(Botoy):
         )
         return {"code": 200}
 
-    async def __exchange_authentication(self, data):
+    async def __exchange_authentication(self, req: Request):
+        data = await req.json()
         self.set_token(data["token"])
         for receiver in self.receivers:
             name = "BOTOY " + receiver.info.name
@@ -75,10 +77,10 @@ class Mahiro(Botoy):
             await asyncio.sleep(2)
 
     def __setup_routes(self):
-        self.app.add_route("/recive/group", self.__message_handler, ["POST"])
-        self.app.add_route("/recive/friend", self.__message_handler, ["POST"])
-        self.app.add_route("/recive/health", lambda: {"code": 200}, ["GET"])
-        self.app.add_route("/recive/auth", self.__exchange_authentication, ["POST"])
+        self.app.post("/recive/group")(self.__message_handler)
+        self.app.post("/recive/friend")(self.__message_handler)
+        self.app.get("/recive/health")(lambda: {"code": 200, "version": "1.5.0"})
+        self.app.post("/recive/auth")(self.__exchange_authentication)
 
     def listen(
         self,
@@ -90,5 +92,7 @@ class Mahiro(Botoy):
         address = address or self.default_address
         p = urlparse(address)
         host, port = p.hostname, p.port
-        self._start_task(self.__ensure_token())
-        uvicorn.run(app=app, port=port, host=host, reload=reload)  # type: ignore
+        if host and port:
+            uvicorn.run(app=self.app, port=port, host=host, reload=reload)
+        else:
+            logger.error(f"不支持的地址：{address}")
