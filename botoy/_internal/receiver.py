@@ -251,6 +251,36 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容, 同时
             self.finish()
         return c, s
 
+    async def confirm(
+        self,
+        text: str,
+        default: bool = False,
+        timeout: Optional[float] = None,
+        show_default: bool = True,
+    ) -> bool:
+        """提示确认消息
+        该方法会一直询问用户确认，直到超时或者用户输入正确 y 表示 yes, n 表示 no, 输入不区分大小写
+        :param text: 需要确认的问题
+        :param default: 如果回复超时则返回该默认值
+        :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
+        :param show_default: 在问题后显示超时默认值
+        """
+        timeout = timeout or self.__s__.default_timeout
+        if show_default:
+            prompt = f"[y/N] {timeout}超时，默认为{default and 'yes' or 'no'}"
+        else:
+            prompt = f"[y/N] {timeout}超时"
+        user_text, _ = await self.text(f"{text}\n\n{prompt}", timeout)
+        while True:
+            if user_text is None:
+                return default
+            elif user_text.lower() == "y":
+                return True
+            elif user_text.lower() == "n":
+                return False
+            else:
+                user_text, _ = await self.text(f"无效输入\n\n{text}\n\n{prompt}")
+
     def set_default_timeout(self, timeout: float):
         """设置消息等待的默认超时时间，单位为秒
         :param timeout: 超时时间，单位为秒。超时返回`None`。默认30s，可通过`set_default_timeout`修改。
