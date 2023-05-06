@@ -104,8 +104,8 @@ def start_session(
     multi_user = bool(multi_user)
     ctx = current_ctx.get()
     # logic
-    group_int = isinstance(group, int)
-    friend_int = isinstance(friend, int)
+    group_int = not isinstance(group, bool)  # bool is int, int is not bool...
+    friend_int = not isinstance(friend, bool)
     if group_int or friend_int:
         if group_int:
             if multi_user:
