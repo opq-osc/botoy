@@ -261,7 +261,9 @@ class Context:
 
         return c(self, "group_msg", msg)
 
-    g = group_msg
+    @property
+    def g(self) -> Optional[GroupMsg]:
+        return self.group_msg
 
     @property
     def friend_msg(self) -> Optional[FriendMsg]:
@@ -272,7 +274,9 @@ class Context:
             logger.debug(f"filter message: {traceback.format_exc()}")
         return c(self, "friend_msg", msg)
 
-    f = friend_msg
+    @property
+    def f(self) -> Optional[FriendMsg]:
+        return self.friend_msg
 
     @property
     def event_msg(self) -> Optional[EventMsg]:
@@ -286,7 +290,9 @@ class Context:
             logger.warning("收到该错误，请进行反馈!\n" + traceback.format_exc())
         return c(self, "event_msg", msg)
 
-    e = event_msg
+    @property
+    def e(self) -> Optional[EventMsg]:
+        return self.event_msg
 
     def __repr__(self) -> str:
         return "Context => {data}".format(data=str(self.data))
