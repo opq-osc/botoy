@@ -549,7 +549,7 @@ class ReceiverMarker:
     def __init__(self) -> None:
         self.__name_codes = []
 
-    def __get_naming_code(self) -> str:
+    def __gen_naming_code(self) -> str:
         code = "".join(random.choices(list(string.ascii_uppercase), k=3))
         while code in self.__name_codes:
             code = "".join(random.choices(list(string.ascii_uppercase), k=3))
@@ -592,7 +592,7 @@ class ReceiverMarker:
                 "usage": usage or receiver.__doc__ or "",
                 "name": name
                 + (" " if " " in name else "-")
-                + self.__get_naming_code(),  # 注意r_
+                + self.__gen_naming_code(),  # 注意r_
                 "meta": meta or "",
             }
         )
