@@ -872,7 +872,7 @@ class Action:
     #
     async def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
-        return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})
+        return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})  # type: ignore
 
     async def getGroupList(self) -> List[dict]:
         """获取群列表"""
