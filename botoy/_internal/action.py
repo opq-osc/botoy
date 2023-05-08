@@ -303,7 +303,6 @@ class Action:
         data = await self.post(
             self.build_request(req, "PicUp.DataUp"), timeout=60  # 这个timeout可能不能写死
         )
-        print(data)
         return self.UploadResponse.parse_obj(data)
 
     class SendGroupPicResponse(BaseModel):
@@ -565,40 +564,43 @@ class Action:
         """
         return await self.sendFriendText(await self.qq, content)
 
-    #
-    #     async def replyGroupMsg(
-    #         self,
-    #         group: int,
-    #         content: str,
-    #         msgSeq: int,
-    #         msgTime: Optional[int] = None,
-    #         user: int = 0,
-    #         rawContent: str = "",
-    #     ):
-    #         """发送回复消息, 回复群消息
-    #         下面的原消息表示需要回复的消息
-    #         :param group: 原消息的群号
-    #         :param content: 回复内容
-    #         :param msgSeq: 原消息的msgSeq, 点击跳转到该条消息位置
-    #         :param msgTime: 原消息的msgTime, 如果不指定，默认为当前时间戳
-    #         :param user: 原消息的人的qq号，也可以是其他人，该用户收到消息会提示“有新回复”, 默认为0
-    #         :param rawContent: 原消息内容，可以任意指定，默认为空
-    #         """
-    #         return await self.post(
-    #             "SendMsg",
-    #             {
-    #                 "toUser": group,
-    #                 "sendToType": 2,
-    #                 "sendMsgType": "ReplayMsg",
-    #                 "content": content,
-    #                 "replayInfo": {
-    #                     "MsgSeq": msgSeq,
-    #                     "MsgTime": msgTime or int(time.time()),
-    #                     "UserID": user,
-    #                     "RawContent": rawContent,
-    #                 },
-    #             },
-    #         )
+    class ReplyGroupMsgResponse(BaseModel):
+        MsgSeq: int
+        MsgTime: int
+
+    async def replyGroupMsg(
+        self,
+        target: GroupMsg,
+        content: str,
+        atUser: Union[int, List[int]] = 0,
+        atUserNick: Union[str, List[str]] = "",
+    ):
+        """回复群消息"""
+        req = {
+            "ToUin": target.from_group,
+            "ToType": 2,
+            "ReplyTo": {
+                "MsgSeq": target.msg_seq,
+                "MsgTime": target.msg_time,
+                "MsgUin": target.msg_uid,
+            },
+            "Content": content,
+        }
+        # at list
+        at_uins = to_list(atUser) if atUser else []
+        at_nicks = to_list(atUserNick) if atUserNick else []
+
+        at_list = []
+        for idx, uin in enumerate(at_uins):
+            try:
+                nick = at_nicks[idx]
+            except:
+                nick = str(uin)
+            at_list.append({"Uin": uin, "Nick": nick})
+        req["AtUinLists"] = at_list  # type: ignore
+        data = await self.post(self.build_request(req))
+        return self.ReplyGroupMsgResponse.parse_obj(data)
+
     #
     #     async def replyFriendMsg(
     #         self,
@@ -938,16 +940,21 @@ class Action:
         #             "ModifyGroupCard", {"UserID": user, "GroupID": group, "NewNick": nick}
         #         )
         #
-        #     async def shutUserUp(self, groupID: int, userid: int, ShutTime: int):
-        #         """禁言用户(禁言时间单位为分钟 ShutTime=0 取消禁言)"""
-        #         return await self.post(
-        #             "OidbSvc.0x570_8",
-        #             {
-        #                 "GroupID": groupID,
-        #                 "ShutUpUserID": userid,
-        #                 "ShutTime": ShutTime,
-        #             },
-        #         )
+
+    async def shutUserUp(self, group: int, user_uid: str, ShutTime: int):
+        """禁言用户
+        :param group: 群id
+        :param user_uid: 用户uid
+        :param time: 禁言时间。单位秒 至少60秒 至多30天 参数为0解除禁言
+        """
+        req = {
+            "OpCode": 4691,
+            "Uin": group,
+            "Uid": user_uid,
+            "BanTime": ShutTime,
+        }
+        return await self.post(self.build_request(req, "SsoGroup.Op"))
+
         #
         #     async def shutAllUp(self, group: int, switch: int):
         #         """全体禁言
@@ -1005,19 +1012,6 @@ class Action:
         #             {"GroupID": group, "UserID": user, "Flag": 0 if flag == 0 else 1},
         #         )
         #
-        #     async def revokeGroupMsg(self, group: int, msgSeq: int, msgRandom: int) -> dict:
-        #         """撤回群消息
-        #         :param group: 群号
-        #         :param msgSeq: 消息msgSeq
-        #         :param msgRandom: 消息msgRandom
-        #         """
-        #         return await self.post(
-        #             "RevokeMsg", {"GroupID": group, "MsgSeq": msgSeq, "MsgRandom": msgRandom}
-        #         )
-        #
-        #     async def revoke(self, ctx: GroupMsg):
-        #         """撤回群消息"""
-        #         return await self.revokeGroupMsg(ctx.FromGroupId, ctx.MsgSeq, ctx.MsgRandom)
         #
         #     async def inviteUserJoinGroup(self, group: int, user: int) -> dict:
         #         """拉人入群
@@ -1048,15 +1042,15 @@ class Action:
         #             {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
         #         )
         #
-        #     async def driveUserAway(self, group: int, user: int) -> dict:
-        #         """移出群聊
-        #         :param group: 哪个群?
-        #         :param user:把谁踢出去?
-        #         """
-        #         return await self.post(
-        #             "GroupMgr",
-        #             {"ActionType": 3, "GroupID": group, "ActionUserID": user, "Content": ""},
-        #         )
+
+    async def driveUserAway(self, group: int, user_uid: str):
+        """移出群聊
+        :param group: 哪个群?
+        :param user_uid: 把谁踢出去?
+        """
+        return await self.post(
+            self.build_request({"OpCode": 2208, "Uin": group, "Uid": user_uid})
+        )
         #
         #     async def refreshKeys(self) -> dict:
         #         """刷新key二次登陆"""
@@ -1236,7 +1230,6 @@ class Action:
         path: str = "/v1/LuaApiCaller",
         timeout: Optional[int] = None,
     ):
-        """封装常用的post操作"""
         return await self.baseRequest(
             method="POST",
             funcname=funcname,
@@ -1253,8 +1246,7 @@ class Action:
         params: Optional[dict] = None,
         path: str = "/v1/LuaApiCaller",
         timeout: Optional[int] = None,
-    ) -> dict:
-        """封装get操作"""
+    ):
         return await self.baseRequest(
             "GET", funcname=funcname, path=path, params=params, timeout=timeout
         )
