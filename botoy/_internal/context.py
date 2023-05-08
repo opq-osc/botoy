@@ -87,6 +87,11 @@ class BaseMsg(metaclass=ABCMeta):
         return c(self, "msg_time", self.msg_head.MsgTime)
 
     @property
+    def msg_uid(self):
+        """CurrentPacket.EventData.MsgHead.MsgUid"""
+        return c(self, "msg_uid", self.msg_head.MsgUid)
+
+    @property
     def msg_type(self):
         """CurrentPacket.EventData.MsgHead.MsgType"""
         return c(self, "msg_type", self.msg_head.MsgType)
