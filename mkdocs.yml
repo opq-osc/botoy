@@ -24,24 +24,31 @@ theme:
     code: Fira Code
 nav:
   - index.md
+  - install.md
   - client.md
   - config.md
-  - middleware.md
-  - decorators.md
-  - refine.md
-  - parser.md
-  - action.md
   - plugin.md
-  - lua.md
+  - context.md
+  - action.md
+  - sugar.md
   - session.md
-  - webhook.md
-  - schedule.md
   - contrib.md
-  - connection.md
-  - async.md
-  - cli.md
-  - other.md
-  - changelog.md
+  # - middleware.md
+  # - decorators.md
+  # - refine.md
+  # - parser.md
+  # - action.md
+  # - plugin.md
+  # - lua.md
+  # - session.md
+  # - webhook.md
+  # - schedule.md
+  # - contrib.md
+  # - connection.md
+  # - async.md
+  # - cli.md
+  # - other.md
+  # - changelog.md
 
 markdown_extensions:
   - pymdownx.highlight:
