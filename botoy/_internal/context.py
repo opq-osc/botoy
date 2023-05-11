@@ -257,6 +257,11 @@ class Context:
         return self.__data
 
     @property
+    def bot_qq(self) -> int:
+        """当前机器人QQ"""
+        return self.data["CurrentQQ"]  # type: ignore
+
+    @property
     def group_msg(self) -> Optional[GroupMsg]:
         msg = None
         try:
