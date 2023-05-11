@@ -1,15 +1,17 @@
-# pylint: disable=W0212
-"""深度封装发送操作"""
+"""该模块封装发送操作
+
+分三类场景：群消息、好友消息、私聊消息
+"""
 import asyncio
 import base64
+import functools
 import re
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, List, Optional, Tuple, Union
+from typing import BinaryIO, List, Tuple, Union
 
 from .action import Action
-from .context import Context
-from .context import ctx as current_ctx
+from .context import Context, current_ctx
 from .utils import file_to_base64
 
 # str => base64, md5, file path
@@ -94,62 +96,89 @@ def _resolve_data_type(data: _T_Data) -> Tuple[int, _T_Data]:
 
 
 class _S:
-    # 为了便捷调用这些常数和兼容
     TYPE_AUTO = TYPE_AUTO
     TYPE_URL = TYPE_URL
     TYPE_BASE64 = TYPE_BASE64
     TYPE_MD5 = TYPE_MD5
     TYPE_PATH = TYPE_PATH
 
-    def __init__(self, ctx: Optional[Context] = None):
-        if ctx:
-            # 调用bind才有这一步
-            self._g_msg = ctx.group_msg
-            self._f_msg = ctx.friend_msg
-            if not self.g_msg and not self.f_msg:
-                raise ValueError("ctx不合法，此处不符合常理，请反馈!")
-        else:
-            self._g_msg = None
-            self._f_msg = None
+    # API必要参数
+    _bot: int
+    # 区分消息类型，选择发送目标
+    _is_private: bool
+    _group_id: int
+    _user_id: int
+    _user_name: str
+    # 用于判断是否为框架默认对象
+    _is_default: bool = True
 
-    @property
-    def g_msg(self):
-        # 没调用bind，这里必为None
-        return self._g_msg or current_ctx.g
+    @classmethod
+    def from_args(
+        cls, bot: int, group_id: int, user_id: int, user_name: str, is_private: bool
+    ):
+        """给定S所需参数创建S
+        API调用所需基本参数：``bot``
+        剩余参数为发送目标判断参数:
+            1. 所有消息都具有 ``user_id``, ``user_name``
+            2. 群消息和私聊消息同时具有``group_id``, 所以使用额外标记``is_private``来区分群聊和私聊
 
-    @property
-    def f_msg(self):
-        return self._f_msg or current_ctx.f
+        """
+        s = cls()
+        s._is_default = False
+        s._bot = bot
+        s._group_id = group_id
+        s._user_id = user_id
+        s._user_name = user_name
+        s._is_private = is_private
+        return s
+
+    @classmethod
+    def from_ctx(cls, ctx: Context):
+        """从消息上下文ctx新建一个S，该方法从ctx中整理S所需参数。有关参数项请查看``from_args``方法注释获取详细说明"""
+        s = cls()
+        s._is_default = False
+        if g := ctx.g:
+            s._bot = g.bot_qq
+            s._group_id = g.from_group
+            s._user_id = g.from_user
+            s._user_name = g.from_user_name
+            s._is_private = False
+        elif f := ctx.f:
+            s._bot = f.bot_qq
+            s._user_id = f.from_user
+            s._user_name = f.from_user_name
+            s._is_private = f.is_private
+            s._group_id = f.from_group if f.is_private else 0
+        return s
 
     def bind(self, ctx: Context) -> "_S":
-        """绑定该上下文对象，获取一个与该上下文对应的新的S"""
-        return _S(ctx)
+        """新建一个绑定ctx的S"""
+        return self.from_ctx(ctx)
+
+    @property
+    def _s(self):
+        return _S.from_ctx(current_ctx.get()) if self._is_default else self
 
     async def text(self, text: str, at: bool = False):
         """发送文字
         :param text: 发送的文字内容
         :param at: 是否要艾特该用户
         """
-        # TODO: ctx中附带连接地址等信息, 在此处处理
-        action = Action((self.g_msg or self.f_msg).bot_qq)  # type: ignore
-        async with action:
-            if g := self.g_msg:
-                return await action.sendGroupText(
-                    g.from_group,
-                    text,
-                    atUser=g.sender_uin if at else 0,
-                    atUserNick=g.sender_nick,
-                )
-            elif f := self.f_msg:
-                if f.msg_type == 141:  # NOTE: 私聊
-                    return await action.sendPrivateText(f.from_user, f.from_group, text)
-                elif f.is_from_phone:
-                    return await action.sendPhoneText(text)
+        s = self._s
+        async with Action(s._bot) as action:
+            if s._is_private:
+                return await action.sendPrivateText(s._user_id, s._group_id, text)
+            else:
+                if s._group_id:
+                    return await action.sendGroupText(
+                        s._group_id,
+                        text,
+                        s._user_id if at else 0,
+                        s._user_name,
+                    )
                 else:
-                    return await action.sendFriendText(f.from_user, text)
-            return None
+                    return await action.sendFriendText(s._user_id, text)
 
-    #
     async def image(
         self, data: _T_Data, text: str = "", at: bool = False, type: int = 0
     ):
@@ -170,263 +199,38 @@ class _S:
         ):
             type, data = _resolve_data_type(data)
 
-        action = Action((self.g_msg or self.f_msg).bot_qq)  # type: ignore
-        async with action:
-            if g := self.g_msg:
-                atUser = g.sender_uin if at else 0
-
-                if type == TYPE_URL:
-                    return await action.sendGroupPic(
-                        g.from_group,
+        s = self._s
+        async with Action(s._bot) as action:
+            if s._is_private:
+                send = functools.partial(
+                    action.sendPrivatePic, s._user_id, s._group_id, text=text
+                )
+            else:
+                if s._group_id:
+                    send = functools.partial(
+                        action.sendGroupPic,
+                        s._group_id,
                         text=text,
-                        url=data,  # type:ignore
-                        atUser=atUser,
-                        atUserNick=g.sender_nick,
+                        atUser=s._user_id if at else 0,
+                        atUserNick=s._user_name if at else "",
                     )
-                elif type == TYPE_BASE64:
-                    return await action.sendGroupPic(
-                        g.from_group,
-                        text=text,
-                        base64=data,  # type: ignore
-                        atUser=atUser,
-                        atUserNick=g.sender_nick,
-                    )
-                elif type == TYPE_MD5:
-                    return await action.sendGroupPic(
-                        g.from_group,
-                        text=text,
-                        md5=data,  # type:ignore
-                        atUser=atUser,
-                        atUserNick=g.sender_nick,
-                    )
-                elif type == TYPE_PATH:
-                    return await action.sendGroupPic(
-                        g.from_group,
-                        text=text,
-                        base64=file_to_base64(data),
-                        atUser=atUser,
-                        atUserNick=g.sender_nick,
-                    )
-            elif f := self.f_msg:
-                if f.msg_type == 141:
-                    if type == TYPE_URL:
-                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, url=data)  # type: ignore
-                    elif type == TYPE_BASE64:
-                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, base64=data)  # type: ignore
-                    elif type == TYPE_MD5:
-                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, md5=data)  # type: ignore
-                    elif type == TYPE_PATH:
-                        return await action.sendPrivatePic(f.from_user, f.from_group, text=text, base64=file_to_base64(data))  # type: ignore
                 else:
-                    if type == TYPE_URL:
-                        return await action.sendFriendPic(f.from_user, text=text, url=data)  # type: ignore
-                    elif type == TYPE_BASE64:
-                        return await action.sendFriendPic(f.from_user, text=text, base64=data)  # type: ignore
-                    elif type == TYPE_MD5:
-                        return await action.sendFriendPic(f.from_user, text=text, md5=data)  # type: ignore
-                    elif type == TYPE_PATH:
-                        return await action.sendFriendPic(f.from_user, text=text, base64=file_to_base64(data))  # type: ignore
+                    send = functools.partial(
+                        action.sendFriendPic, s._user_id, text=text
+                    )
 
-        return None
+            if type == TYPE_URL:
+                return await send(url=data)  # type: ignore
+            elif type == TYPE_BASE64:
+                return await send(base64=data)  # type: ignore
+            elif type == TYPE_MD5:
+                return await send(md5=data)  # type: ignore
+            elif type == TYPE_PATH:
+                return await send(base64=file_to_base64(data))  # type: ignore
 
     async def sleep(self, delay: float):
         """A shortcut of asyncio.sleep"""
         return await asyncio.sleep(delay)
 
-    def __repr__(self) -> str:
-        return f"S <g: {self.g_msg}, f: {self.f_msg}>"
 
-
-#
-#     def voice(self, data: _T_Data, type: int = 0):
-#         """发送语音
-#         :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
-#         或者 base64 字符串, 或者为bytes(此时当作base64), 不支持MD5
-#
-#         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
-#         """
-#         ctx = self.ctx
-#         action = Action.from_ctx(ctx)
-#
-#         if type not in (
-#             TYPE_URL,
-#             TYPE_MD5,
-#             TYPE_BASE64,
-#             TYPE_PATH,
-#         ):
-#             type, data = _resolve_data_type(data)
-#
-#         assert type != TYPE_MD5, "语音不支持MD5发送"
-#
-#         if isinstance(ctx, GroupMsg):
-#             if type == TYPE_URL:
-#                 return action.sendGroupVoice(ctx.FromGroupId, voiceUrl=data)  # type: ignore
-#             elif type == TYPE_BASE64:
-#                 return action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=data)  # type: ignore
-#             elif type == TYPE_PATH:
-#                 return action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=file_to_base64(data))  # type: ignore
-#
-#         elif isinstance(ctx, FriendMsg):
-#             if ctx.TempUin:
-#                 if type == TYPE_URL:
-#                     return action.sendPrivateVoice(
-#                         ctx.FromUin, ctx.TempUin, voiceUrl=data  # type: ignore
-#                     )
-#                 elif type == TYPE_BASE64:
-#                     return action.sendPrivateVoice(
-#                         ctx.FromUin, ctx.TempUin, voiceBase64Buf=data  # type: ignore
-#                     )
-#                 elif type == TYPE_PATH:
-#                     return action.sendPrivateVoice(
-#                         ctx.FromUin, ctx.TempUin, voiceBase64Buf=file_to_base64(data)  # type: ignore
-#                     )
-#             else:
-#                 if type == TYPE_URL:
-#                     return action.sendFriendVoice(ctx.FromUin, voiceUrl=data)  # type: ignore
-#                 elif type == TYPE_BASE64:
-#                     return action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=data)  # type: ignore
-#                 elif type == TYPE_PATH:
-#                     return action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=file_to_base64(data))  # type: ignore
-#
-#         return None
-#
-#     async def atext(self, text: str, at: bool = False):
-#         """发送文字
-#         :param text: 发送的文字内容
-#         :param at: 是否要艾特该用户
-#         """
-#         ctx = self.ctx
-#         async with AsyncAction.from_ctx(ctx) as action:
-#             if isinstance(ctx, GroupMsg):
-#                 return await action.sendGroupText(
-#                     ctx.FromGroupId, text, atUser=ctx.FromUserId if at else 0
-#                 )
-#             elif isinstance(ctx, FriendMsg):
-#                 if ctx.TempUin:
-#                     return await action.sendPrivateText(ctx.FromUin, ctx.TempUin, text)
-#                 elif ctx.MsgType == MsgTypes.PhoneMsg:
-#                     return await action.sendPhoneText(text)
-#                 else:
-#                     return await action.sendFriendText(ctx.FromUin, text)
-#
-#     async def aimage(
-#         self, data: _T_Data, text: str = "", at: bool = False, type: int = 0
-#     ):
-#         """发送图片
-#         :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
-#         或者 base64 字符串, 或者为bytes(此时为base64)，或者为MD5或MD5列表，当为MD5列表(发送多图)时，参数text将无效
-#
-#         :param text: 图片附带的文字信息
-#         :param at: 是否要艾特该用户
-#         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
-#         """
-#
-#         if type not in (
-#             TYPE_URL,
-#             TYPE_MD5,
-#             TYPE_BASE64,
-#             TYPE_PATH,
-#         ):
-#             type, data = _resolve_data_type(data)
-#
-#         ctx = self.ctx
-#         async with AsyncAction.from_ctx(ctx) as action:
-#             if isinstance(ctx, GroupMsg):
-#                 if at:
-#                     text = macro.atUser(ctx.FromUserId) + text
-#
-#                 if type == TYPE_URL:
-#                     return await action.sendGroupPic(ctx.FromGroupId, content=text, picUrl=data)  # type: ignore
-#                 elif type == TYPE_BASE64:
-#                     return await action.sendGroupPic(ctx.FromGroupId, content=text, picBase64Buf=data)  # type: ignore
-#                 elif type == TYPE_MD5:
-#                     return await action.sendGroupPic(
-#                         ctx.FromGroupId, content=text, picMd5s=data  # type:ignore
-#                     )
-#                 elif type == TYPE_PATH:
-#                     return await action.sendGroupPic(
-#                         ctx.FromGroupId, content=text, picBase64Buf=file_to_base64(data)
-#                     )
-#             elif isinstance(ctx, FriendMsg):
-#                 if ctx.TempUin:
-#                     if type == TYPE_URL:
-#                         return await action.sendPrivatePic(
-#                             ctx.FromUin, ctx.TempUin, content=text, picUrl=data  # type: ignore
-#                         )
-#                     elif type == TYPE_BASE64:
-#                         return await action.sendPrivatePic(
-#                             ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=data  # type: ignore
-#                         )
-#                     elif type == TYPE_MD5:
-#                         return await action.sendPrivatePic(
-#                             ctx.FromUin,
-#                             ctx.TempUin,
-#                             content=text,
-#                             picMd5s=data,  # type:ignore
-#                         )
-#                     elif type == TYPE_PATH:
-#                         return await action.sendPrivatePic(
-#                             ctx.FromUin, ctx.TempUin, content=text, picBase64Buf=file_to_base64(data)  # type: ignore
-#                         )
-#                 else:
-#                     if type == TYPE_URL:
-#                         return await action.sendFriendPic(ctx.FromUin, content=text, picUrl=data)  # type: ignore
-#                     elif type == TYPE_BASE64:
-#                         return await action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=data)  # type: ignore
-#                     elif type == TYPE_MD5:
-#                         return await action.sendFriendPic(ctx.FromUin, content=text, picMd5s=data)  # type: ignore
-#                     elif type == TYPE_PATH:
-#                         return await action.sendFriendPic(ctx.FromUin, content=text, picBase64Buf=file_to_base64(data))  # type: ignore
-#
-#     async def avoice(self, data: _T_Data, type: int = 0):
-#         """发送语音
-#         :param data: 发送的内容, 可以为 路径字符串或路径Path对象， 可以为网络(URL)地址,
-#         或者 base64 字符串, 或者为bytes(此时当作base64), 不支持MD5
-#
-#         :param type: 发送内容的类型, 默认自动判断，可选值为 S.TYPE_?
-#         """
-#
-#         if type not in (
-#             TYPE_URL,
-#             TYPE_MD5,
-#             TYPE_BASE64,
-#             TYPE_PATH,
-#         ):
-#             type, data = _resolve_data_type(data)
-#
-#         assert type != TYPE_MD5, "语音不支持MD5发送"
-#
-#         ctx = self.ctx
-#         async with AsyncAction.from_ctx(ctx) as action:
-#             if isinstance(ctx, GroupMsg):
-#                 if type == TYPE_URL:
-#                     return await action.sendGroupVoice(ctx.FromGroupId, voiceUrl=data)  # type: ignore
-#                 elif type == TYPE_BASE64:
-#                     return await action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=data)  # type: ignore
-#                 elif type == TYPE_PATH:
-#                     return await action.sendGroupVoice(ctx.FromGroupId, voiceBase64Buf=file_to_base64(data))  # type: ignore
-#
-#             elif isinstance(ctx, FriendMsg):
-#                 if ctx.TempUin:
-#                     if type == TYPE_URL:
-#                         return await action.sendPrivateVoice(
-#                             ctx.FromUin, ctx.TempUin, voiceUrl=data  # type: ignore
-#                         )
-#                     elif type == TYPE_BASE64:
-#                         return await action.sendPrivateVoice(
-#                             ctx.FromUin, ctx.TempUin, voiceBase64Buf=data  # type: ignore
-#                         )
-#                     elif type == TYPE_PATH:
-#                         return await action.sendPrivateVoice(
-#                             ctx.FromUin, ctx.TempUin, voiceBase64Buf=file_to_base64(data)  # type: ignore
-#                         )
-#                 else:
-#                     if type == TYPE_URL:
-#                         return await action.sendFriendVoice(ctx.FromUin, voiceUrl=data)  # type: ignore
-#                     elif type == TYPE_BASE64:
-#                         return await action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=data)  # type: ignore
-#                     elif type == TYPE_PATH:
-#                         return await action.sendFriendVoice(ctx.FromUin, voiceBase64Buf=file_to_base64(data))  # type: ignore
-#
-#
 S = _S()

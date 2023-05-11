@@ -113,17 +113,25 @@ def start_session(
             if multi_user:
                 friend = False
                 sid = str(group)
+                # 群, 不绑定人
+                s = S.from_args(ctx.bot_qq, group, 0, "", False)
             else:
                 if friend_int:
                     sid = f"{group}-{friend}"
+                    # 私聊
+                    s = S.from_args(ctx.bot_qq, group, friend, "", True)
                 else:
                     friend = False
                     multi_user = True
                     sid = str(group)
+                    # 群, 不绑定人
+                    s = S.from_args(ctx.bot_qq, group, 0, "", False)
         else:
             multi_user = False
             group = False
             sid = str(friend)
+            # 私聊（好友）
+            s = S.from_args(ctx.bot_qq, 0, friend, "", False)
 
     else:
         if g := ctx.g:
@@ -133,28 +141,37 @@ def start_session(
                 if multi_user:
                     friend = False
                     sid = str(g.from_group)
+                    s = S.from_ctx(ctx)
                 else:
                     friend = True
                     sid = f"{g.from_group}-{g.from_user}"
+                    s = S.from_ctx(ctx)
             elif friend:
                 multi_user = False
                 sid = str(g.from_user)
+                # 私聊
+                s = S.from_args(
+                    ctx.bot_qq, g.from_group, g.from_user, g.from_user_name, True
+                )
             else:
                 group = True
                 multi_user = False
                 friend = True
                 sid = f"{g.from_group}-{g.from_user}"
+                s = S.from_ctx(ctx)
         elif f := ctx.f:
             if f.is_from_self:
                 raise RuntimeError("机器人本身无法创建会话, 请修正对话创建条件！")
             group = multi_user = False
             sid = str(f.from_user)
+            s = S.from_ctx(ctx)
         else:
             raise NotImplementedError("事件类型暂不支持创建对话")
     receiver = current_receiver.get()
     if sid in receiver.state:
         raise RuntimeError(f"该类型对话已经创建，不能重复创建。session id = {sid}")
     session = Session(sid, receiver, group, friend, multi_user, skip_responder)
+    session.set_s(s)
     receiver.state[sid] = weakref.ref(session)
     logger.debug(f"{receiver=} start {session=}")
     return SessionExport(session)
@@ -389,6 +406,9 @@ class Session:
 
         # 调用finish的默认提示信息，字符串或者返回字符串的函数
         self.finish_info: Union[Callable[[], str], str] = ""
+
+    def set_s(self, s):
+        self.prev_s = s
 
     def set_finish_info(self, info: Union[Callable[[], str], str]):
         """设置finish时的默认提示信息，默认为空不发送。
