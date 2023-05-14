@@ -1,6 +1,7 @@
 # FIXME: 先凑合用
 import asyncio
 import re
+from contextlib import suppress
 from typing import List, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
@@ -31,6 +32,9 @@ class Response(BaseModel):
 
 
 # TODO: 发送接收数据结构化，但是用pydantic好麻烦哦... 后面再弄合适的方案
+
+lock = asyncio.Lock()
+prev_task: Optional[asyncio.Task] = None
 
 
 def get_base_url(url):
@@ -1152,7 +1156,16 @@ class Action:
         params: Optional[dict] = None,
         timeout: Optional[int] = None,
     ):
+        global lock, prev_task
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
+        async with lock:
+            if prev_task:
+                await asyncio.sleep(0.5)
+                if prev_task.done():
+                    await asyncio.sleep(0.5)
+                else:
+                    with suppress(TimeoutError):
+                        await asyncio.wait_for(prev_task, 1.5)
         params = params or {}
         params["funcname"] = funcname
         if not params.get("qq"):
@@ -1160,12 +1173,15 @@ class Action:
 
         try:
             # 发送请求
-            resp = await self.c.request(
-                method,
-                httpx.URL(url=path, params=params),
-                json=payload,
-                **({"timeout": timeout} if timeout else {}),
+            prev_task = asyncio.ensure_future(
+                self.c.request(
+                    method,
+                    httpx.URL(url=path, params=params),
+                    json=payload,
+                    **({"timeout": timeout} if timeout else {}),
+                )
             )
+            resp = await prev_task
             resp_model = Response.parse_obj(resp.json())
             if resp_model.CgiBaseResponse.ErrMsg:
                 if resp_model.CgiBaseResponse.Ret == 0:
