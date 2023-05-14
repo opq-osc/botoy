@@ -33,6 +33,7 @@ nav:
   - sugar.md
   - session.md
   - contrib.md
+  - cli.md
   - mahiro.md
   # - middleware.md
   # - decorators.md
