@@ -1,45 +1,35 @@
-# 配置
+# 配置 `jconfig`
 
-**本框架对所有配置项都没有进行严格的校验，默认你知道如何配置，配置类型，并且正确配置**。
-建议不需要用的就别配置
+```python
+from botoy import jconfig
+```
 
-配置可以通过实例化时通过传参完成，因为客户端实例只有一个，所以并不麻烦，但是后面要用到动作发送
-API 时，就需要频繁的定义，这十分麻烦，造成这个的主要原因就是你的 bot 端没有按默认设置运行，一般情况下端口(默认为 8888)
-有时 IP 也会根据各自有所不同
+框架推荐使用统一的配置文件来管理配置，文件为工作目录下的`botoy.json` 或 `botoy.local.json` 文件。
 
-所以可以新建一个配置文件，固定为`botoy.json`定义配置，配置项和默认值如下
+优先使用`botoy.local.json`, 注意这两个文件同时存在时，内容不会被合并。
 
-环境变量`BOTOY_HOST`, `BOTOY_PORT` 存在的情况下，将分别作为 host, port 的默认值
+框架当前保留配置如下：
 
 ```json
 {!../botoy.json!}
 ```
 
-配置项在前面客户端部分有说明
+`url` `qq`会被用于所有需要用到连接或机器人 qq 的场景的默认值，如：`Botoy`的`connection_url` 、`Action`的`url`和`qq`等。
 
-后三项与 webhook 功能有关，后续说明
-
-请按需配置
-
-约定：如果存在配置文件的同时在实例化对象时也传入了参数，会优先使用指定的参数值，
 优先级为: `指定参数值 > 配置文件 > 默认值`
-
-**强烈建议使用配置文件**, 并且建议将`botoy.json`作为统一的配置文件用于其他功能的配置
 
 # jconfig
 
-不仅框架自身配置使用 botoy.json,
-同时推荐插件也使用 botoy.json 作为配置文件。使用 jconfig 可以很好的对配置进行操作
+框架提供`jconfig`与`botoy.json`进行交互，配置规则类似`vscode settings.json`（不熟悉也不要紧）
+
+以下通过代码进行说明。(其中有部分配置项，为旧版 Botoy 参数，因为不影响此处演示，故未作修改)
 
 假设 botoy.json 内容如下：
 
 ```json
 {
   "host": "http://127.0.0.1",
-  "port": 8888,
-  "group_blacklist": [],
-  "friend_blacklist": [],
-  "blocked_users": [],
+  "port": 8086,
   "webhook": false,
   "webhook_post_url": "http://127.0.0.1:5000",
   "webhook_timeout": 20,
@@ -68,10 +58,7 @@ format 表示推送格式，includeUrl 表示是否包括该项的网页地址
 ```json
 {
   "host": "new host",
-  "port": 8888,
-  "group_blacklist": [],
-  "friend_blacklist": [],
-  "blocked_users": [],
+  "port": 8086,
   "webhook": false,
   "webhook_post_url": "http://127.0.0.1:5000",
   "webhook_timeout": 20,
@@ -83,7 +70,3 @@ format 表示推送格式，includeUrl 表示是否包括该项的网页地址
   "github.pr.includeUrl": true
 }
 ```
-
-!!!提示
-
-    如果你是vscode用户，那么，这种配置方式应该很熟悉了(settings.json)

@@ -2,111 +2,122 @@
 
 ## 启用
 
-开启插件功能，定义客户端时将参数`use_plugins`设置为`True`即可
-
-插件以模块的方式来提供接收函数，分为两种，单文件和文件夹
+启用就是显式调用`Botoy.load_plugins`方法。
 
 插件目录为`plugins`
 
-单文件: bot_pluginA.py (插件标记为 pluginA)
+## 定义插件
 
-包：bot_pluginB (插件标记为 pluginB)
+所有在 plugins 目录下的`py`文件以及模块（包含`__init__.py`的文件夹）都会被当作插件导入。
 
-包支持子目录提供插件同样支持包和文件夹形式, **最多二级子目录**
+严格来说插件的作用仅仅是提供接收函数`receiver`，所以要在插件内定义`receiver`
 
-bot_pluginB_sub1.py (插件标记为 pluginB.sub1)
+有两种方法定义`receiver`
 
-bot_pluginB_sub2 (插件标记为 pluginB.sub2)
+### `mark_recv`
 
-见下列目录树:
+`mark_recv`用于将**可调用**对象标记为`receiver`。
+
+仍然通过代码示例进行说明。
+
+1. 收到群消息 test 回复 ok
+
+```python
+from botoy import S, ctx, mark_recv
+
+
+async def test():
+    if g := ctx.group_msg:  # 仅当为群消息
+        if g.text == "test":  # 接收信息内容为 test
+            await S.text("ok")  # 根据场景发送文本
+
+
+mark_recv(test, name="测试", author='tester', usage='群聊中发送 test')  # 插件信息仅用于控制台显示, 可选
+```
+
+2. 在群聊中发送 hello，机器人回复 hello。私聊 hello 时，机器人回复 hi
+
+```python
+from botoy import S, ctx, mark_recv
+
+
+async def hello():
+    if g := ctx.g:  # ctx.g == ctx.group_msg
+        if g.text == "hello":
+            await S.text("ok")
+
+
+async def hi():
+    if f := ctx.f:  # ctx.f == ctx.friend_msg
+        if f.text == 'hello':
+            await S.text('hi')
+
+
+# 运算符+快速添加多个接收函数
+_ = mark_recv + hello + hi
+# 也可以调用mark_recv多次
+# mark_recv(hello)
+# mark_recv(hi)
+# 运算符调用使用数组形式传递位置参数 name, author, usage
+# _ = mark_recv + hello + (hi, 'hi friend')
+```
+
+3. mark_recv 可以注册各种类型的可调用对象
+
+```python
+from botoy import mark_recv
+
+
+class A:
+    @classmethod
+    def class_method(cls):
+        pass
+
+    def object_method(self):
+        pass
+
+    @classmethod
+    async def async_class_method(cls):
+        pass
+
+    async def async_object_method(self):
+        pass
+
+
+lambda_function = lambda: None
+
+
+def sync_function():
+    pass
+
+
+async def async_function():
+    pass
+
+
+a = A()
+
+_ = (
+    mark_recv
+    + (A.class_method, '类方法')
+    + (a.object_method, "实例方法")
+    + (lambda_function, '匿名函数')
+    + (sync_function, '同步函数')
+    + (async_function, '异步函数')
+    + (a.async_class_method, '异步类方法')
+    + (a.async_object_method, '异步实例方法')
+)
 
 ```
-plguins
-├── bot_a.py
-├── bot_b.py
-└── bot_c
-    ├── bot_c_1
-    ├── bot_c_2.py
-    └── bot_c_3.py
-```
 
-则插件为：`a`, `b`, `c.c_1`, `c.c_2`, `c.c_3`
+### `r_`命名前缀
 
-## 插件要求
+将函数以`r_`作为前缀命令即可。这样方便点，但是不方便设置`receiver`信息
 
-插件作为模块，从中导入消息接收函数, 接收函数命名
+!!!Tip
 
-|                    |          |
-| ------------------ | -------- |
-| receive_group_msg  | 群消息   |
-| receive_friend_msg | 好友消息 |
-| receive_events     | 事件消息 |
+    插件信息默认为：
 
-!!!tip
-
-    1. 插件命名或接收函数命名有误都不会影响程序运行，因为根本不会导入或调用
-    2. 接收函数参数有且只有一个，与使用client方法装饰器绑定的接收函数一样
-
-要求
-
-1.  文件(或文件夹)名需以`bot_`开头
-
-2.  如果使用文件夹，接收函数需放在`__init__.py`中
-
-## 插件管理器的方法和属性
-
-假设 `bot = Botoy(123)`
-
-方法：
-
-_现在已删除了所有管理插件的快捷方法, 需要管理需要访问`bot.plugMgr`对象的方法_
-
-|                |              |
-| -------------- | ------------ |
-| load_plugins   | 加载插件     |
-| reload_plugins | 重载插件     |
-| reload_plugin  | 重载指定插件 |
-| disable_plugin | 停用指定插件 |
-| enable_plugin  | 启用指定插件 |
-
-同时有以下属性:
-
-|                  |                      |
-| ---------------- | -------------------- |
-| all_plugins      | 返回当前所有插件信息 |
-| disabled_plugins | 已停用的插件         |
-| enabled_plugins  | 已启用的插件信息     |
-
-## 定义插件信息
-
-### 帮助
-
-插件的文档注释就是该插件的帮助(建议显示指定`__doc__`变量)
-
-`plugMgr`的相关方法和属性
-
-- 属性`help` 所有插件的帮助信息，是一个框架整理好的字符串
-- 方法`get_plugin_help` 获取指定插件的帮助信息
-
-### 名称
-
-插件的`__name__`变量，可以在插件显示指定
-
-## 其他
-
-`when_disable` 函数，将在插件被禁用时调用, 该函数没有参数
-`when_connected`函数，将在**每次**连接成功时调用,参数为`(qq 数值列表，host 字符串，port 数值)`
-`when_disconnected`函数，将在**每次**断开连接时调用,参数为`(qq 数值列表，host 字符串，port 数值)`
-
-以上插件内的特殊函数，均为同步函数且可选
-
-## 注意
-
-1. 能不使用重载就别使用重载
-2. 启用和停用只是不再调用该插件中的接收函数（当插件管理器第一次启动时，之前已停用的插件即缓存在 REMOVED_PLUGINS 文件中的插件，将不会导入）,
-   如果涉及到定时任务时，定时任务将不受影响，需要结合上面介绍的特殊函数来实现逻辑。这里的建议是每个插件自己实现开关逻辑，框架提供的开关是开发层面，
-   十分不建议使用，以后甚至会被移除!
-
-!!!tip
-
-    以上所有方法或属性的具体用法或含义请查看注释
+    - `name`: receiver的__name__
+    - `author`: 空
+    - `usage`: receiver的__doc__

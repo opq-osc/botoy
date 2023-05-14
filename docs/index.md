@@ -1,26 +1,66 @@
-# 概览
+Botoy 是 OPQ 机器人框架的一个 Python 开发助手。对连接、消息解析、API 调用进行了封装，整体设计简单易用。
 
-## 工作流程
+一个最简单的 Botoy 程序如下：
 
-### 1. 客户端 Client
+`bot.py`
 
-通过 socktio 连接进行通信，准确来说只有收消息，客户端实例就负责处理这方面的细节，
-配置也十分简单，正常情况下配置好 bot 端运行端口即可
+```python
+from botoy import bot, ctx, S
 
-### 2. 实例化消息 Model
+@bot
+async def test():
+    if ctx.g and ctx.g.text == 'test':
+        await S.text('ok')
 
-客户端收到原始的字典类型消息后，会对数据进行处理并转成为一个对象，这里称为消息上下文，之后全部用 ctx 代替,
-ctx 的属性即为对应信息的数据
+bot.print_receivers()
+bot.run()
+```
 
-### 3. 筛选消息 blacklist
+运行`python bot.py`, 输出结果如下：
 
-可以配置群、好友黑名单以及用户黑名单，决定是否处理该消息
+```
++------+--------+-------+----------------+
+| Name | Author | Usage |      Meta      |
++------+--------+-------+----------------+
+| test |        |       | test.py line 4 |
++------+--------+-------+----------------+
+ℹ️ 04-15 19:21:58 INFO 连接中[ws://localhost:8086/ws]...
+✔️ 04-15 19:21:58 SUCCESS 连接成功!
+```
 
-### 4. 消息中间件 middleware
+以上程序便可实现在收到群消息为`test`时回复`ok`的功能。
 
-可以提供中间件, 对 ctx 进行一些处理
+当然，Botoy 也支持插件形式注册消息接收函数。
+以下示例插件功能是在收到群消息或者好友消息的内容为`hello`时，回复`hello`的示例。
 
-### 5. 消息接收函数 recevier
+在`plugins`目录新建文件 `hello.py`。
 
-这是最关键的一步，经过以上一系列处理后，将最终的 ctx 传入接收函数(recevier)中，而接收函数就是我们需要写逻辑的地方,
-可以通过客户端的方法添加，也可以通过插件添加
+```python
+from botoy import ctx, S, mark_recv
+
+
+async def hello():
+    if msg := (ctx.g or ctx.f):
+        if msg.text == 'hello':
+            await S.text("Hello~")
+
+
+mark_recv(hello)
+```
+
+修改`bot.py`
+
+```diff
+ from botoy import bot, ctx, S
+
+ @bot
+ async def test():
+     if ctx.g and ctx.g.text == 'test':
+         await S.text('ok')
+
++bot.load_plugins()
+ bot.print_receivers()
+ bot.run()
+```
+
+运行`bot.py`便能看到`hello`已被自动注册为接收函数。

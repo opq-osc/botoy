@@ -1,6 +1,16 @@
-# 辅助函数模块
+# 辅助函数 `contrib`
 
-`botoy.contrib`模块封装了部分常用的操作函数
+```python
+from botoy import contrib
+```
+
+或者直接导入需要的东西
+
+```python
+from botoy import file_to_base64, ...
+```
+
+该模块提供了一些可能用得着的操作。
 
 ## `file_to_base64` 获取文件 base64 编码
 
@@ -110,57 +120,32 @@ switcher = sm.of()
 
     目前数据储存在内存中，所以启动就是重置。实用性并不高。后续会添加缓存功能。
 
-## plugin_receiver 插件接收函数定义助手
+### `Revoker` 撤回消息助手
 
-经常会遇到一种情况，在一个插件中有多个分别独立的处理逻辑，方法一是在接收函数中用条件语句判断，
-这样复杂点就一大坨，而且很容易就导致接收函数用不了了，因为逻辑不一致，所以有了方法二，定义多个函数，
-在接收函数中依次执行，这样就避免了方法一的所有不足。
+有时候需要撤回机器人的消息，最简单的方法就是在消息里加入一个标记，收到新消息后检测到标记便说明需要撤回，但是会导致发送的文本不好看，有多余的内容。
 
-方法二示例：
+框架提供了一个助手，用于将文本嵌入撤回信息以及检测。
 
 ```python
-def group_1(ctx):
-  pass
+from botoy import Revoker
 
-def group_2(ctx):
-  pass
-
-def receive_group_msg(ctx):
-  group_1(ctx)
-  group_2(ctx)
+text = Revoker.mark("Hello", 30) # 返回新文本
+timeout = Revoker.check(text) # 检测是否包含撤回信息，返回撤回等待时间
 ```
 
-这个助手就来简化这一操作, 实现上面的示例只需要，附加功能，不需要记住三种接收函数的名字了
+原理是使用零宽字符做标记，所以视觉上不会出现多余的内容。
+
+自动撤回插件
 
 ```python
-from botoy.contrib import plugin_receiver
+import asyncio
 
-@plugin_receiver.group
-def group_1(ctx):
-  pass
+from botoy import Revoker, ctx
 
-@plugin_receiver.group
-def group_2(ctx):
-  pass
+
+async def r_revoke():
+    if (g := ctx.g) and ctx.g.is_from_self:
+        if timeout := Revoker.check(ctx.g.text):
+            await asyncio.sleep(timeout)
+            await g.revoke()
 ```
-
-好友消息和事件同理
-
-另外这三个装饰器只做添加操作，返回值是原函数，所以可以装饰同一个函数用来接收多种类型的消息
-
-```python
-@plugin_receiver.group
-@equal_content('test')
-@plugin_receiver.friend
-def receiver(ctx):
-    print(type(ctx), 'ok')
-```
-
-上面的示例，函数可以接收群消息和好友消息，其中只要收到好友消息就会执行打印，而群消息需要内容为
-test 才会执行打印
-
-注意
-
-      1. 使用了`plugin_receiver` 就不要自己定义`receive_group_msg`, `receive_friend_msg`, `receive_events` 了
-
-      2. 每个函数是按添加顺序执行的

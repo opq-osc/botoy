@@ -1,4 +1,9 @@
-# 定时任务
+# 定时任务 `apscheduler` `scheduler`
+
+```python
+from botoy import scheduler # 同步
+from botoy import async_scheduler # 异步
+```
 
 定时任务使用库`apscheduler`实现，对基本配置项进行封装
 
