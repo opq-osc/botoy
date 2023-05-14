@@ -24,10 +24,10 @@ class Mahiro(Botoy):
         self._token = ""
         mahiro = jconfig.get_configuration("mahiro")
         address = mahiro.get("listen_url", "http://0.0.0.0:8099")
-        if not address.startswith('http'):
+        if not address.startswith("http"):
             self.default_address = f"http://{address}"
         server = mahiro.get("server_url", "http://localhost:8098")
-        if not server.startswith('http'):
+        if not server.startswith("http"):
             server = f"http://{server}"
         self.REGISTER_PLUGIN_URL = f"{server}/api/v1/panel/plugin/register"
         self.GET_TOKEN_URL = f"{server}/api/v1/panel/auth/gettoken"
