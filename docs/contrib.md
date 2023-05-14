@@ -109,3 +109,33 @@ switcher = sm.of()
 !!!tip
 
     目前数据储存在内存中，所以启动就是重置。实用性并不高。后续会添加缓存功能。
+
+### `Revoker` 撤回消息助手
+
+有时候需要撤回机器人的消息，最简单的方法就是在消息里加入一个标记，收到新消息后检测到标记便说明需要撤回，但是会导致发送的文本不好看，有多余的内容。
+
+框架提供了一个助手，用于将文本嵌入撤回信息以及检测。
+
+```python
+from botoy import Revoker
+
+text = Revoker.mark("Hello", 30) # 返回新文本
+timeout = Revoker.check(text) # 检测是否包含撤回信息，返回撤回等待时间
+```
+
+原理是使用零宽字符做标记，所以视觉上不会出现多余的内容。
+
+自动撤回插件
+
+```python
+import asyncio
+
+from botoy import Revoker, ctx
+
+
+async def r_revoke():
+    if (g := ctx.g) and ctx.g.is_from_self:
+        if timeout := Revoker.check(ctx.g.text):
+            await asyncio.sleep(timeout)
+            await g.revoke()
+```

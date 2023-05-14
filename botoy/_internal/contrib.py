@@ -8,8 +8,10 @@ import base64
 import contextvars
 import inspect
 import os
+import re
 import sys
 import threading
+import traceback
 from asyncio import events
 from functools import partial, wraps
 from pathlib import Path
@@ -27,6 +29,7 @@ __all__ = [
     "async_run",
     "download",
     "to_async",
+    "Revoker",
 ]
 
 
@@ -283,3 +286,46 @@ def sync_run(func):
         return loop.run_until_complete(coro)
     finally:
         loop.close()
+
+
+revoker_key = "\u0311"
+revoker_boundary = "\u200b"
+revoker_chars = "\u200d\u0300\u0301\u0302\u0303\u0304\u0306\u0307\u0308\u0309"
+revoker_num2char = lambda x: revoker_chars[x]
+revoker_char2num = lambda x: revoker_chars.index(x)
+
+
+class Revoker:
+    __slots__ = ()
+
+    @staticmethod
+    def mark(text: str, timeout: int = 30) -> str:
+        """插入撤回信息
+        :param text: 源文本
+        :param timeout: 等待延时，10 <= timeout <= 90。默认30
+        :return: 新文本
+        """
+        timeout = min(max(timeout, 10), 90)
+        return (
+            text
+            + revoker_key
+            + revoker_boundary
+            + "".join(revoker_num2char(int(n)) for n in str(timeout))
+            + revoker_boundary
+        )
+
+    @staticmethod
+    def check(text: str) -> int:
+        """检测是否包含撤回信息，返回需等待延时
+        不需要撤回时返回0，使用结果时需要进行条件判断
+        :param text: 文本内容
+        :return: 等待延时
+        """
+        if revoker_key in text:
+            if find := re.findall(
+                revoker_key + revoker_boundary + r"(.*?)" + revoker_boundary,
+                text,
+            ):
+                return int("".join(str(revoker_char2num(char)) for char in find[0]))
+            return 30
+        return 0
