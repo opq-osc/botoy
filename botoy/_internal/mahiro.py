@@ -23,11 +23,14 @@ class Mahiro(Botoy):
         self.app = FastAPI()
         self._token = ""
         mahiro = jconfig.get_configuration("mahiro")
-        # TODO: mahiro相关配置抽离到jconfig里
-        self.default_address = mahiro.get("listen_url", "http://0.0.0.0:8099")
-        server_url = mahiro.get("server_url", "http://localhost:8098")
-        self.REGISTER_PLUGIN_URL = f"{server_url}/api/v1/panel/plugin/register"
-        self.GET_TOKEN_URL = f"{server_url}/api/v1/panel/auth/gettoken"
+        address = mahiro.get("listen_url", "http://0.0.0.0:8099")
+        if not address.startswith('http'):
+            self.default_address = f"http://{address}"
+        server = mahiro.get("server_url", "http://localhost:8098")
+        if not server.startswith('http'):
+            server = f"http://{server}"
+        self.REGISTER_PLUGIN_URL = f"{server}/api/v1/panel/plugin/register"
+        self.GET_TOKEN_URL = f"{server}/api/v1/panel/auth/gettoken"
         self.__setup_routes()
 
     def set_token(self, token: str):
