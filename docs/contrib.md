@@ -1,6 +1,16 @@
 # 辅助函数 `contrib`
 
-`botoy.contrib`模块封装了部分常用的操作函数
+```python
+from botoy import contrib
+```
+
+或者直接导入需要的东西
+
+```python
+from botoy import file_to_base64, ...
+```
+
+该模块提供了一些可能用得着的操作。
 
 ## `file_to_base64` 获取文件 base64 编码
 
