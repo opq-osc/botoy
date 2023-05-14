@@ -98,6 +98,8 @@ class Action:
 
     class SendFriendTextResponse(BaseModel):
         MsgTime: int
+        MsgSeq: int
+
 
     async def sendFriendText(self, user: int, text: str):
         """发送好友文本消息"""
@@ -210,6 +212,8 @@ class Action:
 
     class SendGroupTextResponse(BaseModel):
         MsgTime: int
+        MsgSeq: int
+
 
     async def sendGroupText(
         self,
@@ -307,6 +311,7 @@ class Action:
 
     class SendGroupPicResponse(BaseModel):
         MsgTime: int
+        MsgSeq: int
 
     async def sendPrivatePic(
         self,
