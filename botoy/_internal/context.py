@@ -3,9 +3,10 @@ import re
 import traceback
 from abc import ABCMeta, abstractmethod
 from contextvars import ContextVar
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from . import models
+from .action import Action
 from .log import logger
 from .utils import bind_contextvar
 
@@ -35,22 +36,22 @@ class BaseMsg(metaclass=ABCMeta):
     @property
     def images(self):
         """图片列表 可能为None"""
-        return c(self, "images", self.msg_body.Images)
+        return c(self, "images", self.msg_body.Images)  # type:ignore
 
     @property
     def voice(self):
         """语音 可能为None"""
-        return c(self, "voice", self.msg_body.Voice)
+        return c(self, "voice", self.msg_body.Voice)  # type:ignore
 
     @property
     def video(self):
         """短视频 可能为None"""
-        return c(self, "video", self.msg_body.Video)
+        return c(self, "video", self.msg_body.Video)  # type:ignore
 
     @property
     def text(self):
         """文字内容"""
-        return c(self, "text", self.msg_body.Content)
+        return c(self, "text", self.msg_body.Content)  # type:ignore
 
     @property
     def is_from_self(self):
@@ -148,7 +149,9 @@ class GroupMsg(BaseMsg):
     @property
     def from_group_name(self) -> str:
         """群名称"""
-        return c(self, "from_group_name", self.msg_head.GroupInfo.GroupName)
+        return c(
+            self, "from_group_name", self.msg_head.GroupInfo.GroupName  # type:ignore
+        )
 
     @property
     def from_user(self) -> int:
@@ -163,7 +166,7 @@ class GroupMsg(BaseMsg):
     @property
     def at_list(self):
         """被艾特列表 注意不是int列表"""
-        return c(self, "at_list", self.msg_body.AtUinLists or [])
+        return c(self, "at_list", self.msg_body.AtUinLists or [])  # type:ignore
 
     def is_at_user(self, user_id: int):
         """是否艾特某人"""
@@ -173,6 +176,11 @@ class GroupMsg(BaseMsg):
     def is_at_bot(self):
         """是否艾特机器人"""
         return c(self, "is_at_bot", self.is_at_user(self.model.CurrentQQ))
+
+    async def revoke(self):
+        """撤回该消息"""
+        async with Action(self.bot_qq) as a:
+            return await a.revoke(self)
 
 
 class FriendMsg(BaseMsg):
