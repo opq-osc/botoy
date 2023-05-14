@@ -1,7 +1,6 @@
 # FIXME: 先凑合用
 import asyncio
 import re
-from contextlib import suppress
 from typing import List, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
@@ -1160,12 +1159,12 @@ class Action:
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
         async with lock:
             if prev_task:
-                await asyncio.sleep(0.5)
-                if prev_task.done():
-                    await asyncio.sleep(0.5)
+                try:
+                    await asyncio.wait_for(prev_task, 2)
+                except TimeoutError:
+                    pass
                 else:
-                    with suppress(TimeoutError):
-                        await asyncio.wait_for(prev_task, 1.5)
+                    await asyncio.sleep(0.5)
         params = params or {}
         params["funcname"] = funcname
         if not params.get("qq"):
