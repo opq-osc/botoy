@@ -5,8 +5,7 @@ from abc import ABCMeta, abstractmethod
 from contextvars import ContextVar
 from typing import Optional, Union
 
-from . import models
-from .action import Action
+from . import action, models
 from .log import logger
 from .utils import bind_contextvar
 
@@ -179,7 +178,7 @@ class GroupMsg(BaseMsg):
 
     async def revoke(self):
         """撤回该消息"""
-        async with Action(self.bot_qq) as a:
+        async with action.Action(self.bot_qq) as a:
             return await a.revoke(self)
 
 
