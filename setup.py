@@ -33,5 +33,5 @@ setup(
         [console_scripts]
         botoy=botoy._internal.cli:cli
     """,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
