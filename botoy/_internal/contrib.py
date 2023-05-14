@@ -11,7 +11,6 @@ import os
 import re
 import sys
 import threading
-import traceback
 from asyncio import events
 from functools import partial, wraps
 from pathlib import Path
@@ -288,11 +287,9 @@ def sync_run(func):
         loop.close()
 
 
-revoker_key = "\u0311"
-revoker_boundary = "\u200b"
-revoker_chars = "\u200d\u0300\u0301\u0302\u0303\u0304\u0306\u0307\u0308\u0309"
-revoker_num2char = lambda x: revoker_chars[x]
-revoker_char2num = lambda x: revoker_chars.index(x)
+revoker_key = "\u200b"
+revoker_sep = "\u200c"
+revoker_boundary = "\u200d"
 
 
 class Revoker:
@@ -302,17 +299,12 @@ class Revoker:
     def mark(text: str, timeout: int = 30) -> str:
         """插入撤回信息
         :param text: 源文本
-        :param timeout: 等待延时，10 <= timeout <= 90。默认30
+        :param timeout: 等待延时，5 <= timeout <= 90。默认30
         :return: 新文本
         """
-        timeout = min(max(timeout, 10), 90)
-        return (
-            text
-            + revoker_key
-            + revoker_boundary
-            + "".join(revoker_num2char(int(n)) for n in str(timeout))
-            + revoker_boundary
-        )
+        timeout = min(max(timeout, 5), 90)
+        mark = revoker_sep.join(revoker_key * int(i) for i in str(timeout))
+        return text + revoker_boundary + mark + revoker_boundary
 
     @staticmethod
     def check(text: str) -> int:
@@ -323,9 +315,13 @@ class Revoker:
         """
         if revoker_key in text:
             if find := re.findall(
-                revoker_key + revoker_boundary + r"(.*?)" + revoker_boundary,
+                revoker_boundary + r"(.*?)" + revoker_boundary,
                 text,
             ):
-                return int("".join(str(revoker_char2num(char)) for char in find[0]))
+                return int(
+                    "".join(
+                        str(i.count(revoker_key)) for i in find[0].split(revoker_sep)
+                    )
+                )
             return 30
         return 0
