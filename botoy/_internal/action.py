@@ -100,7 +100,6 @@ class Action:
         MsgTime: int
         MsgSeq: int
 
-
     async def sendFriendText(self, user: int, text: str):
         """发送好友文本消息"""
         data = await self.post(
@@ -213,7 +212,6 @@ class Action:
     class SendGroupTextResponse(BaseModel):
         MsgTime: int
         MsgSeq: int
-
 
     async def sendGroupText(
         self,
