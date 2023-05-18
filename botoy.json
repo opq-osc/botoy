@@ -1,4 +1,5 @@
 {
   "qq": 1234,
-  "url": "localhost:8086"
+  "url": "localhost:8086",
+  "unsafe": false
 }
