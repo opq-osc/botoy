@@ -4,6 +4,8 @@
 
 [![pypi](https://img.shields.io/pypi/v/botoy?style=flat-square 'pypi')](https://pypi.org/project/botoy/)
 [![python](https://img.shields.io/badge/python-3.8+-blue 'python')](https://pypi.org/project/botoy/)
+[![Lines of code](https://img.shields.io/tokei/lines/github/opq-osc/botoy?label=lines&style=flat-square)](https://github.com/opq-osc/botoy)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/opq-osc/botoy?style=flat-square)](https://github.com/opq-osc/botoy)
 [![LICENSE](https://img.shields.io/github/license/opq-osc/botoy?style=flat-square)](https://github.com/opq-osc/botoy/blob/main/LICENSE)
 
 对机器人框架[OPQ](https://github.com/OPQBOT/OPQ/)接口的 Python 封装,
