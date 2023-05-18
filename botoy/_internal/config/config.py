@@ -2,7 +2,7 @@ import json
 import threading
 from typing import Any, Generic, List, Optional, TypeVar, Union
 
-from .constants import CONFIG_FILE_PATH, DEFAULT_URL
+from .constants import CONFIG_FILE_PATH, DEFAULT_URL, UNSAFE_WORD
 from .util import dict2tree, lookup
 
 V = TypeVar("V")
@@ -10,9 +10,7 @@ T = TypeVar("T")
 
 lock = threading.RLock()
 
-botoy_config = {
-    "url": DEFAULT_URL,
-}
+botoy_config = {"url": DEFAULT_URL, "unsafe": UNSAFE_WORD}
 botoy_config_tree = dict2tree(botoy_config)
 
 
@@ -100,6 +98,7 @@ class Configurations:
 
     # 框架专属配置
     url: str
+    unsafe: bool
 
     def __new__(cls):
         if not cls._instance:

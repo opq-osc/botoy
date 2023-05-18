@@ -8,3 +8,5 @@ if local_config.exists():
     CONFIG_FILE_PATH = local_config
 else:
     CONFIG_FILE_PATH = Path.cwd() / "botoy.json"
+
+UNSAFE_WORD = False

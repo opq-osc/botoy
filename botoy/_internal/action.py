@@ -105,6 +105,9 @@ class Action:
 
     async def sendFriendText(self, user: int, text: str):
         """发送好友文本消息"""
+        if not jconfig.unsafe:
+            text = text.replace("你", "您")
+
         data = await self.post(
             self.build_request({"ToUin": user, "ToType": 1, "Content": text})
         )
@@ -112,6 +115,8 @@ class Action:
 
     async def sendPrivateText(self, user: int, group: int, text: str):
         """发送私聊文本消息"""
+        if not jconfig.unsafe:
+            text = text.replace("你", "您")
         data = await self.post(
             self.build_request(
                 {"ToUin": user, "GroupCode": group, "ToType": 3, "Content": text}
@@ -135,6 +140,8 @@ class Action:
         :param base64: 发送图片base64, 可以为列表
         :param md5: 发送图片md5或md5列表, 可以为列表
         """
+        if not jconfig.unsafe:
+            text = text.replace("你", "您")
         req = {
             "ToUin": user,
             "ToType": 1,
@@ -229,6 +236,8 @@ class Action:
         :param atUser: 需要艾特的用户QQ号
         :param atUserNick: 需要艾特的用户昵称, 需与atUser对应，如果缺失会将被艾特用户QQ号作为昵称
         """
+        if not jconfig.unsafe:
+            text = text.replace("你", "您")
         # NOTE: 用两个参数是因为，后续可能会支持不提供nick也能正确艾特出来
         # 因为个人觉得还需要传nick太多余了，但目前不传不行
         if isinstance(atUser, int) and atUser != 0:
@@ -332,6 +341,8 @@ class Action:
         :param base64: 发送图片base64, 可以为列表
         :param md5: 发送图片md5或md5列表, 可以为列表
         """
+        if not jconfig.unsafe:
+            text = text.replace("你", "您")
         req = {
             "ToUin": user,
             "GroupCode": group,
@@ -388,6 +399,8 @@ class Action:
         :param atUser: 需要艾特的用户QQ号, 可以为列表
         :param atUserNick: 需要艾特的用户昵称, 需与atUser对应，如果缺失会将被艾特用户QQ号作为昵称
         """
+        if not jconfig.unsafe:
+            text = text.replace("你", "您")
         req = {
             "ToUin": group,
             "ToType": 2,
