@@ -147,7 +147,9 @@ async def r_repeat():
             await s.text(text)
 ```
 
-### 信息录入
+![repeat](https://github.com/opq-osc/botoy/assets/47070852/82e7bd51-b7b9-4d69-95d1-9e522eecec13)
+
+### 信息录入 v1
 
 需求：
 
@@ -170,5 +172,34 @@ async def login():
             password, s = await ss.must_text("请输入密码")
             await s.text(f"您的用户名为：{username}\n您的密码为：{password}")
 ```
+
+![login](https://github.com/opq-osc/botoy/assets/47070852/782e5dbd-af44-4570-82aa-2358b9f494b2)
+
+### 信息录入 v2
+
+需求：
+
+在 v1 的基础上，增加确认提示。如果用户确认，则提示“登录成功”。如果用户未确认，则提示用户重新开启会话。
+
+实现：
+
+```python
+from botoy import ctx, start_session
+
+async def r_login():
+    if msg := (ctx.g or ctx.f):
+        if msg.text == 'login':
+            ss = start_session(friend=True)
+            ss.set_finish_info("输入超时，对话结束")
+            username, s = await ss.must_text("请输入用户名")
+            password, s = await ss.must_text("请输入密码")
+            info = f"您的用户名为：{username}\n您的密码为：{password}\n请确认是否输入无误。"
+            if await ss.confirm(info):
+                await s.text("登录成功")
+            else:
+                await s.text("确认超时或确认失败，请重新登录！")
+```
+
+![yes](https://github.com/opq-osc/botoy/assets/47070852/b5176839-23d9-4fc9-9af1-9bcca7fd5022)
 
 ...
