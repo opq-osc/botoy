@@ -1,4 +1,4 @@
-# 辅助函数 `contrib`
+# 辅助函数 (contrib)
 
 ```python
 from botoy import contrib

@@ -1,4 +1,4 @@
-# 配置 `jconfig`
+# 配置 (jconfig)
 
 ```python
 from botoy import jconfig

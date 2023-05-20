@@ -1,4 +1,4 @@
-# 定时任务 `apscheduler` `scheduler`
+# 定时任务 (apscheduler, scheduler)
 
 ```python
 from botoy import scheduler # 同步

@@ -1,4 +1,4 @@
-# 发送 `Action`
+# 发送操作 (Action)
 
 ```python
 from botoy import Action

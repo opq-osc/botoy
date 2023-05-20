@@ -1,4 +1,4 @@
-# 客户端 `Botoy`
+# 客户端 (Botoy)
 
 ```python
 from botoy import Botoy
