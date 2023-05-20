@@ -84,14 +84,3 @@ async def hellworld():
 | is_private      | 判断消息是否为私聊                                     | 布尔值 (bool)  |
 | from_group      | 发送者的群号                                           | 整数 (int)     |
 | is_from_phone   | 判断消息是否来自手机                                   | 布尔值 (bool)  |
-
-`from_user` 属性返回发送者的QQ号，数据类型为整数 (int)。
-
-`from_user_name` 属性返回发送者的昵称，数据类型为字符串 (str)。
-
-`is_private` 属性用于判断消息是否为私聊，返回布尔值 (bool)。如果调用 `from_group` 属性时产生异常，则消息为私聊，返回True；否则，返回False。
-
-`from_group` 属性返回发送者的群号。仅在私聊时才有值，否则会引发异常。数据类型为整数 (int)。
-
-`is_from_phone` 属性用于判断消息是否来自手机。如果消息体为空，且发送者的QQ号与接收者的QQ号相同，并且消息类型为529，则表示消息来自手机，返回布尔值 (bool)。
-
