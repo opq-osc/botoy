@@ -880,8 +880,10 @@ class Action:
         """获取当前集群信息"""
         return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})  # type: ignore
     
-    async def getQrCode(self, qq='default_value'):
-        """"获取登录二维码base64"""
+    async def getQrCode(self, qq='default_value') -> str:
+        """获取登录二维码base64
+        :param qq: 登录的qq号，默认不填为default_value.
+        """
         respon =  await self.get("", path=f"/v1/login/getqrcode",params={"qq": qq, "json": 1})
         return respon['BQrpic']
 
