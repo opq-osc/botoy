@@ -519,7 +519,7 @@ class Session:
         if the_ctx:
             self.prev_s = S.bind(the_ctx)
             return the_ctx.g, self.prev_s
-        return None, S
+        return None, self.prev_s or S
 
     async def next_f(
         self, info: str = "", timeout: Optional[float] = None
@@ -541,7 +541,7 @@ class Session:
         if the_ctx:
             self.prev_s = S.bind(the_ctx)
             return the_ctx.f, self.prev_s
-        return None, S
+        return None, self.prev_s or S
 
     async def next_ctx(
         self, info: str = "", timeout: Optional[float] = None
@@ -562,7 +562,7 @@ class Session:
         if the_ctx:
             self.prev_s = S.bind(the_ctx)
             return the_ctx, self.prev_s
-        return None, S
+        return None, self.prev_s or S
 
     def __repr__(self) -> str:
         return f"<Session[sid={self.sid}]>"
