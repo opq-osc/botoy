@@ -286,9 +286,9 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容, 同时
         """
         timeout = timeout or self.__s__.default_timeout
         if show_default:
-            prompt = f"[y/N] {timeout}超时，默认为{default and 'yes' or 'no'}"
+            prompt = f"[y/N] {timeout}秒超时，默认为{default and 'yes' or 'no'}"
         else:
-            prompt = f"[y/N] {timeout}超时"
+            prompt = f"[y/N] {timeout}秒超时"
         user_text, _ = await self.text(f"{text}\n\n{prompt}", timeout)
         while True:
             if user_text is None:
