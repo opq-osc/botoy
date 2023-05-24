@@ -880,11 +880,12 @@ class Action:
         """获取当前集群信息"""
         return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})  # type: ignore
     
-    async def getQrCode(self, qq='default_value') -> str:
+    async def getQrCode(self, qq='',devicename='') -> str:
         """获取登录二维码base64
-        :param qq: 登录的qq号，默认不填为default_value.
+        :param qq: 复用设备信息登录需填写 首次登录会随机设备信息
+        :param devicename: 登录的设备名称
         """
-        respon =  await self.get("", path=f"/v1/login/getqrcode",params={"qq": qq, "json": 1})
+        respon =  await self.get("", path=f"/v1/login/getqrcode",params={"qq": qq, "devicename":devicename,"json": 1})
         return respon['BQrpic']
 
     async def getGroupList(self) -> List[dict]:
