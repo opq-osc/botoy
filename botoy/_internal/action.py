@@ -879,14 +879,18 @@ class Action:
     async def getClusterInfo(self) -> dict:
         """获取当前集群信息"""
         return await self.get("", path="v1/clusterinfo", params={"isShow": 1, "qq": 1})  # type: ignore
-    
-    async def getQrCode(self, qq='',devicename='') -> str:
+
+    async def getQrCode(self, qq="", devicename="") -> str:
         """获取登录二维码base64
         :param qq: 复用设备信息登录需填写 首次登录会随机设备信息
         :param devicename: 登录的设备名称
         """
-        respon =  await self.get("", path=f"/v1/login/getqrcode",params={"qq": qq, "devicename":devicename,"json": 1})
-        return respon['BQrpic']
+        respon = await self.get(
+            "",
+            path=f"/v1/login/getqrcode",
+            params={"qq": qq, "devicename": devicename, "json": 1},
+        )
+        return respon["BQrpic"]
 
     async def getGroupList(self) -> List[dict]:
         """获取群列表"""
