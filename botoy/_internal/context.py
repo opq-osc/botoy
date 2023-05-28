@@ -252,14 +252,17 @@ class EventMsg:
 
 
 class Context:
-    def __init__(self, data: str) -> None:
+    def __init__(self, data: Union[str, dict]) -> None:
         """
         :param data: websokets收到的原始包数据
         """
-        self.__data = json.loads(data)
+        if isinstance(data, dict):
+            self.__data = data
+        else:
+            self.__data = json.loads(data)
 
     @property
-    def data(self) -> str:
+    def data(self) -> dict:
         """websokets收到的原始包数据"""
         return self.__data
 
