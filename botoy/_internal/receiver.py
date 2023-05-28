@@ -286,9 +286,9 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容, 同时
         """
         timeout = timeout or self.__s__.default_timeout
         if show_default:
-            prompt = f"[y/N] {timeout}超时，默认为{default and 'yes' or 'no'}"
+            prompt = f"[y/N] {timeout}秒超时，默认为{default and 'yes' or 'no'}"
         else:
-            prompt = f"[y/N] {timeout}超时"
+            prompt = f"[y/N] {timeout}秒超时"
         user_text, _ = await self.text(f"{text}\n\n{prompt}", timeout)
         while True:
             if user_text is None:
@@ -519,7 +519,7 @@ class Session:
         if the_ctx:
             self.prev_s = S.bind(the_ctx)
             return the_ctx.g, self.prev_s
-        return None, S
+        return None, self.prev_s or S
 
     async def next_f(
         self, info: str = "", timeout: Optional[float] = None
@@ -541,7 +541,7 @@ class Session:
         if the_ctx:
             self.prev_s = S.bind(the_ctx)
             return the_ctx.f, self.prev_s
-        return None, S
+        return None, self.prev_s or S
 
     async def next_ctx(
         self, info: str = "", timeout: Optional[float] = None
@@ -562,7 +562,7 @@ class Session:
         if the_ctx:
             self.prev_s = S.bind(the_ctx)
             return the_ctx, self.prev_s
-        return None, S
+        return None, self.prev_s or S
 
     def __repr__(self) -> str:
         return f"<Session[sid={self.sid}]>"
