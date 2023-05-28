@@ -113,19 +113,19 @@ class Botoy:
 
     __call__ = attach
 
-    async def _packet_handler(self, pkt, __available_names: Optional[List[str]] = None):
+    async def _packet_handler(self, pkt, _available_names: Optional[List[str]] = None):
         # __available_names 用于mahiro管理
         # 当前的实现，副作用：增加一项要求: 接收函数有 name 并且 name 唯一
         # TODO: 在mark_recv中处理好name
         # 由botoy注册的框架名自动添加 BOTOY前缀如："name" => "BOTOY name"
         token = current_ctx.set(Context(pkt))
-        if __available_names is not None:
-            __available_names = [i[6:] for i in __available_names]
+        if _available_names is not None:
+            _available_names = [i[6:] for i in _available_names]
             await asyncio.gather(
                 *(
                     self._start_task(receiver)
                     for receiver in self.receivers
-                    if receiver.info.name in __available_names
+                    if receiver.info.name in _available_names
                 ),
                 return_exceptions=True,
             )

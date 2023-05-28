@@ -46,7 +46,7 @@ class Mahiro(Botoy):
         self._start_task(
             self._packet_handler,
             data["raw"],
-            __available_names=data.get("configs", {}).get("availablePlugins", []),
+            _available_names=data.get("configs", {}).get("availablePlugins", []),
         )
         return {"code": 200}
 
