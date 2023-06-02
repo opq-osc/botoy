@@ -1,4 +1,3 @@
-# FIXME: 先凑合用
 import asyncio
 import re
 from typing import List, Optional, TypeVar, Union
@@ -9,15 +8,9 @@ from pydantic import BaseModel
 
 T = TypeVar("T")
 
-# from . import macro, utils
 from .config import jconfig
 from .context import GroupMsg
 from .log import logger
-
-# from botoy.parser import event as eventParser
-
-
-# from .model import EventMsg, FriendMsg, GroupMsg
 
 
 class BaseResponse(BaseModel):
@@ -30,10 +23,7 @@ class Response(BaseModel):
     ResponseData: dict
 
 
-# TODO: 发送接收数据结构化，但是用pydantic好麻烦哦... 后面再弄合适的方案
-
 lock = asyncio.Lock()
-prev_task: Optional[asyncio.Task] = None
 
 
 def get_base_url(url):
@@ -885,17 +875,17 @@ class Action:
         :param qq: 复用设备信息登录需填写 首次登录会随机设备信息
         :param devicename: 登录的设备名称
         """
-        respon = await self.get(
+        resp = await self.get(
             "",
             path=f"/v1/login/getqrcode",
             params={"qq": qq, "devicename": devicename, "json": 1},
         )
-        return respon["BQrpic"]
+        return resp["BQrpic"]  # type: ignore
 
     async def getGroupList(self) -> List[dict]:
         """获取群列表"""
         data = await self.post(self.build_request(request={}, cmd="GetGroupLists"))
-        return data["GroupLists"]
+        return data["GroupLists"]  # type: ignore
 
     async def getGroupMembers(self, group: int) -> List[dict]:
         """获取群成员列表"""
@@ -908,11 +898,11 @@ class Action:
                     cmd="GetGroupMemberLists",
                 )
             )
-            if "MemberLists" in data:
-                members.extend(data["MemberLists"])
-            if "LastBuffer" not in data or data["LastBuffer"] == "":
+            if "MemberLists" in data:  # type: ignore
+                members.extend(data["MemberLists"])  # type: ignore
+            if "LastBuffer" not in data or data["LastBuffer"] == "":  # type:ignore
                 break
-            LastBuffer = data["LastBuffer"]
+            LastBuffer = data["LastBuffer"]  # type: ignore
         return members
 
     async def getGroupAdminList(self, group: int, include_owner=True) -> List[dict]:
@@ -1167,32 +1157,36 @@ class Action:
         params: Optional[dict] = None,
         timeout: Optional[int] = None,
     ):
-        global lock, prev_task
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
+
         async with lock:
-            if prev_task:
-                try:
-                    await asyncio.wait_for(prev_task, 2)
-                except TimeoutError:
-                    pass
-                else:
-                    await asyncio.sleep(0.5)
+            await asyncio.sleep(0.5)
+
         params = params or {}
         params["funcname"] = funcname
-        if not params.get("qq"):
+        if "qq" not in params:
             params["qq"] = await self.qq
 
         try:
-            # 发送请求
-            prev_task = asyncio.ensure_future(
+            request_task = asyncio.ensure_future(
                 self.c.request(
                     method,
                     httpx.URL(url=path, params=params),
                     json=payload,
-                    **({"timeout": timeout} if timeout else {}),
+                    timeout=timeout,
                 )
             )
-            resp = await prev_task
+
+            resp = None
+            async with lock:
+                try:
+                    resp = await asyncio.wait_for(request_task, 2)
+                except TimeoutError:
+                    pass
+            if resp is None or not request_task.done():
+                resp = await request_task
+
+            # TODO: 处理更多细节
             resp_model = Response.parse_obj(resp.json())
             if resp_model.CgiBaseResponse.ErrMsg:
                 if resp_model.CgiBaseResponse.Ret == 0:
@@ -1203,53 +1197,6 @@ class Action:
         except Exception as e:
             logger.error(e)
             return None
-        # try:
-        #     resp = await self.c.request(
-        #         method, httpx.URL(url=path, params=params), json=payload
-        #     )
-        #     resp.raise_for_status()
-        # except httpx.TimeoutException:
-        #     logger.warning(f"响应超时，但不代表处理未成功, 结果未知!")
-        #     return {}
-        # except httpx.HTTPStatusError:
-        #     logger.error(
-        #         f"响应码出错 => {resp.status_code}，大概率是因为账号已离线或者qq号错误",  # type:ignore
-        #     )
-        #     return {}
-        # except Exception:
-        #     logger.error(f"请求出错: {traceback.format_exc()}")
-        #     return {}
-        #
-        # # 处理数据
-        # try:
-        #     data = resp.json()
-        # except Exception:
-        #     logger.error("API响应结果非json格式")
-        #     return {}
-        #
-        # if data is None:
-        #     logger.error("返回为null, 该类情况多数是因为响应超时或者该API不存在，或服务端操作超时(此时不代表未成功)")
-        #     return {}
-        #
-        # # 返回码提示
-        # if "Ret" in data:
-        #     ret = data.get("Ret")
-        #     if ret == 0:
-        #         pass
-        #     elif ret == 34:
-        #         logger.error(f"未知错误，跟消息长度似乎无关，可以尝试分段重新发送 => {data}")
-        #     elif ret == 110:
-        #         logger.error(f"发送失败，你已被移出该群，请重新加群 => {data}")
-        #     elif ret == 120:
-        #         logger.error(f"机器人被禁言 => {data}")
-        #     elif ret == 241:
-        #         logger.error(f"消息发送频率过高，对同一个群或好友，建议发消息的最小间隔控制在1100ms以上 => {data}")
-        #     elif ret == 299:
-        #         logger.error(f"超过群发言频率限制 => {data}")
-        #     else:
-        #         logger.error(f"请求发送成功, 但处理失败 => {data}")
-        #
-        # return data
 
     #
     async def post(
