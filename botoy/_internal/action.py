@@ -296,7 +296,7 @@ class Action:
         else:
             raise ValueError("缺少参数")
         data = await self.post(
-            self.build_request(req, "PicUp.DataUp"), timeout=60  # 这个timeout可能不能写死
+            self.build_request(req, "PicUp.DataUp"), path="/v1/upload", funcname=None, timeout=60  # 这个timeout可能不能写死
         )
         return self.UploadResponse.parse_obj(data)
 
