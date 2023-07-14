@@ -299,7 +299,7 @@ class Action:
         data = await self.post(
             self.build_request(req, "PicUp.DataUp"),
             path="/v1/upload",
-            funcname=None,
+            funcname="",
             timeout=60,  # 这个timeout可能不能写死
         )
         return self.UploadResponse.parse_obj(data)
