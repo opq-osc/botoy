@@ -69,6 +69,7 @@ class Action:
 
     def set_url(self, url):
         self.base_url = get_base_url(url)
+        self.c.base_url = self.base_url
 
     def set_qq(self, qq: int):
         self._qq = qq
