@@ -1162,7 +1162,6 @@ class Action:
         timeout: Optional[int] = None,
     ):
         """基础请求方法, 提供部分提示信息，出错返回空字典，其他返回服务端响应结果"""
-
         async with lock:
             await asyncio.sleep(0.5)
 
@@ -1172,24 +1171,12 @@ class Action:
             params["qq"] = await self.qq
 
         try:
-            request_task = asyncio.ensure_future(
-                self.c.request(
-                    method,
-                    httpx.URL(url=path, params=params),
-                    json=payload,
-                    timeout=timeout,
-                )
+            resp = await self.c.request(
+                method,
+                httpx.URL(url=path, params=params),
+                json=payload,
+                timeout=timeout,
             )
-
-            resp = None
-            async with lock:
-                try:
-                    resp = await asyncio.wait_for(request_task, 2)
-                except TimeoutError:
-                    pass
-            if resp is None or not request_task.done():
-                resp = await request_task
-
             # TODO: 处理更多细节
             resp_model = Response.parse_obj(resp.json())
             if resp_model.CgiBaseResponse.ErrMsg:
