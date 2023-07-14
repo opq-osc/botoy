@@ -1,6 +1,6 @@
 # pylint: disable=C0415,C0413
 # type: ignore
-__version__ = "9.1"
+__version__ = "9.2"
 
 
 def check_version(daemon=True):
