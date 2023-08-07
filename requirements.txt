@@ -4,7 +4,7 @@ loguru
 click
 prettytable
 apscheduler
-pydantic<2.0
+pydantic
 colorama
 
 # mahiro
