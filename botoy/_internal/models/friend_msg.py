@@ -69,7 +69,7 @@ class AtUinList(BaseModel):
 
 
 class Image(BaseModel):
-    FileId: int
+    FileId: Optional[int] = None
     FileMd5: str
     FileSize: int
     Url: str
