@@ -107,7 +107,7 @@
                       "FileSize": { "type": "integer" },
                       "Url": { "type": "string" }
                     },
-                    "required": ["FileId", "FileMd5", "FileSize", "Url"]
+                    "required": ["FileMd5", "FileSize", "Url"]
                   }
                 },
                 "Video": {
