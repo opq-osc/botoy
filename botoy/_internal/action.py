@@ -27,7 +27,7 @@ lock = asyncio.Lock()
 
 
 def get_base_url(url):
-    if not re.match(r"$(http|https|ws)://", url):
+    if not re.match(r"^(http|https|ws)://", url):
         url = "http://" + url
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname
