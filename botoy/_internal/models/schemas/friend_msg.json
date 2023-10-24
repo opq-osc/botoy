@@ -105,7 +105,9 @@
                       "FileId": { "type": "integer" },
                       "FileMd5": { "type": "string" },
                       "FileSize": { "type": "integer" },
-                      "Url": { "type": "string" }
+                      "Url": { "type": "string" },
+                      "Width": { "type": "integer" },
+                      "Height": { "type": "integer" }
                     },
                     "required": ["FileMd5", "FileSize", "Url"]
                   }

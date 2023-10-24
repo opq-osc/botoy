@@ -2,8 +2,12 @@ import asyncio
 import re
 from typing import List, Optional, TypeVar, Union
 from urllib.parse import urlparse
+import requests
+from PIL import Image
+from io import BytesIO
 
 import httpx
+import base64 as bs64
 from pydantic import BaseModel
 
 T = TypeVar("T")
@@ -144,6 +148,8 @@ class Action:
                     "FileMd5": resp.FileMd5,
                     "FileSize": resp.FileSize,
                     "FileId": resp.FileId,
+                    "Width": resp.Width,
+                    "Height": resp.Height
                 }
             )
 
@@ -264,6 +270,8 @@ class Action:
         FileMd5: str
         FileSize: int
         FileId: int
+        Width: int
+        Height: int
 
     async def upload(self, cmd: int, url: str = "", base64: str = "", path: str = ""):
         """上传资源文件
@@ -302,6 +310,28 @@ class Action:
             funcname="",
             timeout=60,  # 这个timeout可能不能写死
         )
+
+        def get_image_size(req):
+            fileUrl = req.get("FileUrl")
+            base64Buf = req.get("Base64Buf")
+            filePath = req.get("FilePath")
+            if fileUrl:
+                response = requests.get(fileUrl, headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"})
+                image_data = response.content
+                image = Image.open(BytesIO(image_data))
+                return image.size
+            elif base64Buf:
+                image_data = bs64.b64decode(base64Buf)
+                image = Image.open(BytesIO(image_data))
+                return image.size
+            else:
+                image = Image.open(filePath)
+                return image.size
+        if cmd == 1 or cmd == 2:
+            width, height = get_image_size(req)
+            data["Width"] = width
+            data["Height"] = height
+
         return self.UploadResponse.parse_obj(data)
 
     class SendGroupPicResponse(BaseModel):
@@ -345,6 +375,8 @@ class Action:
                     "FileMd5": resp.FileMd5,
                     "FileSize": resp.FileSize,
                     "FileId": resp.FileId,
+                    "Width": resp.Width,
+                    "Height": resp.Height
                 }
             )
 
@@ -400,11 +432,14 @@ class Action:
                 "FileMd5": resp.FileMd5,
                 "FileSize": resp.FileSize,
                 "FileId": resp.FileId,
+                "Width": resp.Width,
+                "Height": resp.Height,
             }
             images.append(image)
 
         for url in url_list:
-            add_image(await self.upload(2, url=url))
+            imageUrl = await self.upload(2, url=url)
+            add_image(imageUrl)
             await asyncio.sleep(0.5)
         for b64 in base64_list:
             add_image(await self.upload(2, base64=b64))
@@ -427,7 +462,6 @@ class Action:
             at_list.append({"Uin": uin, "Nick": nick})
         req["AtUinLists"] = at_list  # type: ignore
         ###########
-
         data = await self.post(self.build_request(req))
         return self.SendGroupPicResponse.parse_obj(data)
 
