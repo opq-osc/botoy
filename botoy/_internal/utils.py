@@ -2,6 +2,10 @@
 import asyncio
 import base64
 import re
+import warnings
+from io import BytesIO
+from pathlib import Path
+from typing import Optional, Tuple, Union
 
 
 def to_address(host, port) -> str:
@@ -71,3 +75,59 @@ def sync_run(func):
         return loop.run_until_complete(coro)
     finally:
         loop.close()
+
+
+try:
+    import cv2
+    import numpy as np
+
+    def _get_image_size(target: Union[bytes, BytesIO, str, Path]) -> Tuple[int, int]:  # type: ignore
+        """获取图像尺寸
+        :param target: 目标图像。接收图像路径或图像二进制数据
+        :return: (长, 宽)
+        """
+        if isinstance(target, (bytes, BytesIO)):
+            if isinstance(target, BytesIO):
+                target.seek(0)
+                target = target.read()
+            arr = np.frombuffer(target, np.uint8)  # type: ignore
+            img = cv2.imdecode(arr, cv2.IMREAD_COLOR)  # type: ignore
+        elif isinstance(target, (str, Path)):
+            img = cv2.imread(target.absolute() if isinstance(target, Path) else target)  # type: ignore
+        else:
+            raise TypeError("参数类型有误")
+        h, w = img.shape[:2]
+        return h, w
+
+except ImportError:
+    try:
+        from PIL import Image
+
+        def _get_image_size(target: Union[bytes, BytesIO, str, Path]) -> Tuple[int, int]:  # type: ignore
+            """获取图像尺寸
+            :param target: 目标图像。接收图像路径或图像二进制数据
+            :return: (长, 宽)
+            """
+            if isinstance(target, str):
+                target = Path(target)
+            elif isinstance(target, bytes):
+                target = BytesIO(target)
+            img = Image.open(target)
+            w, h = img.size
+            return h, w
+
+    except ImportError:
+
+        def _get_image_size(_):  # type: ignore
+            warnings.warn("为了让发送的图片有较好的预览效果，请安装 opencv-python 或者 pillow")
+            return None
+
+
+def get_image_size(
+    target: Union[bytes, BytesIO, str, Path]
+) -> Optional[Tuple[int, int]]:
+    """获取图像尺寸
+    :param target: 目标图像。接收图像路径或图像二进制数据
+    :return: (长, 宽)
+    """
+    return _get_image_size(target)

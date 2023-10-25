@@ -1,10 +1,12 @@
 import asyncio
+import base64 as _base64
 import re
-from typing import List, Optional, TypeVar, Union
+from typing import List, Optional, Tuple, TypeVar, Union
 from urllib.parse import urlparse
 
 import httpx
 from pydantic import BaseModel
+from utils import get_image_size
 
 T = TypeVar("T")
 
@@ -40,6 +42,20 @@ def to_list(item: Union[T, List[T]]) -> List[T]:
     if isinstance(item, List):
         return item
     return [item]
+
+
+def add_image(
+    images: list, resp: "Action.UploadResponse", size: Optional[Tuple[int, int]] = None
+):
+    item = {
+        "FileMd5": resp.FileMd5,
+        "FileSize": resp.FileSize,
+        "FileId": resp.FileId,
+    }
+    if size:
+        item["Height"] = size[0]
+        item["Width"] = size[1]
+    images.append(item)
 
 
 class Action:
@@ -138,20 +154,22 @@ class Action:
 
         images = []
 
-        def add_image(resp: "Action.UploadResponse"):
-            images.append(
-                {
-                    "FileMd5": resp.FileMd5,
-                    "FileSize": resp.FileSize,
-                    "FileId": resp.FileId,
-                }
-            )
-
         for url in url_list:
-            add_image(await self.upload(1, url=url))
+            size = None
+            try:
+                res = await self.c.get(
+                    url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10
+                )
+                res.raise_for_status()
+            except Exception:
+                pass
+            else:
+                size = get_image_size(res.content)
+            add_image(images, await self.upload(1, url=url), size)
             await asyncio.sleep(0.5)
         for b64 in base64_list:
-            add_image(await self.upload(1, base64=b64))
+            size = get_image_size(_base64.b64decode(b64))
+            add_image(images, await self.upload(1, base64=b64), size)
             await asyncio.sleep(0.5)
         # for md5 in md5_list:
         #     images.append({'FileMd5': md5})
@@ -263,7 +281,8 @@ class Action:
     class UploadResponse(BaseModel):
         FileMd5: str
         FileSize: int
-        FileId: int
+        FileId: Optional[int]
+        FileToken: Optional[str]
 
     async def upload(self, cmd: int, url: str = "", base64: str = "", path: str = ""):
         """上传资源文件
@@ -339,20 +358,22 @@ class Action:
 
         images = []
 
-        def add_image(resp: "Action.UploadResponse"):
-            images.append(
-                {
-                    "FileMd5": resp.FileMd5,
-                    "FileSize": resp.FileSize,
-                    "FileId": resp.FileId,
-                }
-            )
-
         for url in url_list:
-            add_image(await self.upload(1, url=url))
+            size = None
+            try:
+                res = await self.c.get(
+                    url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10
+                )
+                res.raise_for_status()
+            except Exception:
+                pass
+            else:
+                size = get_image_size(res.content)
+            add_image(images, await self.upload(1, url=url), size)
             await asyncio.sleep(0.5)
         for b64 in base64_list:
-            add_image(await self.upload(1, base64=b64))
+            size = get_image_size(_base64.b64decode(b64))
+            add_image(images, await self.upload(1, base64=b64), size)
             await asyncio.sleep(0.5)
         # for md5 in md5_list:
         #     images.append({'FileMd5': md5})
@@ -395,19 +416,23 @@ class Action:
 
         images = []
 
-        def add_image(resp: "Action.UploadResponse"):
-            image = {
-                "FileMd5": resp.FileMd5,
-                "FileSize": resp.FileSize,
-                "FileId": resp.FileId,
-            }
-            images.append(image)
-
         for url in url_list:
-            add_image(await self.upload(2, url=url))
+            size = None
+            try:
+                res = await self.c.get(
+                    url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10
+                )
+                res.raise_for_status()
+            except Exception:
+                pass
+            else:
+                size = get_image_size(res.content)
+            imageUrl = await self.upload(2, url=url)
+            add_image(images, imageUrl, size)
             await asyncio.sleep(0.5)
         for b64 in base64_list:
-            add_image(await self.upload(2, base64=b64))
+            size = get_image_size(_base64.b64decode(b64))
+            add_image(images, await self.upload(2, base64=b64), size)
             await asyncio.sleep(0.5)
         # for md5 in md5_list:
         #     images.append({'FileMd5': md5})
@@ -427,7 +452,6 @@ class Action:
             at_list.append({"Uin": uin, "Nick": nick})
         req["AtUinLists"] = at_list  # type: ignore
         ###########
-
         data = await self.post(self.build_request(req))
         return self.SendGroupPicResponse.parse_obj(data)
 

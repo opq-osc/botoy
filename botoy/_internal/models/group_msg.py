@@ -66,6 +66,8 @@ class Image(BaseModel):
     FileMd5: str
     FileSize: int
     Url: str
+    Width: int
+    Height: int
 
 
 class Video(BaseModel):
