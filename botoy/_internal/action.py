@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 
 import httpx
 from pydantic import BaseModel
-from utils import get_image_size
+
+from .utils import get_image_size
 
 T = TypeVar("T")
 
