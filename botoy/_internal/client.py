@@ -226,7 +226,7 @@ class Botoy:
         runner.run(self, reload)
 
     def _get_ws_url(self, url: str) -> str:
-        if not re.match(r"$(http|https|ws)://", url):
+        if not re.match(r"^(http|https|ws)://", url):
             url = "ws://" + url
         parsed_url = urlparse(url)
         hostname = parsed_url.hostname
