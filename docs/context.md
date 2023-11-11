@@ -63,4 +63,14 @@ from botoy import ctx
 
 ### `EventMsg` 事件消息
 
-TODO
+暂时没封装事件消息，目前可使用 `ctx.data`（原始数据）自行处理
+
+例：处理退群事件
+
+```python
+packet = ctx.data['CurrentPacket']
+if packet['EventName'] == 'ON_EVENT_GROUP_EXIT':
+    ev = packet['EventData']
+    uid = ev['Event']['Uid'] # 退群者
+    group = ev['MsgHead']['ToUid'] # 群号
+```
