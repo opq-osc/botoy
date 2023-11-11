@@ -1,7 +1,7 @@
 import asyncio
 import base64 as _base64
 import re
-from typing import List, Optional, Tuple, TypeVar, Union
+from typing import Any, List, Optional, Tuple, TypeVar, Union
 from urllib.parse import urlparse
 
 import httpx
@@ -23,7 +23,7 @@ class BaseResponse(BaseModel):
 
 class Response(BaseModel):
     CgiBaseResponse: BaseResponse
-    ResponseData: dict
+    ResponseData: Any
 
 
 lock = asyncio.Lock()
@@ -180,22 +180,35 @@ class Action:
         data = await self.post(self.build_request(req))
         return self.SendGroupPicResponse.parse_obj(data)
 
-    #
-    #     async def sendFriendVoice(
-    #         self, user: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
-    #     ):
-    #         """发送好友语音消息"""
-    #         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
-    #         return await self.post(
-    #             "SendMsg",
-    #             {
-    #                 "toUser": user,
-    #                 "sendToType": 1,
-    #                 "sendMsgType": "VoiceMsg",
-    #                 "voiceUrl": voiceUrl,
-    #                 "voiceBase64Buf": voiceBase64Buf,
-    #             },
-    #         )
+    class SendFriendVoiceResponse(BaseModel):
+        MsgTime: int
+        MsgSeq: int
+
+    async def sendFriendVoice(self, user: int, *, url: str = "", base64: str = ""):
+        """发送好友语音消息
+        :param url: 语音网络链接
+        :param base64: 语音文件base64编码
+        """
+        assert any([url, base64]), "缺少参数"
+        if url:
+            file = await self.upload(26, url=url)
+        else:
+            file = await self.upload(26, base64=base64)
+        data = await self.post(
+            self.build_request(
+                {
+                    "ToUin": user,
+                    "ToType": 1,
+                    "Voice": {
+                        "FileMd5": file.FileMd5,
+                        "FileSize": file.FileSize,
+                        "FileToken": file.FileToken,
+                    },
+                }
+            )
+        )
+        return self.SendFriendVoiceResponse.parse_obj(data)
+
     #
     #     async def sendFriendXml(self, user: int, content: str) -> dict:
     #         """发送好友Xml消息"""
@@ -456,46 +469,56 @@ class Action:
         data = await self.post(self.build_request(req))
         return self.SendGroupPicResponse.parse_obj(data)
 
-    #
-    #     async def sendGroupVoice(
-    #         self, group: int, *, voiceUrl: str = "", voiceBase64Buf: str = ""
-    #     ) -> dict:
-    #         """发送群组语音消息"""
-    #         assert any([voiceUrl, voiceBase64Buf]), "缺少参数"
-    #         return await self.post(
-    #             "SendMsg",
-    #             {
-    #                 "toUser": group,
-    #                 "sendToType": 2,
-    #                 "sendMsgType": "VoiceMsg",
-    #                 "voiceUrl": voiceUrl,
-    #                 "voiceBase64Buf": voiceBase64Buf,
-    #             },
-    #         )
-    #
-    #     async def sendGroupXml(self, group: int, content: str) -> dict:
-    #         """发送群组Xml消息"""
-    #         return await self.post(
-    #             "SendMsgV2",
-    #             {
-    #                 "ToUserUid": group,
-    #                 "SendToType": 2,
-    #                 "SendMsgType": "XmlMsg",
-    #                 "Content": content,
-    #             },
-    #         )
-    #
-    #     async def sendGroupJson(self, group: int, content: str) -> dict:
-    #         """发送群组Json消息"""
-    #         return await self.post(
-    #             "SendMsgV2",
-    #             {
-    #                 "ToUserUid": group,
-    #                 "SendToType": 2,
-    #                 "SendMsgType": "JsonMsg",
-    #                 "Content": content,
-    #             },
-    #         )
+    class SendGroupVoiceResponse(BaseModel):
+        MsgTime: int
+        MsgSeq: int
+
+    async def sendGroupVoice(self, group: int, *, url: str = "", base64: str = ""):
+        """发送群组语音消息
+        :param url: 语音网络链接
+        :param base64: 语音文件base64编码
+        """
+        assert any([url, base64]), "缺少参数"
+        if url:
+            file = await self.upload(29, url=url)
+        else:
+            file = await self.upload(29, base64=base64)
+        data = await self.post(
+            self.build_request(
+                {
+                    "ToUin": group,
+                    "ToType": 2,
+                    "Voice": {
+                        "FileMd5": file.FileMd5,
+                        "FileSize": file.FileSize,
+                        "FileToken": file.FileToken,
+                    },
+                }
+            )
+        )
+        return self.SendGroupVoiceResponse.parse_obj(data)
+
+    class SendGroupXmlResponse(BaseModel):
+        MsgTime: int
+
+    async def sendGroupXml(self, group: int, content: str):
+        """发送群组Xml消息"""
+        data = await self.post(
+            self.build_request(
+                {"ToUin": group, "ToType": 2, "SubMsgType": 12, "Content": content}
+            )
+        )
+        return self.SendGroupXmlResponse.parse_obj(data)
+
+    async def sendGroupJson(self, group: int, content: str):
+        """发送群组Json消息"""
+        data = await self.post(
+            self.build_request(
+                {"ToUin": group, "ToType": 2, "SubMsgType": 51, "Content": content}
+            )
+        )
+        return self.SendGroupXmlResponse.parse_obj(data)
+
     #
     #     async def sendGroupTeXiaoText(self, group: int, text: str) -> dict:
     #         """发送群组特效文本消息"""
@@ -971,12 +994,18 @@ class Action:
         #             {"GroupID": group, "UserID": user, "NewTitle": title},
         #         )
         #
-        #     async def modifyGroupCard(self, user: int, group: int, nick: str):
-        #         """修改群名片"""
-        #         return await self.post(
-        #             "ModifyGroupCard", {"UserID": user, "GroupID": group, "NewNick": nick}
-        #         )
-        #
+
+    async def modifyGroupCard(self, user: str, group: int, nick: str):
+        """修改用户群名片
+        :param user: 用户uid，注意是str类型，格式为：u_
+        :param group: 群号
+        :param nick: 新群名片昵称
+        """
+        return await self.post(
+            self.build_request(
+                {"OpCode": 2300, "Uin": group, "Uid": user, "Nick": nick}
+            )
+        )
 
     async def shutUserUp(self, group: int, user_uid: str, ShutTime: int):
         """禁言用户
@@ -1070,15 +1099,14 @@ class Action:
         #             {"ActionType": 1, "GroupID": group, "ActionUserID": 0, "Content": content},
         #         )
         #
-        #     async def exitGroup(self, group: int) -> dict:
-        #         """退出群聊
-        #         :param group: 哪个群?
-        #         """
-        #         return await self.post(
-        #             "GroupMgr",
-        #             {"ActionType": 2, "GroupID": group, "ActionUserID": 0, "Content": ""},
-        #         )
-        #
+
+    async def exitGroup(self, group: int):
+        """退出群聊
+        :param group: 哪个群?
+        """
+        return await self.post(
+            self.build_request({"OpCode": 4247, "Uin": group}), "SsoGroup.Op"
+        )
 
     async def driveUserAway(self, group: int, user_uid: str):
         """移出群聊
@@ -1175,6 +1203,38 @@ class Action:
         """获取OPQ登陆的所有机器人QQ号"""
         return [i["QQ"] for i in (await self.getClusterInfo())["QQUsers"]]
 
+    class QueryUinByUidResponse(BaseModel):
+        Uin: int
+        Uid: str
+        Nick: str
+        Head: str
+        Signature: str
+        Sex: int
+        Level: int
+
+    async def queryUinByUid(self, uid: str):
+        """用户Uid转Uin，返回值中不仅仅包含uin, 还包括用户信息
+        :param uid: 用户uid
+        """
+        req = self.build_request({"Uid": uid}, "QueryUinByUid")
+        data = await self.post(req)
+        return self.QueryUinByUidResponse.parse_obj(
+            data[0] if isinstance(data, list) else data
+        )
+
+    async def getClientKey(self) -> int:
+        """自己看OPQ文档"""
+        return await self.post(self.build_request({}, "GetClientKey"))
+
+    class GetPSKeyResponse(BaseModel):
+        Domain: str
+        PSKey: str
+
+    async def getPSKey(self, domain: str = "qzone.qq.com"):
+        """自己看OPQ文档"""
+        data = await self.post(self.build_request({"Domain": domain}, "GetPSKey"))
+        return self.GetPSKeyResponse.parse_obj(data)
+
         ############################################################################
 
     async def baseRequest(
@@ -1195,6 +1255,7 @@ class Action:
         if "qq" not in params:
             params["qq"] = await self.qq
 
+        ret = None
         try:
             resp = await self.c.request(
                 method,
@@ -1202,8 +1263,8 @@ class Action:
                 json=payload,
                 timeout=timeout,
             )
-            # TODO: 处理更多细节
-            resp_model = Response.parse_obj(resp.json())
+            ret = resp.json()
+            resp_model = Response.parse_obj(ret)
             if resp_model.CgiBaseResponse.ErrMsg:
                 if resp_model.CgiBaseResponse.Ret == 0:
                     logger.success(resp_model.CgiBaseResponse.ErrMsg)
@@ -1212,6 +1273,7 @@ class Action:
             return resp_model.ResponseData
         except Exception as e:
             logger.error(e)
+            logger.debug(f"接口返回数据：{ret}")
             return None
 
     #

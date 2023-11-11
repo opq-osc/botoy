@@ -68,67 +68,69 @@ qq 如果未传，则尝试读取配置文件中的`qq` 字段。
 
 基于`baseRequest`, `get`, `post`方法，封装了以下方法。
 
-| 名称                    | 作用                                                                |
-| ----------------------- | ------------------------------------------------------------------- |
-| `sendPhoneText`         | 给手机发文字                                                        |
-| `sendFriendText`        | 发送好友文本消息                                                    |
-|                         | 发送好友语音消息                                                    |
-| `sendFriendPic`         | 发送好友图片消息                                                    |
-|                         | 发送好友 Xml 类型消息                                               |
-| `sendGroupText`         | 发送群文字消息                                                      |
-| `at`                    | 仅 at 群成员的空消息                                                |
-|                         | 发送群语音                                                          |
-|                         | 发送群图片                                                          |
-| `sendGroupPic`          | 发送群多图                                                          |
-|                         | 发送群 Json 类型信息                                                |
-|                         | 发送群 Xml 类型信息                                                 |
-| `sendPrivateText`       | 发送私聊文字消息                                                    |
-|                         | 发送私聊语音                                                        |
-| `sendPrivatePic`        | 发送私聊图片                                                        |
-|                         | 发送私聊 Xml 类型信息                                               |
-| `replyGroupMsg` `reply` | 发送回复消息,回复群消息                                             |
-|                         | 发送回复消息,回复好友消息,不好用                                    |
-|                         | 获取用户信息                                                        |
-|                         | 获取 cookies                                                        |
-|                         | 获取好友列表                                                        |
-| `getGroupList`          | 获取群聊列表                                                        |
-| `getGroupMembers`       | 获取群成员列表                                                      |
-| `getGroupAdminList`     | 获取群管理列表                                                      |
-| `getAllBots`            | 获取该 OPQ 登陆的所有 QQ 列表                                       |
-|                         | 设置群成员头衔                                                      |
-|                         | 修改群名片                                                          |
-|                         | 开启或关闭全员禁言                                                  |
-|                         | 设置群成员禁言                                                      |
-|                         | 点赞                                                                |
-|                         | 设置群公告                                                          |
-|                         | 设置或取消群管理员                                                  |
-| `revokeGroupMsg`        | 撤回群消息                                                          |
-| `revoke`                | 撤回群消息, revokeGroupMsg 的便捷操作，直接传入消息 `GroupMsg` 即可 |
-|                         | 拉人入群                                                            |
-|                         | 加入群聊                                                            |
-|                         | 退出群聊                                                            |
-|                         | 移出群聊                                                            |
-| `getClusterInfo`        | 获取当前集群信息                                                    |
-|                         | 搜索群组                                                            |
-|                         | 刷新 key 二次登陆                                                   |
-|                         | 添加好友                                                            |
-|                         | 处理好友请求                                                        |
-|                         | 退出指定 qq                                                         |
-|`getQrCode`              | 获取登录二维码的 base64 编码                                        |
-|                         | 获取好友文件下载链接                                                |
-|                         | 获取群文件下载链接                                                  |
-|                         | 转发视频到群聊                                                      |
-|                         | 转发视频给好友                                                      |
-|                         | 获取短视频链接                                                      |
-|                         | 发送群组特效文本消息                                                |
-|                         | 获取企鹅卡片资料                                                    |
-|                         | 戳一戳                                                              |
-|                         | 上传群文件                                                          |
-|                         | 入群审核                                                            |
-|                         | 上传群图片获取图片信息                                              |
-|                         | 上传头像                                                            |
-|                         | 打开红包                                                            |
-| `upload`                | 上传资源文件                                                        |
+| 名称                        | 作用                                                                |
+| --------------------------- | ------------------------------------------------------------------- |
+| `sendPhoneText`             | 给手机发文字                                                        |
+| `sendFriendText`            | 发送好友文本消息                                                    |
+| `sendFriendVoice`           | 发送好友语音消息                                                    |
+| `sendFriendPic`             | 发送好友图片消息                                                    |
+|                             | 发送好友 Xml 类型消息                                               |
+| `sendGroupText`             | 发送群文字消息                                                      |
+| `at`                        | 仅 at 群成员的空消息                                                |
+| `sendGroupVoice`            | 发送群语音                                                          |
+| `sendGroupPic`              | 发送群图片，包括多图                                                |
+| `sendGroupJson`             | 发送群 Json 类型信息                                                |
+| `sendGroupXml`              | 发送群 Xml 类型信息                                                 |
+| `sendPrivateText`           | 发送私聊文字消息                                                    |
+|                             | 发送私聊语音                                                        |
+| `sendPrivatePic`            | 发送私聊图片                                                        |
+|                             | 发送私聊 Xml 类型信息                                               |
+| `replyGroupMsg` `reply`     | 发送回复消息,回复群消息                                             |
+|                             | 发送回复消息,回复好友消息,不好用                                    |
+| 暂时可用`queryUinByUid`代替 | 获取用户信息                                                        |
+|                             | 获取 cookies                                                        |
+|                             | 获取好友列表                                                        |
+| `getGroupList`              | 获取群聊列表                                                        |
+| `getGroupMembers`           | 获取群成员列表                                                      |
+| `getGroupAdminList`         | 获取群管理列表                                                      |
+| `getAllBots`                | 获取该 OPQ 登陆的所有 QQ 列表                                       |
+|                             | 设置群成员头衔                                                      |
+| `modifyGroupCard`           | 修改用户群名片                                                      |
+|                             | 开启或关闭全员禁言                                                  |
+| `shutUserUp`                | 设置群成员禁言                                                      |
+|                             | 点赞                                                                |
+|                             | 设置群公告                                                          |
+|                             | 设置或取消群管理员                                                  |
+| `revokeGroupMsg`            | 撤回群消息                                                          |
+| `revoke`                    | 撤回群消息, revokeGroupMsg 的便捷操作，直接传入消息 `GroupMsg` 即可 |
+|                             | 拉人入群                                                            |
+|                             | 加入群聊                                                            |
+| `exitGroup`                 | 退出群聊                                                            |
+| `driveUserAway`             | 移出群聊                                                            |
+| `getClusterInfo`            | 获取当前集群信息                                                    |
+|                             | 搜索群组                                                            |
+|                             | 刷新 key 二次登陆                                                   |
+|                             | 添加好友                                                            |
+|                             | 处理好友请求                                                        |
+|                             | 退出指定 qq                                                         |
+| `getQrCode`                 | 获取登录二维码的 base64 编码                                        |
+|                             | 获取好友文件下载链接                                                |
+|                             | 获取群文件下载链接                                                  |
+|                             | 转发视频到群聊                                                      |
+|                             | 转发视频给好友                                                      |
+|                             | 获取短视频链接                                                      |
+|                             | 发送群组特效文本消息                                                |
+|                             | 获取企鹅卡片资料                                                    |
+|                             | 戳一戳                                                              |
+|                             | 上传群文件                                                          |
+|                             | 入群审核                                                            |
+| 用 `upload`                 | 上传群图片获取图片信息                                              |
+|                             | 上传头像                                                            |
+|                             | 打开红包                                                            |
+| `upload`                    | 上传资源文件                                                        |
+| `queryUinByUid`             | 用户 Uid(u\_)转 qq 号, 其中还包括用户信息                           |
+| `getClientKey`              | 获取 `client_key`                                                   |
+| `getPSKey`                  | 获取 `ps_key`                                                       |
 
 **如何使用，遇到问题如何解决？**
 
