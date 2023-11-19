@@ -138,11 +138,11 @@ class Action:
     ):
         """发送好友图片消息
         :param user: 好友ID
-        :param content: 发送文字内容, 可以为列表
-        :param url: 发送图片链接, 可以为列表
-        :param base64: 发送图片base64, 可以为列表
-        :param md5: 发送图片md5或md5列表, 可以为列表
+        :param text: 发送文字内容
+        :param url: 发送图片链接, 可以使用列表发送多张图片
+        :param base64: 发送图片base64, 可以使用列表发送多张图片
         """
+        # :param md5: 发送图片md5或md5列表, 可以为列表
         req = {
             "ToUin": user,
             "ToType": 1,
@@ -354,11 +354,11 @@ class Action:
         """发送私聊图片消息
         :param user: 好友ID
         :param group: 群号
-        :param content: 发送文字内容, 可以为列表
-        :param url: 发送图片链接, 可以为列表
-        :param base64: 发送图片base64, 可以为列表
-        :param md5: 发送图片md5或md5列表, 可以为列表
+        :param text: 发送文字内容
+        :param url: 发送图片链接, 可以使用列表发送多张图片
+        :param base64: 发送图片base64, 可以使用列表发送多张图片
         """
+        # :param md5: 发送图片md5或md5列表
         req = {
             "ToUin": user,
             "GroupCode": group,
@@ -410,13 +410,13 @@ class Action:
     ):
         """发送群组图片消息
         :param group: 发送群ID
-        :param content: 发送文字内容
+        :param text: 发送文字内容
         :param url: 发送图片链接, 可以为列表
         :param base64: 发送图片base64, 可以为列表
-        :param md5: 发送图片md5, 可以为列表
         :param atUser: 需要艾特的用户QQ号, 可以为列表
         :param atUserNick: 需要艾特的用户昵称, 需与atUser对应，如果缺失会将被艾特用户QQ号作为昵称
         """
+        # :param md5: 发送图片md5, 可以为列表
         req = {
             "ToUin": group,
             "ToType": 2,
