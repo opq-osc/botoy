@@ -79,9 +79,7 @@ class Action:
     @property
     async def qq(self) -> int:
         if self._qq == 0:
-            # TODO: 自动获取qq号
-            raise ValueError("bot qq不能为0，请通过参数指定或配置文件中指定")
-            # self._qq = (await self.getAllBots())[0]
+            self._qq = (await self.getAllBots())[0]
         return int(self._qq)
 
     def set_url(self, url):
