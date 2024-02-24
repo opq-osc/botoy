@@ -8,6 +8,7 @@
         bot_pluginB_sub1.py (插件标记为pluginB.sub1)
         bot_pluginB_sub2 (插件标记为pluginB.sub2)
 """
+
 import importlib
 import os
 import re

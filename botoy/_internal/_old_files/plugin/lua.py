@@ -61,10 +61,10 @@ class LuaRuntime:
     def receive_group_msg(self):
         receiver = self.g.receive_group_msg
         if receiver:
-            wrapped_receiver = self.__dict__[
-                "receive_group_msg"
-            ] = lambda ctx: receiver(
-                self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+            wrapped_receiver = self.__dict__["receive_group_msg"] = (
+                lambda ctx: receiver(
+                    self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+                )
             )
             return wrapped_receiver
 
@@ -72,10 +72,10 @@ class LuaRuntime:
     def receive_friend_msg(self):
         receiver = self.g.receive_friend_msg
         if receiver:
-            wrapped_receiver = self.__dict__[
-                "receive_friend_msg"
-            ] = lambda ctx: receiver(
-                self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+            wrapped_receiver = self.__dict__["receive_friend_msg"] = (
+                lambda ctx: receiver(
+                    self.to_lua_value(dict(bot=ctx.CurrentQQ, data=ctx.data, ctx=ctx))
+                )
             )
             return wrapped_receiver
 

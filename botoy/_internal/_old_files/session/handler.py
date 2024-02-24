@@ -41,7 +41,9 @@ class SessionHandler:
         # self.handle
         self.handler = None
         # self.got
-        self.condition_handlers: List[ConditionHandler] = []  # 具体操作时要和session绑定
+        self.condition_handlers: List[ConditionHandler] = (
+            []
+        )  # 具体操作时要和session绑定
         # self.receive
         self.receiver = None
         # self.parse
@@ -103,7 +105,9 @@ class SessionHandler:
                     data = msg_ctx.Content
                 else:
                     data = self.parser(msg_ctx)
-                logger.debug(f"有正在等待的数据，开始自动设置 {session.waitings[0]} => {data}")
+                logger.debug(
+                    f"有正在等待的数据，开始自动设置 {session.waitings[0]} => {data}"
+                )
                 session.set(session.waitings[0], data)
             # 3. 执行condition handler
             logger.debug("checking condition handler")

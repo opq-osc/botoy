@@ -1,4 +1,5 @@
 """test plugin_receiver"""
+
 import time
 
 from botoy import S

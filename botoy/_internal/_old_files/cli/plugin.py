@@ -192,7 +192,9 @@ def install_plugin(src: str, name: Optional[str], data: dict):
             for node in tree:
                 if node["path"] != path and node["path"].startswith(path):
                     if node["type"] != "blob":
-                        raise RuntimeError("文件夹下载不支持嵌套文件夹，请手动安装此插件")
+                        raise RuntimeError(
+                            "文件夹下载不支持嵌套文件夹，请手动安装此插件"
+                        )
                     filename = node["path"].split("/")[-1]
                     echo(f"正在下载文件 [{node['path']}]")
                     base64_str = httpx.get(node["url"], timeout=20).json()["content"]

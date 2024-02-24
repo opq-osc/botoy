@@ -2,6 +2,7 @@
 
 分三类场景：群消息、好友消息、私聊消息
 """
+
 import asyncio
 import base64
 import functools

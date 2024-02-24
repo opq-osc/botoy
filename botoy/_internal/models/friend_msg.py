@@ -91,7 +91,8 @@ class Voice(BaseModel):
 
 class MsgBody(BaseModel):
     SubMsgType: int = Field(
-        ..., description="0为单一或复合类型消息(文字 At 图片 自由组合), 12 Xml消息 19 Video消息 51 JSON卡片消息"
+        ...,
+        description="0为单一或复合类型消息(文字 At 图片 自由组合), 12 Xml消息 19 Video消息 51 JSON卡片消息",
     )
     Content: str
     AtUinLists: Optional[List[AtUinList]] = None

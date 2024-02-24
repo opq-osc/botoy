@@ -74,12 +74,20 @@ def version():
 @cli.command()
 @click.option("-n", "--name", prompt="程序入口文件名", default="bot", show_default=True)
 @click.option(
-    "-q", "--qq", prompt="机器人qq号", type=int, required=True, default=0, show_default=True
+    "-q",
+    "--qq",
+    prompt="机器人qq号",
+    type=int,
+    required=True,
+    default=0,
+    show_default=True,
 )
 @click.option(
     "--host", prompt="机器人运行host", default="http://127.0.0.1", show_default=True
 )
-@click.option("--port", prompt="机器人运行端口", default=8888, show_default=True, type=int)
+@click.option(
+    "--port", prompt="机器人运行端口", default=8888, show_default=True, type=int
+)
 def init(name, qq, host, port):
     """创建程序入口文件和配置文件"""
     plug = click.confirm("是否使用插件功能", default=True, show_default=True)
@@ -226,7 +234,9 @@ def add(name, friend, group, event):
         )
 
     use_file = click.confirm(
-        "插件使用单文件还是文件夹形式, 默认选是表示单文件(是表示单文件，否表示文件夹)", default=True, show_default=True
+        "插件使用单文件还是文件夹形式, 默认选是表示单文件(是表示单文件，否表示文件夹)",
+        default=True,
+        show_default=True,
     )
     if use_file:
         write_file = plugin_path_file
@@ -330,7 +340,13 @@ def sweet():
             port = int(input("Port: "))
 
         qq = None
-        if getchar(f"需要设置机器人QQ号吗？(不建议设置，因为这里的qq只是筛选作用) y/n", ["y", "n"]) == "y":
+        if (
+            getchar(
+                f"需要设置机器人QQ号吗？(不建议设置，因为这里的qq只是筛选作用) y/n",
+                ["y", "n"],
+            )
+            == "y"
+        ):
             qq = int(input("QQ: "))
 
         is_async = getchar("使用异步吗?（建议使用）y/n", ["y", "n"]) == "y"

@@ -15,4 +15,6 @@ def group(ctx: GroupMsg):
     at_data = gp.at(ctx)
     if at_data is not None:
         if ctx.CurrentQQ in at_data.UserID:
-            print(f"我是机器人，我现在被{ctx.FromNickName}艾特了，他说：{at_data.Content}")
+            print(
+                f"我是机器人，我现在被{ctx.FromNickName}艾特了，他说：{at_data.Content}"
+            )

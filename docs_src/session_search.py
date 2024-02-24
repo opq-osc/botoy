@@ -1,4 +1,5 @@
 """发送 查询 即可进入查询模式"""
+
 from botoy.decorators import equal_content, ignore_botself
 from botoy.session import SessionHandler, ctx, session
 

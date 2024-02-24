@@ -325,7 +325,9 @@ class SessionExport:  # 避免代码补全太多不需要关注的内容, 同时
         info = "\n".join([f"【{idx}】 {item}" for idx, item in enumerate(items, 1)])
 
         ret, s = await self.text(
-            f"{prompt}\n发送序号选择一项(总次数：{retry_times}次, 超时时间：{timeout}秒)" + "\n" + info,
+            f"{prompt}\n发送序号选择一项(总次数：{retry_times}次, 超时时间：{timeout}秒)"
+            + "\n"
+            + info,
             timeout,
         )
         while retry_times > 0:
@@ -481,7 +483,9 @@ class Session:
             await (self.prev_s or S).text(info)
         the_ctx, the_S = await self.next_ctx(timeout=timeout)
         if the_ctx and the_S:
-            if msg := the_ctx.f or the_ctx.g:  # 在receiver里进行了消息过滤, 此处无需再次判断
+            if (
+                msg := the_ctx.f or the_ctx.g
+            ):  # 在receiver里进行了消息过滤, 此处无需再次判断
                 return msg.text, the_S
         return None, the_S
 

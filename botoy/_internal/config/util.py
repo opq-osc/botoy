@@ -20,7 +20,9 @@ def dict2tree(data: dict) -> dict:
                         pre[part] = {}
                     pre = pre[part]
                     if not isinstance(pre, dict):
-                        raise ValueError(f'"{part}" 不能作为键名, 请查看文档修改你的配置')
+                        raise ValueError(
+                            f'"{part}" 不能作为键名, 请查看文档修改你的配置'
+                        )
     return res
 
 

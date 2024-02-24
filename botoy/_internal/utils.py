@@ -1,4 +1,5 @@
 """提供框架所需的通用函数"""
+
 import asyncio
 import base64
 import re
@@ -119,7 +120,9 @@ except ImportError:
     except ImportError:
 
         def _get_image_size(_):  # type: ignore
-            warnings.warn("为了让发送的图片有较好的预览效果，请安装 opencv-python 或者 pillow")
+            warnings.warn(
+                "为了让发送的图片有较好的预览效果，请安装 opencv-python 或者 pillow"
+            )
             return None
 
 
