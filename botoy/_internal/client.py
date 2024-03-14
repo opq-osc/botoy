@@ -47,14 +47,10 @@ class Botoy:
         self.state = "disconnected"
         self.loaded_plugins = False
         self.pool = WorkerPool()
-        self._url = self._get_ws_url(jconfig.url)
-
-    @property
-    def connection_url(self):
-        return self._url
+        self.connection_urls = self._get_ws_urls(jconfig.url)
 
     def set_url(self, url: str):
-        self._url = self._get_ws_url(url)
+        self.connection_urls = self._get_ws_urls(url)
 
     def load_plugins(self):
         """加载插件"""
@@ -168,22 +164,29 @@ class Botoy:
 
         ws = None
         while True:
-            try:
-                logger.info(f"连接中[{self.connection_url}]...")
-                self.state = "connecting"
-                ws = await ws_connect(self.connection_url, open_timeout=5)
-            except InvalidURI as e:
-                logger.error(f"连接地址有误: {e}")
-                await asyncio.sleep(2)
-            except asyncio.TimeoutError as e:
-                logger.error(f"连接超时: {e}")
-                await asyncio.sleep(2)
-            except Exception as e:
-                logger.error(f"连接失败: {e}")
-                await asyncio.sleep(2)
-            else:
-                logger.success("连接成功!")
+            for idx, connection_url in enumerate(self.connection_urls):
+                try:
+                    if idx == 0:
+                        logger.info(f"正在连接[{connection_url}]...")
+                    else:
+                        logger.info(f"尝试连接[{connection_url}]...")
+                    self.state = "connecting"
+                    ws = await ws_connect(connection_url, open_timeout=3)
+                except InvalidURI as e:
+                    logger.error(f"连接地址有误[{connection_url}]: {e}")
+                except asyncio.TimeoutError as e:
+                    logger.error(f"连接超时[{connection_url}]: {e}")
+                except Exception as e:
+                    logger.error(f"连接失败[{connection_url}]: {e}")
+                else:
+                    self.connection_urls.remove(connection_url)
+                    self.connection_urls.insert(0, connection_url)
+                    logger.success(f"连接成功[{connection_url}]!")
+                    break
+                await asyncio.sleep(1)
+            if ws:
                 break
+            await asyncio.sleep(1)
 
         if ws:
             self.state = "connected"
@@ -225,12 +228,15 @@ class Botoy:
         """
         runner.run(self, reload)
 
-    def _get_ws_url(self, url: str) -> str:
-        if not re.match(r"^(http|https|ws)://", url):
+    def _get_ws_urls(self, url: str) -> List[str]:
+        if not re.match(r"^(http|https|ws|wss)://", url):
             url = "ws://" + url
         parsed_url = urlparse(url)
+        scheme = parsed_url.scheme
         hostname = parsed_url.hostname
-        # print(parsed_url)
-        assert hostname, f"{url} 有误，请检查!"
         port = parsed_url.port
-        return f"ws://{hostname}{ ':'+ str(port) if port is not None else ''}/ws"
+        assert hostname, f"{url} 有误，请检查!"
+        schemes = ["ws", "wss"] if scheme in ["http", "ws"] else ["wss", "ws"]
+        return [
+            f"{s}://{hostname}{ ':'+  str(port) if port  else ''}/ws" for s in schemes
+        ]
