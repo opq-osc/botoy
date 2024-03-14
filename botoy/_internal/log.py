@@ -7,8 +7,10 @@ from loguru import logger as _logger
 
 logger = _logger
 
-CONSOLE_LOG_FORMAT = "{level.icon} {time:MM-DD HH:mm:ss} <lvl>{level} {message}</lvl>"
-FILE_LOG_FORMAT = "{time:YYYY-MM-DD HH:mm} {level}\t{message}"
+CONSOLE_LOG_FORMAT = (
+    "{level.icon} {time:MM-DD HH:mm:ss} <lvl>{level: <8} {message}</lvl>"
+)
+FILE_LOG_FORMAT = "{time:YYYY-MM-DD HH:mm} {level: <8} {message}"
 FILE_LOG_PATH_NAMING = "./logs/{time}.log"
 
 
