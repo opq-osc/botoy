@@ -33,11 +33,9 @@ def get_base_url(url):
     if not re.match(r"^(http|https|ws|wss)://", url):
         url = "http://" + url
     parsed_url = urlparse(url)
-    scheme = parsed_url.scheme
-    hostname = parsed_url.hostname
-    port = parsed_url.port
-    assert hostname, f"{url} 有误，请检查!"
-    return f"{'https' if scheme in ['https', 'wss'] else 'http'  }://{hostname}{ ':'+ str(port) if port else ''}"
+    scheme = "https" if parsed_url.scheme in ["https", "wss"] else "http"
+    netloc = parsed_url.netloc
+    return f"{scheme}://{netloc}"
 
 
 def to_list(item: Union[T, List[T]]) -> List[T]:

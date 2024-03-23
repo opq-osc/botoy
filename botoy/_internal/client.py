@@ -231,12 +231,11 @@ class Botoy:
     def _get_ws_urls(self, url: str) -> List[str]:
         if not re.match(r"^(http|https|ws|wss)://", url):
             url = "ws://" + url
+
         parsed_url = urlparse(url)
         scheme = parsed_url.scheme
-        hostname = parsed_url.hostname
-        port = parsed_url.port
-        assert hostname, f"{url} 有误，请检查!"
+        netloc = parsed_url.netloc
+
         schemes = ["ws", "wss"] if scheme in ["http", "ws"] else ["wss", "ws"]
-        return [
-            f"{s}://{hostname}{ ':'+  str(port) if port  else ''}/ws" for s in schemes
-        ]
+
+        return [f"{s}://{netloc}/ws" for s in schemes]
