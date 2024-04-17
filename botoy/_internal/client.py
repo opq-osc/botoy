@@ -173,7 +173,7 @@ class Botoy:
                     else:
                         logger.info(f"尝试连接[{connection_url}]...")
                     self.state = "connecting"
-                    ws = await ws_connect(connection_url, open_timeout=3)
+                    ws = await ws_connect(connection_url, open_timeout=10)
                 except InvalidURI as e:
                     logger.error(f"连接地址有误[{connection_url}]: {e}")
                 except asyncio.TimeoutError as e:
