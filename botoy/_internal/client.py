@@ -11,6 +11,8 @@ from urllib.parse import urlparse
 import prettytable
 from websockets.client import connect as ws_connect
 from websockets.exceptions import ConnectionClosed, InvalidURI
+from websockets.legacy.server import WebSocketServerProtocol
+from websockets.server import serve as ws_serve
 
 from . import runner
 from .config import jconfig
@@ -227,6 +229,28 @@ class Botoy:
         :param reload: 开启热重载
         """
         runner.run(self, reload)
+
+    def run_as_server(self, port: int):
+        """开启websocket服务
+        :param port: 监听端口
+        """
+
+        async def handler(websocket: WebSocketServerProtocol):
+            logger.info(f"建立连接 {websocket.id}")
+            try:
+                async for pkt in websocket:
+                    if self.receivers:
+                        self._start_task(self._packet_handler, pkt)
+            except ConnectionClosed:
+                pass
+            logger.warning(f"连接断开 {websocket.id}")
+
+        async def main():
+            async with ws_serve(handler, "", port) as server:
+                logger.success(f"监听中 :{port}")
+                await server.wait_closed()
+
+        asyncio.get_event_loop().run_until_complete(main())
 
     def _get_ws_urls(self, url: str) -> List[str]:
         if not re.match(r"^(http|https|ws|wss)://", url):

@@ -26,6 +26,7 @@ from botoy import Botoy
 | `disconnect`      | 断开连接                                                                      |
 | `wait`            | 阻塞等待至`disconnect`被调用                                                  |
 | `run`             | 一键启动                                                                      |
+| `run_as_server`   | 启动ws服务                                                                    |
 
 !!!Tip
 
