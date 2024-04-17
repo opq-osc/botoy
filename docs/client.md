@@ -21,6 +21,7 @@ from botoy import Botoy
 | `set_url`         | 设置 opq websockets 连接地址                                                  |
 | `load_plugins`    | 加载插件，必须显式调用该方法才会加载插件(插件仅仅是分文件/分模块提供接收函数) |
 | `print_receivers` | 打印所有接收函数信息                                                          |
+| `log_messages`    | 启用消息日志打印                                                              |
 | `attach`          | 装饰并注册接收函数，直接使用实例对象本身 `@bot`                               |
 | `connect`         | 连接 opq 服务端                                                               |
 | `disconnect`      | 断开连接                                                                      |

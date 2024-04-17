@@ -50,9 +50,13 @@ class Botoy:
         self.loaded_plugins = False
         self.pool = WorkerPool()
         self.connection_urls = self._get_ws_urls(jconfig.url)
+        self._log_messages = False
 
     def set_url(self, url: str):
         self.connection_urls = self._get_ws_urls(url)
+
+    def log_messages(self):
+        self._log_messages = True
 
     def load_plugins(self):
         """加载插件"""
@@ -116,7 +120,10 @@ class Botoy:
         # 当前的实现，副作用：增加一项要求: 接收函数有 name 并且 name 唯一
         # TODO: 在mark_recv中处理好name
         # 由botoy注册的框架名自动添加 BOTOY前缀如："name" => "BOTOY name"
-        token = current_ctx.set(Context(pkt))
+        _ctx = Context(pkt)
+        if self._log_messages:
+            logger.info(_ctx)
+        token = current_ctx.set(_ctx)
         if _available_names is not None:
             _available_names = [i[6:] for i in _available_names]
             await asyncio.gather(
