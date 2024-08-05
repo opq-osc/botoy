@@ -289,25 +289,26 @@ def sync_run(func):
 
 # Zero-width character mapping
 zeroWidthChars = {
-    1: '\u200B',  # U+200B Zero Width Space
-    2: '\u200C',  # U+200C Zero Width Non-Joiner
-    3: '\u200D',  # U+200D Zero Width Joiner
-    4: '\u200E',  # U+200E Left-To-Right Mark
-    5: '\u200F',  # U+200F Right-To-Left Mark
-    6: '\uFEFF',  # U+FEFF Zero Width No-Break Space
-    7: '\u205F',  # U+205F Medium Mathematical Space
-    8: '\u2060',  # U+2060 Word Joiner
-    9: '\u202A',  # U+202A Left-To-Right Embedding
-    10: '\u202B', # U+202B Right-To-Left Embedding
-    11: '\u202C', # U+202C Pop Directional Formatting
-    12: '\u202D', # U+202D Left-To-Right Override
-    13: '\u202E', # U+202E Right-To-Left Override
-    14: '\u202F'  # U+202F Narrow No-Break Space
+    1: "\u200B",  # U+200B Zero Width Space
+    2: "\u200C",  # U+200C Zero Width Non-Joiner
+    3: "\u200D",  # U+200D Zero Width Joiner
+    4: "\u200E",  # U+200E Left-To-Right Mark
+    5: "\u200F",  # U+200F Right-To-Left Mark
+    6: "\uFEFF",  # U+FEFF Zero Width No-Break Space
+    7: "\u205F",  # U+205F Medium Mathematical Space
+    8: "\u2060",  # U+2060 Word Joiner
+    9: "\u202A",  # U+202A Left-To-Right Embedding
+    10: "\u202B",  # U+202B Right-To-Left Embedding
+    11: "\u202C",  # U+202C Pop Directional Formatting
+    12: "\u202D",  # U+202D Left-To-Right Override
+    13: "\u202E",  # U+202E Right-To-Left Override
+    14: "\u202F",  # U+202F Narrow No-Break Space
 }
+
 
 class Revoker:
     __slots__ = ()
-    
+
     @staticmethod
     def _encode_timeout(timeout):
         timeout_chars = []
@@ -319,15 +320,15 @@ class Revoker:
                 char = zeroWidthChars[digit]
                 timeout_chars.insert(0, char)
                 timeout = timeout // 10
-        return ''.join(timeout_chars)
-    
+        return "".join(timeout_chars)
+
     @staticmethod
     def _decode_timeout(timeout_chars):
         timeout = 0
         zeroWidthCharsReverse = {v: k for k, v in zeroWidthChars.items()}
         i = 0
         while i < len(timeout_chars):
-            char = timeout_chars[i:i + 1]
+            char = timeout_chars[i : i + 1]
             if char in zeroWidthCharsReverse:
                 timeout = timeout * 10 + (zeroWidthCharsReverse[char] - 1)
                 i += 1
@@ -356,10 +357,10 @@ class Revoker:
         """
         delay_marker = zeroWidthChars[1]
         marker_pos = text.find(delay_marker)
-        
+
         if marker_pos != -1:
-            timeout_chars = text[marker_pos + len(delay_marker):]
+            timeout_chars = text[marker_pos + len(delay_marker) :]
             timeout = Revoker._decode_timeout(timeout_chars)
             return timeout
-        
+
         return 0
