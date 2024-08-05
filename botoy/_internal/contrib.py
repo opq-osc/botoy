@@ -299,10 +299,6 @@ zeroWidthChars = {
     8: "\u2060",  # U+2060 Word Joiner
     9: "\u202A",  # U+202A Left-To-Right Embedding
     10: "\u202B",  # U+202B Right-To-Left Embedding
-    11: "\u202C",  # U+202C Pop Directional Formatting
-    12: "\u202D",  # U+202D Left-To-Right Override
-    13: "\u202E",  # U+202E Right-To-Left Override
-    14: "\u202F",  # U+202F Narrow No-Break Space
 }
 
 
