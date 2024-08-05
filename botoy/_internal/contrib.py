@@ -287,13 +287,53 @@ def sync_run(func):
         loop.close()
 
 
-revoker_key = "\u200b"
-revoker_sep = "\u200c"
-revoker_boundary = "\u200d"
-
+# Zero-width character mapping
+zeroWidthChars = {
+    1: '\u200B',  # U+200B Zero Width Space
+    2: '\u200C',  # U+200C Zero Width Non-Joiner
+    3: '\u200D',  # U+200D Zero Width Joiner
+    4: '\u200E',  # U+200E Left-To-Right Mark
+    5: '\u200F',  # U+200F Right-To-Left Mark
+    6: '\uFEFF',  # U+FEFF Zero Width No-Break Space
+    7: '\u205F',  # U+205F Medium Mathematical Space
+    8: '\u2060',  # U+2060 Word Joiner
+    9: '\u202A',  # U+202A Left-To-Right Embedding
+    10: '\u202B', # U+202B Right-To-Left Embedding
+    11: '\u202C', # U+202C Pop Directional Formatting
+    12: '\u202D', # U+202D Left-To-Right Override
+    13: '\u202E', # U+202E Right-To-Left Override
+    14: '\u202F'  # U+202F Narrow No-Break Space
+}
 
 class Revoker:
     __slots__ = ()
+    
+    @staticmethod
+    def _encode_timeout(timeout):
+        timeout_chars = []
+        if timeout == 0:
+            timeout_chars.append(zeroWidthChars[1])
+        else:
+            while timeout > 0:
+                digit = (timeout % 10) + 1
+                char = zeroWidthChars[digit]
+                timeout_chars.insert(0, char)
+                timeout = timeout // 10
+        return ''.join(timeout_chars)
+    
+    @staticmethod
+    def _decode_timeout(timeout_chars):
+        timeout = 0
+        zeroWidthCharsReverse = {v: k for k, v in zeroWidthChars.items()}
+        i = 0
+        while i < len(timeout_chars):
+            char = timeout_chars[i:i + 1]
+            if char in zeroWidthCharsReverse:
+                timeout = timeout * 10 + (zeroWidthCharsReverse[char] - 1)
+                i += 1
+            else:
+                i += 1
+        return timeout
 
     @staticmethod
     def mark(text: str, timeout: int = 30) -> str:
@@ -303,8 +343,9 @@ class Revoker:
         :return: 新文本
         """
         timeout = min(max(timeout, 5), 90)
-        mark = revoker_sep.join(revoker_key * int(i) for i in str(timeout))
-        return text + revoker_boundary + mark + revoker_boundary
+        delay_marker = zeroWidthChars[1]
+        timeout_marker = Revoker._encode_timeout(timeout)
+        return text + delay_marker + timeout_marker
 
     @staticmethod
     def check(text: str) -> int:
@@ -313,15 +354,12 @@ class Revoker:
         :param text: 文本内容
         :return: 等待延时
         """
-        if revoker_key in text:
-            if find := re.findall(
-                revoker_boundary + r"(.*?)" + revoker_boundary,
-                text,
-            ):
-                return int(
-                    "".join(
-                        str(i.count(revoker_key)) for i in find[0].split(revoker_sep)
-                    )
-                )
-            return 30
+        delay_marker = zeroWidthChars[1]
+        marker_pos = text.find(delay_marker)
+        
+        if marker_pos != -1:
+            timeout_chars = text[marker_pos + len(delay_marker):]
+            timeout = Revoker._decode_timeout(timeout_chars)
+            return timeout
+        
         return 0
