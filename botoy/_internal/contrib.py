@@ -287,13 +287,56 @@ def sync_run(func):
         loop.close()
 
 
-revoker_key = "\u200b"
-revoker_sep = "\u200c"
-revoker_boundary = "\u200d"
+# Zero-width character mapping
+zeroWidthChars = {
+    1: "\u200B",  # U+200B Zero Width Space
+    2: "\u200C",  # U+200C Zero Width Non-Joiner
+    3: "\u200D",  # U+200D Zero Width Joiner
+    4: "\u200E",  # U+200E Left-To-Right Mark
+    5: "\u200F",  # U+200F Right-To-Left Mark
+    6: "\uFEFF",  # U+FEFF Zero Width No-Break Space
+    7: "\u205F",  # U+205F Medium Mathematical Space
+    8: "\u2060",  # U+2060 Word Joiner
+    9: "\u202A",  # U+202A Left-To-Right Embedding
+    10: "\u202B",  # U+202B Right-To-Left Embedding
+}
 
 
 class Revoker:
     __slots__ = ()
+
+    @staticmethod
+    def _encode_timeout(timeout):
+        """将超时时间编码为零宽字符序列"""
+        timeout_chars = []
+        if timeout == 0:
+            # 特殊情况处理：超时为0时，使用第一个零宽字符
+            timeout_chars.append(zeroWidthChars[1])
+        else:
+            # 将每一位数字转换为对应的零宽字符
+            while timeout > 0:
+                digit = (timeout % 10) + 1  # 转换数字到1-10范围
+                char = zeroWidthChars[digit]  # 获取对应的零宽字符
+                timeout_chars.insert(0, char)  # 插入字符到前面
+                timeout = timeout // 10  # 继续处理下一个数字
+        return "".join(timeout_chars)  # 将字符列表组合成字符串
+
+    @staticmethod
+    def _decode_timeout(timeout_chars):
+        """将零宽字符序列解码为超时时间"""
+        timeout = 0
+        # 创建反向映射，从零宽字符到数字
+        zeroWidthCharsReverse = {v: k for k, v in zeroWidthChars.items()}
+        i = 0
+        while i < len(timeout_chars):
+            char = timeout_chars[i : i + 1]
+            if char in zeroWidthCharsReverse:
+                # 将零宽字符转换回数字并构建超时时间
+                timeout = timeout * 10 + (zeroWidthCharsReverse[char] - 1)
+                i += 1  # 继续处理下一个字符
+            else:
+                i += 1  # 跳过不匹配的字符
+        return timeout
 
     @staticmethod
     def mark(text: str, timeout: int = 30) -> str:
@@ -302,9 +345,10 @@ class Revoker:
         :param timeout: 等待延时，5 <= timeout <= 90。默认30
         :return: 新文本
         """
-        timeout = min(max(timeout, 5), 90)
-        mark = revoker_sep.join(revoker_key * int(i) for i in str(timeout))
-        return text + revoker_boundary + mark + revoker_boundary
+        timeout = min(max(timeout, 5), 90)  # 确保超时在合法范围内
+        delay_marker = zeroWidthChars[1]  # 使用第一个零宽字符作为标记
+        timeout_marker = Revoker._encode_timeout(timeout)  # 编码超时编码为零宽字符序列
+        return text + delay_marker + timeout_marker  # 将标记和编码后的超时附加到文本后
 
     @staticmethod
     def check(text: str) -> int:
@@ -313,15 +357,13 @@ class Revoker:
         :param text: 文本内容
         :return: 等待延时
         """
-        if revoker_key in text:
-            if find := re.findall(
-                revoker_boundary + r"(.*?)" + revoker_boundary,
-                text,
-            ):
-                return int(
-                    "".join(
-                        str(i.count(revoker_key)) for i in find[0].split(revoker_sep)
-                    )
-                )
-            return 30
-        return 0
+        delay_marker = zeroWidthChars[1]  # 标记零宽字符
+        marker_pos = text.find(delay_marker)  # 查找标记字符的位置
+
+        if marker_pos != -1:
+            # 找到标记，解码超时时间
+            timeout_chars = text[marker_pos + len(delay_marker) :]
+            timeout = Revoker._decode_timeout(timeout_chars)
+            return timeout  # 返回解码后的超时时间
+
+        return 0  # 未找到标记，返回0表示无需撤回
