@@ -307,6 +307,7 @@ class Revoker:
 
     @staticmethod
     def _encode_timeout(timeout):
+        """将超时时间编码为零宽字符序列"""
         timeout_chars = []
         if timeout == 0:
             timeout_chars.append(zeroWidthChars[1])
@@ -320,6 +321,7 @@ class Revoker:
 
     @staticmethod
     def _decode_timeout(timeout_chars):
+        """将零宽字符序列解码为超时时间"""
         timeout = 0
         zeroWidthCharsReverse = {v: k for k, v in zeroWidthChars.items()}
         i = 0
