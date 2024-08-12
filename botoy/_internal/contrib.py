@@ -301,6 +301,7 @@ zeroWidthChars = {
     10: "\u202B",  # U+202B Right-To-Left Embedding
 }
 
+
 class Revoker:
     __slots__ = ()
 
