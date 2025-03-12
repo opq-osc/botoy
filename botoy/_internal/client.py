@@ -214,10 +214,12 @@ class Botoy:
         logger.info("准备重连中...")
         try:
             await self.connect()
+            raise
         except:
             pass
         else:
             self.reconnect_task = None
+            raise
 
     async def wait(self):
         while True:
