@@ -180,7 +180,7 @@ class Botoy:
                     else:
                         logger.info(f"尝试连接[{connection_url}]...")
                     self.state = "connecting"
-                    ws = await ws_connect(connection_url, open_timeout=10)
+                    ws = await ws_connect(connection_url, open_timeout=10,compression=None)
                 except InvalidURI as e:
                     logger.error(f"连接地址有误[{connection_url}]: {e}")
                 except asyncio.TimeoutError as e:
@@ -214,12 +214,10 @@ class Botoy:
         logger.info("准备重连中...")
         try:
             await self.connect()
-            raise
         except:
             pass
         else:
             self.reconnect_task = None
-            raise
 
     async def wait(self):
         while True:
