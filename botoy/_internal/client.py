@@ -225,10 +225,12 @@ class Botoy:
                 break
             await self.ws.wait_closed()
             await asyncio.sleep(1)
-            if not self.reconnect_task:
-                break
-            await self.reconnect_task
-            if self.state != "connected":
+            if self.reconnect_task:
+                try:
+                    await self.reconnect_task
+                except Exception:
+                    pass
+            if self.state != "connected" and not self.reconnect_task:
                 break
 
     def run(self, reload=False):
